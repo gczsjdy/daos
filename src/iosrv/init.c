@@ -206,34 +206,40 @@ modules_load(uint64_t *facs)
 static int
 dss_tgt_nr_get(int ncores, int nr)
 {
-	int nr_default;
+	int tgt_nr;
 
 	D_ASSERT(ncores >= 1);
-	/* Each system XS uses one core, and each main XS with
-	 * dss_tgt_offload_xs_nr offload XS. Calculate the nr_default
-	 * as the number of main XS based on number of cores.
-	 */
-	if (dss_numa_node == -1)
-		nr_default = (ncores - dss_sys_xs_nr) / DSS_XS_NR_PER_TGT;
-	else
-		nr_default = (((ncores - dss_sys_xs_nr) - dss_core_offset) /
-			      DSS_XS_NR_PER_TGT);
 
-	if (nr_default == 0)
-		nr_default = 1;
+	if (dss_tgt_offload_xs_nr > 2 * nr)
+		dss_tgt_offload_xs_nr = 2 * nr;
+
+	/* Each system XS uses one core, and  with dss_tgt_offload_xs_nr
+	 * offload XS. Calculate the tgt_nr as the number of main XS based
+	 * on number of cores.
+	 */
+retry:
+	tgt_nr = ncores - DAOS_TGT0_OFFSET - dss_tgt_offload_xs_nr;
+	if (tgt_nr <= 0)
+		tgt_nr = 1;
 
 	/* If user requires less target threads then set it as dss_tgt_nr,
 	 * if user requires more then uses the number calculated above
 	 * as creating more threads than #cores may hurt performance.
 	 */
-	if (nr >= 1 && nr < nr_default)
-		nr_default = nr;
+	if (nr >= 1 && nr < tgt_nr) {
+		tgt_nr = nr;
+		if (dss_tgt_offload_xs_nr > 2 * tgt_nr)
+			dss_tgt_offload_xs_nr = 2 * tgt_nr;
+	} else if (dss_tgt_offload_xs_nr > 2 * tgt_nr) {
+		dss_tgt_offload_xs_nr--;
+		goto retry;
+	}
 
-	if (nr_default != nr)
+	if (tgt_nr != nr)
 		D_PRINT("%d target XS(xstream) requested (#cores %d); "
-			"use (%d) target XS\n", nr, ncores, nr_default);
+			"use (%d) target XS\n", nr, ncores, tgt_nr);
 
-	return nr_default;
+	return tgt_nr;
 }
 
 static int
@@ -456,6 +462,7 @@ server_init(int argc, char *argv[])
 	uint32_t	flags = CRT_FLAG_BIT_SERVER | CRT_FLAG_BIT_LM_DISABLE;
 	d_rank_t	rank = -1;
 	uint32_t	size = -1;
+	unsigned int	ctx_nr;
 	char		hostname[256] = { 0 };
 
 	rc = daos_debug_init(NULL);
@@ -485,8 +492,9 @@ server_init(int argc, char *argv[])
 	/* initialize the network layer */
 	if (dss_pmixless())
 		flags |= CRT_FLAG_BIT_PMIX_DISABLE;
+	ctx_nr = dss_ctx_nr_get();
 	rc = crt_init_opt(daos_sysname, flags,
-			  daos_crt_init_opt_get(true, DSS_CTX_NR_TOTAL));
+			  daos_crt_init_opt_get(true, ctx_nr));
 	if (rc)
 		D_GOTO(exit_mod_init, rc);
 	D_INFO("Network successfully initialized\n");
@@ -580,7 +588,7 @@ server_init(int argc, char *argv[])
 
 	gethostname(hostname, 255);
 	D_PRINT("DAOS I/O server (v%s) process %u started on rank %u "
-		"(out of %u) with %u target, %d helper XS per target, "
+		"(out of %u) with %u target, %d helper XS, "
 		"firstcore %d, host %s.\n", DAOS_VERSION, getpid(), rank,
 		size, dss_tgt_nr, dss_tgt_offload_xs_nr, dss_core_offset,
 		hostname);
@@ -732,12 +740,6 @@ parse(int argc, char **argv)
 			nr = strtoul(optarg, &end, 10);
 			if (end == optarg || nr == ULONG_MAX) {
 				rc = -DER_INVAL;
-				break;
-			}
-			if (nr > 2) {
-				printf("invalid xshelpernr %u, should within "
-				       "[0, 2], user default value %u instead",
-				       nr, dss_tgt_offload_xs_nr);
 				break;
 			}
 			dss_tgt_offload_xs_nr = nr;
