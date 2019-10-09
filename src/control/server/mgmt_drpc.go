@@ -52,6 +52,7 @@ const (
 
 	srvModuleID = C.DRPC_MODULE_SRV
 	notifyReady = C.DRPC_METHOD_SRV_NOTIFY_READY
+	bioErr      = C.DRPC_METHOD_SRV_BIO_ERR
 )
 
 // mgmtModule represents the daos_server mgmt dRPC module. It sends dRPCs to
@@ -82,6 +83,8 @@ func (mod *srvModule) HandleCall(cli *drpc.Client, method int32, req []byte) ([]
 	switch method {
 	case notifyReady:
 		return nil, mod.handleNotifyReady(req)
+	case bioErr:
+		return nil, mod.handleBioErr(req)
 	default:
 		return nil, errors.Errorf("unknown dRPC %d", method)
 	}
@@ -109,6 +112,26 @@ func (mod *srvModule) handleNotifyReady(reqb []byte) error {
 	}
 
 	mod.iosrvs[req.InstanceIdx].NotifyReady(req)
+
+	return nil
+}
+
+func (mod *srvModule) handleBioErr(reqb []byte) error {
+	req := &srvpb.BioErrorReq{}
+	if err := proto.Unmarshal(reqb, req); err != nil {
+		return errors.Wrap(err, "unmarshal NotifyReady request")
+	}
+
+	if req.InstanceIdx >= uint32(len(mod.iosrvs)) {
+		return errors.Errorf("instance index %v is out of range (%v instances)",
+				     req.InstanceIdx, len(mod.iosrvs))
+	}
+
+	//if err := checkDrpcClientSocketPath(req.DrpcListenerSock); err != nil {
+	//	return errors.Wrap(err, "check NotifyReady request socket path")
+	//}
+
+	mod.iosrvs[req.InstanceIdx].BioErrorNotify(req)
 
 	return nil
 }

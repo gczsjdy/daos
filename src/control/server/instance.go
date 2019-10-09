@@ -27,6 +27,8 @@ import (
 	"context"
 	"os"
 	"sync"
+	"fmt"
+	"bytes"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
@@ -457,4 +459,28 @@ func (srv *IOServerInstance) CallDrpc(module, method int32, body proto.Message) 
 	}
 
 	return makeDrpcCall(dc, module, method, body)
+}
+
+func (srv *IOServerInstance) BioErrorNotify(bio *srvpb.BioErrorReq) {
+	var buf bytes.Buffer
+
+	fmt.Fprintf(&buf, "I/O server instance %d has detected BIO Error!\n",
+		    srv.Index)
+	if bio.UnmapErr {
+		fmt.Fprintf(&buf, "\tUnmap error logged from tgt_id:%d\n",
+			    bio.TgtId)
+	} else {
+		if bio.UpdateErr {
+			fmt.Fprintf(&buf, "\tWrite error logged from tgt_id:%d\n",
+				    bio.TgtId)
+		} else {
+			fmt.Fprintf(&buf, "\tRead error logged from tgt_id:%d\n",
+				    bio.TgtId)
+		}
+	}
+
+	srv.log.Debugf(buf.String())
+
+	// Activate the dRPC client connection to this iosrv
+	// srv.drpcClient = drpc.NewClientConnection(msg.DrpcListenerSock)
 }

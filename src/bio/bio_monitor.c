@@ -28,6 +28,12 @@
 #include "bio_internal.h"
 #include <daos_srv/smd.h>
 
+/* for notify_bio_error() */
+#include <daos/drpc.h>
+#include <daos/drpc_modules.h>
+#include <daos/drpc.pb-c.h>
+#include "bio.pb-c.h"
+
 /* Period to query SPDK device health stats (1 min period) */
 #define DAOS_SPDK_STATS_PERIOD	(60 * (NSEC_PER_SEC / NSEC_PER_USEC))
 /* Used to preallocate buffer to query error log pages from SPDK health info */
@@ -48,7 +54,10 @@
 #endif /* Warning is defined in clang */
 #endif /* __has_warning not defined */
 
-
+/** Socket Directory */
+const char	*dss_socket_dir = "/var/run/daos_server";
+/** IO server instance index */
+unsigned int	 dss_instance_idx;
 
 /*
  * Used for getting bio device state, which requires exclusive access from
@@ -460,6 +469,65 @@ bio_init_health_monitoring(struct bio_blobstore *bb,
 	return 0;
 }
 
+/* Send dRPC request to daos_server to notify admin of BIO error */
+void
+notify_bio_error(bool unmap, bool update, int tgt_id)
+{
+	Srv__BioErrorReq	 bioerr_req = SRV__BIO_ERROR_REQ__INIT;
+	Drpc__Call		*dreq;
+	Drpc__Response		*dresp;
+	struct drpc		*dss_drpc_ctx;
+	uint8_t			*req;
+	size_t			 req_size;
+	char			*path;
+	int			 rc;
+
+	rc = asprintf(&path, "%s/%s", dss_socket_dir, "daos_server.sock");
+	if (rc < 0)
+		return;
+
+	dss_drpc_ctx = drpc_connect(path);
+	if (dss_drpc_ctx == NULL)
+		goto out_path;
+
+	bioerr_req.unmap_err = unmap;
+	bioerr_req.update_err = update;
+	bioerr_req.tgt_id = tgt_id;
+	bioerr_req.instanceidx = dss_instance_idx;
+	/* bioerr_req.drpclistenersock = drpc_listener_socket_path; */
+
+	req_size = srv__bio_error_req__get_packed_size(&bioerr_req);
+	D_ALLOC(req, req_size);
+	if (req == NULL) {
+		D_ERROR("Unable to alloc bio error dRPC request\n");
+		return;
+	}
+
+	srv__bio_error_req__pack(&bioerr_req, req);
+
+	dreq = drpc_call_create(dss_drpc_ctx, DRPC_MODULE_SRV,
+				DRPC_METHOD_SRV_BIO_ERR);
+	if (dreq == NULL) {
+		D_FREE(req);
+		goto out_path;
+	}
+	dreq->body.len = req_size;
+	dreq->body.data = req;
+
+	rc = drpc_call(dss_drpc_ctx, R_SYNC, dreq, &dresp);
+	if (rc != 0)
+		goto out_dreq;
+	if (dresp->status != DRPC__STATUS__SUCCESS)
+		D_ERROR("received erroneous dRPC response: %d\n", dresp->status);
+	drpc_response_free(dresp);
+
+out_dreq:
+	/* This also frees reqb via dreq->body.data. */
+	drpc_call_free(dreq);
+out_path:
+	D_FREE(path);
+}
+
 /*
  * MEDIA ERROR event.
  * Store BIO I/O error in in-memory device state. Called from device owner
@@ -489,6 +557,9 @@ bio_media_error(void *msg_arg)
 
 	/* TODO Implement checksum error counter */
 	dev_state->bds_checksum_errs = 0;
+
+	/* Notify admin through Control Plane of BIO error */
+	notify_bio_error(mem->mem_unmap, mem->mem_update, mem->mem_tgt_id);
 
 	D_FREE(mem);
 }

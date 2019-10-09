@@ -637,7 +637,8 @@ rw_completion(void *cb_arg, int err)
 	D_ASSERT(biod->bd_inflights > 0);
 	biod->bd_inflights--;
 
-	if (biod->bd_result == 0 && err != 0) {
+	//if (biod->bd_result == 0 && err != 0) {
+	if (1) {
 		biod->bd_result = daos_errno2der(-err);
 		D_ALLOC_PTR(mem);
 		if (mem == NULL)

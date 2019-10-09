@@ -247,4 +247,6 @@ int bio_blob_close(struct bio_io_context *ctxt, bool async);
 extern struct bio_reaction_ops *ract_ops;
 int bio_bs_state_transit(struct bio_blobstore *bbs);
 
+void notify_bio_error(bool unmap, bool update, int tgt_id);
+
 #endif /* __BIO_INTERNAL_H__ */

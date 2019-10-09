@@ -24,6 +24,7 @@ DAOS_ROOT ?= $(shell git rev-parse --show-toplevel)
 
 C_HEADER_FILES = include/daos/drpc.pb-c.h\
 		 iosrv/srv.pb-c.h\
+		 bio/bio.pb-c.h\
 		 mgmt/mgmt.pb-c.h\
 		 mgmt/pool.pb-c.h\
 		 mgmt/storage_query.pb-c.h\
@@ -33,6 +34,7 @@ C_HEADER_FILES = include/daos/drpc.pb-c.h\
 		 tests/drpc/drpc_test.pb-c.h
 C_SOURCE_FILES = common/drpc.pb-c.c\
 		 iosrv/srv.pb-c.c\
+		 bio/bio.pb-c.c\
 		 mgmt/mgmt.pb-c.c\
 		 mgmt/pool.pb-c.c\
 		 mgmt/storage_query.pb-c.c\
@@ -52,6 +54,7 @@ GO_CONTROL_FILES = common/proto/mgmt/mgmt.pb.go\
 		   common/proto/ctl/storage_scm.pb.go\
 		   common/proto/ctl/control.pb.go\
 		   common/proto/srv/srv.pb.go\
+		   common/proto/srv/bio.pb.go\
 		   drpc/drpc.pb.go\
 		   security/acl/acl.pb.go\
 		   security/auth/auth.pb.go\
@@ -130,6 +133,12 @@ $(DAOS_ROOT)/src/iosrv/%.pb-c.h: $(PROTO_SOURCE_DIR)/srv/%.proto
 	protoc -I $(dir $<) --c_out=$(dir $@) $(notdir $<)
 
 $(DAOS_ROOT)/src/iosrv/%.pb-c.c: $(PROTO_SOURCE_DIR)/srv/%.proto
+	protoc -I $(dir $<) --c_out=$(dir $@) $(notdir $<)
+
+$(DAOS_ROOT)/src/bio/%.pb-c.h: $(PROTO_SOURCE_DIR)/srv/%.proto
+	protoc -I $(dir $<) --c_out=$(dir $@) $(notdir $<)
+
+$(DAOS_ROOT)/src/bio/%.pb-c.c: $(PROTO_SOURCE_DIR)/srv/%.proto
 	protoc -I $(dir $<) --c_out=$(dir $@) $(notdir $<)
 
 $(DAOS_ROOT)/src/tests/drpc/%.pb-c.h: $(PROTO_SOURCE_DIR)/test/%.proto
