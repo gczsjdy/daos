@@ -79,6 +79,7 @@ int dc_pool_set_attr(tse_task_t *task);
 int dc_pool_exclude(tse_task_t *task);
 int dc_pool_exclude_out(tse_task_t *task);
 int dc_pool_add(tse_task_t *task);
+int dc_pool_add_force(tse_task_t *task);
 int dc_pool_evict(tse_task_t *task);
 int dc_pool_stop_svc(tse_task_t *task);
 

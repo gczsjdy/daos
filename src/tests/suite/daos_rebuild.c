@@ -132,7 +132,7 @@ rebuild_add_back_tgts(test_arg_t *arg, d_rank_t failed_rank, int *failed_tgts,
 		int i;
 
 		for (i = 0; i < nr; i++)
-			daos_add_target(arg->pool.pool_uuid, arg->group,
+			daos_add_target_force(arg->pool.pool_uuid, arg->group,
 					&arg->pool.svc, failed_rank,
 					failed_tgts ? failed_tgts[i] : -1);
 	}
@@ -627,7 +627,7 @@ rebuild_retry_rebuild(void **state)
 	rebuild_io(arg, oids, OBJ_NR);
 
 	/* Set no hdl fail_loc on all servers */
-	if (arg->myrank == 0)	
+	if (arg->myrank == 0)
 		daos_mgmt_set_params(arg->group, -1, DSS_KEY_FAIL_LOC,
 				     DAOS_REBUILD_NO_HDL | DAOS_FAIL_ONCE,
 				     0, NULL);

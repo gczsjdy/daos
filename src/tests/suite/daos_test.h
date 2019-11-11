@@ -291,8 +291,8 @@ bool test_rebuild_query(test_arg_t **args, int args_cnt);
 void test_rebuild_wait(test_arg_t **args, int args_cnt);
 void daos_exclude_target(const uuid_t pool_uuid, const char *grp,
 			 const d_rank_list_t *svc, d_rank_t rank, int tgt);
-void daos_add_target(const uuid_t pool_uuid, const char *grp,
-		     const d_rank_list_t *svc, d_rank_t rank, int tgt);
+void daos_add_target_force(const uuid_t pool_uuid, const char *grp,
+			   const d_rank_list_t *svc, d_rank_t rank, int tgt);
 
 void daos_exclude_server(const uuid_t pool_uuid, const char *grp,
 			 const d_rank_list_t *svc, d_rank_t rank);

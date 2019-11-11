@@ -313,22 +313,25 @@ ds_pool_map_tgts_update(struct pool_map *map, struct pool_target_id_list *tgts,
 				dom->do_comp.co_status = PO_COMP_ST_DOWN;
 				dom->do_comp.co_fseq = target->ta_comp.co_fseq;
 			}
-		} else if (opc == POOL_ADD &&
+		} else if ((opc == POOL_ADD_FORCE || opc == POOL_ADD) &&
 			 target->ta_comp.co_status != PO_COMP_ST_UP &&
 			 target->ta_comp.co_status != PO_COMP_ST_UPIN) {
 			/**
-			 * XXX this is only temporarily used for recovering
-			 * the DOWNOUT target back to UP after rebuild test,
-			 * so we do not update co_ver for now, otherwise the
-			 * object layout might be changed, so the ring shuffle
-			 * is based on target version. Once this is used
-			 * for reintegrate new target, co_ver should be
-			 * updated.
+			 * XXX This block is for POOL_ADD_FORCE. Since POOL_ADD
+			 * (with reintegration) is not supported yet, both
+			 * are handled here. Once reintegration is added,
+			 * this block will not handle POOL_ADD
+			 *
+			 * This is only used for recovering the DOWNOUT target
+			 * back to UP after rebuild test, so we do not update
+			 * co_ver for now, otherwise the object layout might be
+			 * changed, so the ring shuffle is based on target
+			 * version.
 			 */
-			D_DEBUG(DF_DSMS, "change target %u/%u to UP %p\n",
+			D_DEBUG(DF_DSMS, "force change target %u/%u to UP %p\n",
 				target->ta_comp.co_rank,
 				target->ta_comp.co_index, map);
-			D_PRINT("Target (rank %u idx %u) is added.\n",
+			D_PRINT("Target (rank %u idx %u) is force added.\n",
 				target->ta_comp.co_rank,
 				target->ta_comp.co_index);
 			target->ta_comp.co_status = PO_COMP_ST_UPIN;

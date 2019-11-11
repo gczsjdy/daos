@@ -175,6 +175,28 @@ daos_pool_add_tgt(const uuid_t uuid, const char *grp,
 }
 
 int
+daos_pool_add_force_tgt(const uuid_t uuid, const char *grp,
+			const d_rank_list_t *svc, struct d_tgt_list *tgts,
+			daos_event_t *ev)
+{
+	daos_pool_update_t	*args;
+	tse_task_t		*task;
+	int			 rc;
+
+	rc = dc_task_create(dc_pool_add_force, NULL, ev, &task);
+	if (rc)
+		return rc;
+
+	args = dc_task_get_args(task);
+	args->grp	= grp;
+	args->svc	= (d_rank_list_t *)svc;
+	args->tgts	= tgts;
+	uuid_copy((unsigned char *)args->uuid, uuid);
+
+	return dc_task_schedule(task, true);
+}
+
+int
 daos_pool_tgt_exclude_out(const uuid_t uuid, const char *grp,
 			  const d_rank_list_t *svc, struct d_tgt_list *tgts,
 			  daos_event_t *ev)

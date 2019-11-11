@@ -736,8 +736,8 @@ daos_exclude_target(const uuid_t pool_uuid, const char *grp,
 }
 
 void
-daos_add_target(const uuid_t pool_uuid, const char *grp,
-		const d_rank_list_t *svc, d_rank_t rank, int tgt_idx)
+daos_add_target_force(const uuid_t pool_uuid, const char *grp,
+		      const d_rank_list_t *svc, d_rank_t rank, int tgt_idx)
 {
 	struct d_tgt_list	targets;
 	int			rc;
@@ -746,7 +746,7 @@ daos_add_target(const uuid_t pool_uuid, const char *grp,
 	targets.tl_nr = 1;
 	targets.tl_ranks = &rank;
 	targets.tl_tgts = &tgt_idx;
-	rc = daos_pool_add_tgt(pool_uuid, grp, svc, &targets, NULL);
+	rc = daos_pool_add_force_tgt(pool_uuid, grp, svc, &targets, NULL);
 	if (rc)
 		print_message("add pool failed rc %d\n", rc);
 	assert_int_equal(rc, 0);
@@ -763,7 +763,7 @@ void
 daos_add_server(const uuid_t pool_uuid, const char *grp,
 		const d_rank_list_t *svc, d_rank_t rank)
 {
-	daos_add_target(pool_uuid, grp, svc, rank, -1);
+	daos_add_target_force(pool_uuid, grp, svc, rank, -1);
 }
 
 void
