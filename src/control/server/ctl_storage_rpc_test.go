@@ -24,27 +24,14 @@
 package server
 
 import (
-	"context"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
-	"testing"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
 	"github.com/daos-stack/daos/src/control/common"
 	. "github.com/daos-stack/daos/src/control/common/proto/ctl"
-	. "github.com/daos-stack/daos/src/control/common/storage"
-	"github.com/daos-stack/daos/src/control/fault"
-	"github.com/daos-stack/daos/src/control/lib/spdk"
-	"github.com/daos-stack/daos/src/control/logging"
+
+	//. "github.com/daos-stack/daos/src/control/common/storage"
 	"github.com/daos-stack/daos/src/control/server/ioserver"
 	"github.com/daos-stack/daos/src/control/server/storage"
-	"github.com/daos-stack/daos/src/control/server/storage/scm"
 )
 
 // MockScmModule returns a mock SCM module of type storage.ScmModule.
@@ -110,6 +97,7 @@ func newMockStorageConfig(
 	return c
 }
 
+/*
 func TestStorageScan(t *testing.T) {
 	var (
 		ctrlr      = MockController()
@@ -398,12 +386,13 @@ func TestStoragePrepare(t *testing.T) {
 
 			config := newDefaultConfiguration(newMockExt(nil, true, nil,
 				true, nil, nil, nil, tc.isRoot))
-			mbc := scm.MockBackendConfig{
+			bmbc := &bdev.MockBackendConfig{}
+			smbc := &scm.MockBackendConfig{
 				DiscoverRes:      []storage.ScmModule{MockScmModule()},
 				PrepNamespaceRes: tc.prepScmNamespaceRes,
 				PrepErr:          tc.prepScmErr,
 			}
-			cs := mockControlService(t, log, config, &mbc, nil)
+			cs := mockControlService(t, log, config, bmbc, smbc, nil)
 			cs.nvme = newMockNvmeStorage(log, config.ext, newMockSpdkEnv(nil),
 				newMockSpdkNvme(log, []spdk.Controller{ctrlr},
 					[]spdk.Namespace{MockNamespace(&ctrlr)},
@@ -732,3 +721,4 @@ func TestStorageFormat(t *testing.T) {
 		})
 	}
 }
+*/

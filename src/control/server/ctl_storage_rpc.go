@@ -24,6 +24,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -34,6 +35,7 @@ import (
 	"github.com/daos-stack/daos/src/control/fault"
 	"github.com/daos-stack/daos/src/control/logging"
 	"github.com/daos-stack/daos/src/control/server/storage"
+	"github.com/daos-stack/daos/src/control/server/storage/bdev"
 	"github.com/daos-stack/daos/src/control/server/storage/scm"
 )
 
@@ -86,10 +88,31 @@ func scmNamespacesToPB(nss []storage.ScmNamespace) (pbNss pb_types.ScmNamespaces
 	return
 }
 
+func convert(in interface{}, out interface{}) error {
+	j, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(j, out)
+}
+
+func nvmeControllersToPB(ncl storage.NvmeControllers) (pbNcl pb_types.NvmeControllers) {
+	for _, nc := range ncl {
+		pbCtl := &ctlpb.NvmeController{}
+		if err := convert(nc, pbCtl); err != nil {
+			return
+		}
+		pbNcl = append(pbNcl, pbCtl)
+	}
+
+	return
+}
+
 func (c *StorageControlService) doNvmePrepare(req *ctlpb.PrepareNvmeReq) (resp *ctlpb.PrepareNvmeResp) {
 	resp = &ctlpb.PrepareNvmeResp{}
 	msg := "Storage Prepare NVMe"
-	err := c.NvmePrepare(NvmePrepareRequest{
+	_, err := c.NvmePrepare(bdev.PrepareRequest{
 		HugePageCount: int(req.GetNrhugepages()),
 		TargetUser:    req.GetTargetuser(),
 		PCIWhitelist:  req.GetPciwhitelist(),
@@ -159,7 +182,7 @@ func (c *StorageControlService) StorageScan(ctx context.Context, req *ctlpb.Stor
 	msg := "Storage Scan "
 	resp := new(ctlpb.StorageScanResp)
 
-	controllers, err := c.NvmeScan()
+	bsr, err := c.bdev.Scan(bdev.ScanRequest{})
 	if err != nil {
 		resp.Nvme = &ctlpb.ScanNvmeResp{
 			State: newState(c.log, ctlpb.ResponseStatus_CTL_ERR_NVME, err.Error(), "", msg+"NVMe"),
@@ -167,24 +190,24 @@ func (c *StorageControlService) StorageScan(ctx context.Context, req *ctlpb.Stor
 	} else {
 		resp.Nvme = &ctlpb.ScanNvmeResp{
 			State:  newState(c.log, ctlpb.ResponseStatus_CTL_SUCCESS, "", "", msg+"NVMe"),
-			Ctrlrs: controllers,
+			Ctrlrs: nvmeControllersToPB(bsr.Controllers),
 		}
 	}
 
-	result, err := c.scm.Scan(scm.ScanRequest{})
+	ssr, err := c.scm.Scan(scm.ScanRequest{})
 	if err != nil {
 		resp.Scm = &ctlpb.ScanScmResp{
 			State: newState(c.log, ctlpb.ResponseStatus_CTL_ERR_SCM, err.Error(), "", msg+"SCM"),
 		}
 	} else {
-		msg += fmt.Sprintf("SCM (%s)", result.State)
+		msg += fmt.Sprintf("SCM (%s)", ssr.State)
 		resp.Scm = &ctlpb.ScanScmResp{
 			State: newState(c.log, ctlpb.ResponseStatus_CTL_SUCCESS, "", "", msg),
 		}
-		if len(result.Namespaces) > 0 {
-			resp.Scm.Pmems = scmNamespacesToPB(result.Namespaces)
+		if len(ssr.Namespaces) > 0 {
+			resp.Scm.Pmems = scmNamespacesToPB(ssr.Namespaces)
 		} else {
-			resp.Scm.Modules = scmModulesToPB(result.Modules)
+			resp.Scm.Modules = scmModulesToPB(ssr.Modules)
 		}
 	}
 
@@ -285,10 +308,31 @@ func (c *ControlService) doFormat(i *IOServerInstance, reformat bool, resp *ctlp
 		bdevConfig := i.bdevConfig()
 
 		// A config with SCM and no block devices is valid.
-		// TODO: pull protobuf specifics out of c.nvme into this file.
 		if len(bdevConfig.DeviceList) > 0 {
-			// TODO: return result to be in line with scmFormat
-			c.nvme.Format(bdevConfig, &results)
+			res, err := c.bdev.Format(bdev.FormatRequest{
+				Class:      bdevConfig.Class,
+				DeviceList: bdevConfig.DeviceList,
+			})
+			if err != nil {
+				return err
+			}
+
+			for dev, status := range res.DeviceResponses {
+				var errMsg, infoMsg string
+				ctlpbStatus := ctlpb.ResponseStatus_CTL_SUCCESS
+				if status.Error != nil {
+					ctlpbStatus = ctlpb.ResponseStatus_CTL_ERR_NVME
+					errMsg = status.Error.Error()
+					if fault.HasResolution(status.Error) {
+						infoMsg = fault.ShowResolutionFor(status.Error)
+					}
+				}
+				results = append(results,
+					newCret(c.log, "format", dev, ctlpbStatus, errMsg, infoMsg))
+			}
+		} else {
+			results = append(results,
+				newCret(c.log, "format", "", ctlpb.ResponseStatus_CTL_SUCCESS, "", msgBdevNoDevs))
 		}
 	}
 
@@ -297,8 +341,6 @@ func (c *ControlService) doFormat(i *IOServerInstance, reformat bool, resp *ctlp
 	if results.HasErrors() {
 		c.log.Error(msgFormatErr)
 	} else {
-		// TODO: remove use of nvme formatted flag to be consistent with scm
-		c.nvme.formatted = true
 		i.NotifyStorageReady()
 	}
 
