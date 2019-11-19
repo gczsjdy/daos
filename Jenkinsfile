@@ -1252,6 +1252,8 @@ pipeline {
                                                test_tag=pr,-hw
                                            fi
                                            tnodes=$(echo $NODELIST | cut -d ',' -f 1-9)
+                                           rm -rf install/lib/daos/TESTING/ftest/avocado ./*_results.xml
+                                           mkdir -p install/lib/daos/TESTING/ftest/avocado/job-results
                                            ./ftest.sh "$test_tag" $tnodes''',
                                 junit_files: "install/lib/daos/TESTING/ftest/avocado/*/*/*.xml install/lib/daos/TESTING/ftest/*_results.xml",
                                 failure_artifacts: env.STAGE_NAME
@@ -1259,6 +1261,9 @@ pipeline {
                     post {
                         always {
                             sh '''rm -rf install/lib/daos/TESTING/ftest/avocado/*/*/html/
+                                  # Remove the latest avocado symlink directory to avoid inclusion in the
+                                  # jenkins build artifacts
+                                  unlink install/lib/daos/TESTING/ftest/avocado/job-results/latest
                                   if [ -n "$STAGE_NAME" ]; then
                                       rm -rf "$STAGE_NAME/"
                                       mkdir "$STAGE_NAME/"
@@ -1330,6 +1335,8 @@ pipeline {
                                                test_tag=pr,hw
                                            fi
                                            tnodes=$(echo $NODELIST | cut -d ',' -f 1-9)
+                                           rm -rf install/lib/daos/TESTING/ftest/avocado ./*_results.xml
+                                           mkdir -p install/lib/daos/TESTING/ftest/avocado/job-results
                                            ./ftest.sh "$test_tag" $tnodes''',
                                 junit_files: "install/lib/daos/TESTING/ftest/avocado/*/*/*.xml install/lib/daos/TESTING/ftest/*_results.xml",
                                 failure_artifacts: env.STAGE_NAME
@@ -1337,6 +1344,9 @@ pipeline {
                     post {
                         always {
                             sh '''rm -rf install/lib/daos/TESTING/ftest/avocado/*/*/html/
+                                  # Remove the latest avocado symlink directory to avoid inclusion in the
+                                  # jenkins build artifacts
+                                  unlink install/lib/daos/TESTING/ftest/avocado/job-results/latest
                                   if [ -n "$STAGE_NAME" ]; then
                                       rm -rf "$STAGE_NAME/"
                                       mkdir "$STAGE_NAME/"
