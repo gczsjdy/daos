@@ -49,6 +49,8 @@ def component_repos = ""
 def daos_repo = "daos@${env.BRANCH_NAME}:${env.BUILD_NUMBER}"
 def el7_daos_repos = el7_component_repos + ' ' + component_repos + ' ' + daos_repo
 def sle12_daos_repos = sle12_component_repos + ' ' + component_repos + ' ' + daos_repo
+def ior_repos = "mpich@PR-10 ior-hpc@daos"
+def el7_functional_repos = el7_daos_repos + ' ' + ior_repos + ' romio@PR-1 testmpio@PR-1 hdf5@PR-2 mpi4py@PR-2'
 def functional_rpms  = "ior-hpc mpich-autoload romio-tests hdf5-tests mpi4py-tests testmpio"
 
 def rpm_test_pre = '''if git show -s --format=%B | grep "^Skip-test: true"; then
@@ -1243,7 +1245,7 @@ pipeline {
                         provisionNodes NODELIST: env.NODELIST,
                                        node_count: 9,
                                        snapshot: true,
-                                       inst_repos: el7_daos_repos,
+                                       inst_repos: el7_functional_repos,
                                        inst_rpms: 'cart-' + env.CART_COMMIT + ' ' +
                                                   functional_rpms + ' ndctl'
                         runTest stashes: [ 'CentOS-install', 'CentOS-build-vars' ],
@@ -1319,14 +1321,14 @@ pipeline {
                         provisionNodes NODELIST: env.NODELIST,
                                        node_count: 1,
                                        snapshot: true,
-                                       inst_repos: el7_daos_repos,
+                                       inst_repos: el7_functional_repos,
                                        inst_rpms: 'cart-' + env.CART_COMMIT + ' ' +
                                                   functional_rpms + ' ndctl'
                         // Then just reboot the physical nodes
                         provisionNodes NODELIST: env.NODELIST,
                                        node_count: 9,
                                        power_only: true,
-                                       inst_repos: el7_daos_repos,
+                                       inst_repos: el7_functional_repos,
                                        inst_rpms: 'cart-' + env.CART_COMMIT + ' ' +
                                                   functional_rpms + ' ndctl'
                         runTest stashes: [ 'CentOS-install', 'CentOS-build-vars' ],
