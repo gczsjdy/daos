@@ -150,7 +150,7 @@ if [ \"\${HOSTNAME%%%%.*}\" != \"${nodes[0]}\" ]; then
                /proc/meminfo)\"
     if [ \$memsize -gt 32000000 ]; then
         # make it twice as big on the hardware cluster
-        tmpfs_size=$((tmpfs_size*2))
+        tmpfs_size=\$((tmpfs_size*2))
     fi
     sudo ed <<EOF /etc/fstab
 \\\$a
