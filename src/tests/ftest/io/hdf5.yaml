@@ -17,6 +17,6 @@ pool:
     createsvc:
         svcn: 1
 client_processes:
-    np: 1
+    np: 8
 test_repo:
     hdf5: "/usr/lib64/hdf5/tests"
