@@ -66,7 +66,7 @@ on_faulty(struct bio_blobstore *bbs)
 
 	rc = ract_ops->faulty_reaction(tgt_ids, tgt_cnt);
 	if (rc < 0)
-		D_ERROR("Faulty reaction failed. %d\n", rc);
+		D_ERROR("Faulty reaction failed. %s\n", d_errstr(rc));
 
 	return rc;
 }
@@ -228,7 +228,7 @@ bio_bs_state_set(struct bio_blobstore *bbs, enum bio_bs_state new_state)
 
 			rc = smd_dev_set_state(dev_id, dev_state);
 			if (rc)
-				D_ERROR("Set device state failed. %d\n", rc);
+				D_ERROR("Set device state failed. %s\n", d_errstr(rc));
 		}
 	}
 	ABT_mutex_unlock(bbs->bb_mutex);

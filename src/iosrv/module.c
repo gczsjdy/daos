@@ -194,13 +194,13 @@ dss_module_unload_internal(struct loaded_mod *lmod)
 	/* unregister RPC handlers */
 	rc = daos_rpc_unregister(smod->sm_proto_fmt);
 	if (rc) {
-		D_ERROR("failed to unregister RPC %d\n", rc);
+		D_ERROR("failed to unregister RPC %s\n", d_errstr(rc));
 		return rc;
 	}
 
 	rc = drpc_hdlr_unregister_all(smod->sm_drpc_handlers);
 	if (rc != 0) {
-		D_ERROR("Failed to unregister dRPC %d\n", rc);
+		D_ERROR("Failed to unregister dRPC %s\n", d_errstr(rc));
 	}
 
 	dss_unregister_key(smod->sm_key);
@@ -209,7 +209,7 @@ dss_module_unload_internal(struct loaded_mod *lmod)
 	/* finalize the module */
 	rc = smod->sm_fini();
 	if (rc) {
-		D_ERROR("module finalization failed for: %d\n", rc);
+		D_ERROR("module finalization failed for: %s\n", d_errstr(rc));
 		return rc;
 
 	}

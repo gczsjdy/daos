@@ -1006,7 +1006,7 @@ bio_rwv(struct bio_io_context *ioctxt, struct bio_sglist *bsgl_in,
 
 	rc = bio_iod_copy(biod, sgl, 1 /* single sgl */);
 	if (rc)
-		D_ERROR("Copy biod failed, rc:%d\n", rc);
+		D_ERROR("Copy biod failed, rc:%s\n", d_errstr(rc));
 
 	/* release DMA buffer, write data back to NVMe device for write */
 	rc = bio_iod_post(biod);

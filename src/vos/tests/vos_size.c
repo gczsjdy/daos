@@ -52,7 +52,7 @@ static int alloc_overhead = 16;
 		rc = vos_tree_get_overhead(alloc_overhead, type, 0,	\
 					   &name);			\
 		if (rc != 0) {						\
-			printf(#name " lookup failed: rc = %d\n", rc);	\
+			printf(#name " lookup failed: rc = %s\n", d_errstr(rc));	\
 			goto exit_1;					\
 		}							\
 	} while (0);

@@ -185,7 +185,7 @@ vos_dtx_table_register(void)
 
 	rc = dbtree_class_register(VOS_BTR_DTX_TABLE, 0, &dtx_btr_ops);
 	if (rc != 0)
-		D_ERROR("Failed to register DTX dbtree: rc = %d\n", rc);
+		D_ERROR("Failed to register DTX dbtree: rc = %s\n", d_errstr(rc));
 
 	return rc;
 }
@@ -212,7 +212,8 @@ vos_dtx_table_create(struct vos_pool *pool, struct vos_dtx_table_df *dtab_df)
 				   &dtab_df->tt_active_btr, &hdl);
 	if (rc != 0) {
 		D_ERROR("Failed to create DTX active dbtree for pool "
-			DF_UUID": rc = %d\n", DP_UUID(pool->vp_id), rc);
+			DF_UUID": rc = %s\n", DP_UUID(pool->vp_id),
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -223,7 +224,8 @@ vos_dtx_table_create(struct vos_pool *pool, struct vos_dtx_table_df *dtab_df)
 				   &dtab_df->tt_committed_btr, &hdl);
 	if (rc != 0) {
 		D_ERROR("Failed to create DTX committed dbtree for pool "
-			DF_UUID": rc = %d\n", DP_UUID(pool->vp_id), rc);
+			DF_UUID": rc = %s\n", DP_UUID(pool->vp_id),
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -254,7 +256,8 @@ vos_dtx_table_destroy(struct vos_pool *pool, struct vos_dtx_table_df *dtab_df)
 
 		if (rc != 0)
 			D_ERROR("Fail to destroy DTX active dbtree for pool"
-				DF_UUID": rc = %d\n", DP_UUID(pool->vp_id), rc);
+				DF_UUID": rc = %s\n", DP_UUID(pool->vp_id),
+				d_errstr(rc));
 	}
 
 	if (dtab_df->tt_committed_btr.tr_class != 0) {
@@ -265,7 +268,8 @@ vos_dtx_table_destroy(struct vos_pool *pool, struct vos_dtx_table_df *dtab_df)
 
 		if (rc != 0)
 			D_ERROR("Fail to destroy DTX committed dbtree for pool"
-				DF_UUID": rc = %d\n", DP_UUID(pool->vp_id), rc);
+				DF_UUID": rc = %s\n", DP_UUID(pool->vp_id),
+				d_errstr(rc));
 	}
 
 	return rc;
@@ -468,8 +472,8 @@ vos_dtx_commit_one(struct vos_container *cont, struct dtx_id *dti)
 			dtx->te_intent == DAOS_INTENT_PUNCH ? true : false);
 
 out:
-	D_DEBUG(DB_TRACE, "Commit the DTX "DF_DTI": rc = %d\n",
-		DP_DTI(dti), rc);
+	D_DEBUG(DB_TRACE, "Commit the DTX "DF_DTI": rc = %s\n",
+		DP_DTI(dti), d_errstr(rc));
 
 	return rc;
 }
@@ -505,7 +509,8 @@ vos_dtx_abort_one(struct vos_container *cont, daos_epoch_t epoch,
 		dtx_rec_release(vos_cont2umm(cont), off, true, true, false);
 
 out:
-	D_DEBUG(DB_TRACE, "Abort the DTX "DF_DTI": rc = %d\n", DP_DTI(dti), rc);
+	D_DEBUG(DB_TRACE, "Abort the DTX "DF_DTI": rc = %s\n", DP_DTI(dti),
+		d_errstr(rc));
 
 	if (rc != 0 && force)
 		rc = 0;
@@ -861,8 +866,9 @@ vos_dtx_prepared(struct dtx_handle *dth)
 		if (rc == 0)
 			dth->dth_ent = UMOFF_NULL;
 		else
-			D_ERROR(DF_UOID" fail to commit for "DF_DTI" rc = %d\n",
-				DP_UOID(dtx->te_oid), DP_DTI(&dtx->te_xid), rc);
+			D_ERROR(DF_UOID" fail to commit for "DF_DTI" rc = %s\n",
+				DP_UOID(dtx->te_oid), DP_DTI(&dtx->te_xid),
+				d_errstr(rc));
 	} else if (dtx->te_flags & DTX_EF_SHARES || dtx->te_dkey_hash == 0) {
 		/* If some DTXs share something (object/key) with others,
 		 * or punch object that is quite possible affect subsequent
@@ -1071,8 +1077,8 @@ vos_dtx_mark_sync(daos_handle_t coh, daos_unit_oid_t oid, daos_epoch_t epoch)
 	rc = vos_obj_hold(occ, cont, oid, &epr, true,
 			  DAOS_INTENT_DEFAULT, true, &obj);
 	if (rc != 0) {
-		D_ERROR(DF_UOID" fail to mark sync(1): rc = %d\n",
-			DP_UOID(oid), rc);
+		D_ERROR(DF_UOID" fail to mark sync(1): rc = %s\n",
+			DP_UOID(oid), d_errstr(rc));
 		return rc;
 	}
 
@@ -1092,8 +1098,8 @@ vos_dtx_mark_sync(daos_handle_t coh, daos_unit_oid_t oid, daos_epoch_t epoch)
 			       obj->obj_sync_epoch, epoch, DP_UOID(oid));
 			obj->obj_sync_epoch = epoch;
 		} else {
-			D_ERROR(DF_UOID" fail to mark sync(2): rc = %d\n",
-				DP_UOID(oid), rc);
+			D_ERROR(DF_UOID" fail to mark sync(2): rc = %s\n",
+				DP_UOID(oid), d_errstr(rc));
 		}
 	}
 

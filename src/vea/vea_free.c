@@ -451,5 +451,5 @@ migrate_free_exts(struct vea_space_info *vsi)
 	rc = umem_tx_add_callback(vsi->vsi_umem, vsi->vsi_txd, TX_STAGE_NONE,
 				  migrate_end_cb, vsi);
 	if (rc)
-		D_ERROR("Add transaction end callback error %d\n", rc);
+		D_ERROR("Add transaction end callback error %s\n", d_errstr(rc));
 }

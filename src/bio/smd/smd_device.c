@@ -267,7 +267,7 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 
 	rc = dbtree_iter_prepare(smd_store.ss_dev_hdl, 0, &iter_hdl);
 	if (rc) {
-		D_ERROR("Prepare device iterator failed. %d\n", rc);
+		D_ERROR("Prepare device iterator failed. %s\n", d_errstr(rc));
 		goto out;
 	}
 
@@ -275,7 +275,7 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 			       NULL, NULL);
 	if (rc) {
 		if (rc != -DER_NONEXIST)
-			D_ERROR("Probe first device failed. %d\n", rc);
+			D_ERROR("Probe first device failed. %s\n", d_errstr(rc));
 		else
 			rc = 0;
 		goto done;
@@ -287,14 +287,14 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 	while (1) {
 		rc = dbtree_iter_fetch(iter_hdl, &key, &val, NULL);
 		if (rc != 0) {
-			D_ERROR("Iterate fetch failed. %d\n", rc);
+			D_ERROR("Iterate fetch failed. %s\n", d_errstr(rc));
 			break;
 		}
 
 		info = create_dev_info(key_dev.uuid, &entry);
 		if (info == NULL) {
 			rc = -DER_NOMEM;
-			D_ERROR("Create device info failed. %d\n", rc);
+			D_ERROR("Create device info failed. %s\n", d_errstr(rc));
 			break;
 		}
 		d_list_add_tail(&info->sdi_link, dev_list);
@@ -304,7 +304,7 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 		rc = dbtree_iter_next(iter_hdl);
 		if (rc) {
 			if (rc != -DER_NONEXIST)
-				D_ERROR("Iterate next failed. %d\n", rc);
+				D_ERROR("Iterate next failed. %s\n", d_errstr(rc));
 			else
 				rc = 0;
 			break;

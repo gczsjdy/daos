@@ -506,8 +506,8 @@ obj_shard_tgts_query(struct dc_object *obj, uint32_t map_ver, uint32_t shard,
 			shard_tgt->st_rank = TGTS_IGNORE;
 			rc = 0;
 		} else {
-			D_ERROR(DF_OID" obj_shard_open failed, rc %d.\n",
-				DP_OID(obj->cob_md.omd_id), rc);
+			D_ERROR(DF_OID" obj_shard_open failed, rc %s.\n",
+				DP_OID(obj->cob_md.omd_id), d_errstr(rc));
 		}
 		D_GOTO(out, rc);
 	}
@@ -647,8 +647,9 @@ obj_shards_2_fwtgts(struct dc_object *obj, uint32_t map_ver, uint64_t tgt_set,
 		if (req_tgts->ort_srv_disp) {
 			rc = obj_grp_leader_get(obj, shard_idx, map_ver);
 			if (rc < 0) {
-				D_ERROR(DF_OID" no valid shard, rc %d.\n",
-					DP_OID(obj->cob_md.omd_id), rc);
+				D_ERROR(DF_OID" no valid shard, rc %s.\n",
+					DP_OID(obj->cob_md.omd_id),
+					d_errstr(rc));
 				return rc;
 			}
 			leader_shard = rc;
@@ -1108,8 +1109,8 @@ err:
 		dc_task_decref(pool_task);
 
 	task->dt_result = result; /* restore the orignal error */
-	D_ERROR("Failed to retry task=%p(err=%d), io_retry=%d, rc %d.\n",
-		task, result, obj_auxi->io_retry, rc);
+	D_ERROR("Failed to retry task=%p(err=%d), io_retry=%d, rc %s.\n",
+		task, result, obj_auxi->io_retry, d_errstr(rc));
 	return rc;
 }
 
@@ -1147,7 +1148,7 @@ obj_bulk_prep(d_sg_list_t *sgls, unsigned int nr, bool bulk_bind,
 				continue;
 			rc = crt_bulk_bind(bulks[i], daos_task2ctx(task));
 			if (rc != 0) {
-				D_ERROR("crt_bulk_bind failed, rc: %d.\n", rc);
+				D_ERROR("crt_bulk_bind failed, rc: %s\n", d_errstr(rc));
 				D_GOTO(out, rc);
 			}
 		}
@@ -1267,7 +1268,7 @@ obj_recx_valid(unsigned int nr, daos_recx_t *recxs, bool update)
 					   BTR_FEAT_DIRECT_KEY, 8,
 					   &uma, &broot, &bth);
 		if (rc != 0) {
-			D_ERROR("failed to create recx tree: %d\n", rc);
+			D_ERROR("failed to create recx tree: %s\n", d_errstr(rc));
 			return false;
 		}
 
@@ -1484,7 +1485,8 @@ obj_req_get_tgts(struct dc_object *obj, enum obj_rpc_opc opc, int *shard,
 					 OBJ_TGT_FLAG_CLI_DISPATCH);
 		if (rc != 0) {
 			D_ERROR("opc %d "DF_OID", obj_shards_2_fwtgts failed "
-				"%d.\n", opc, DP_OID(obj->cob_md.omd_id), rc);
+				"%s.\n", opc, DP_OID(obj->cob_md.omd_id),
+				d_errstr(rc));
 			goto out;
 		}
 		/* obj_req_tgts_dump(req_tgts); */
@@ -1507,7 +1509,8 @@ obj_req_get_tgts(struct dc_object *obj, enum obj_rpc_opc opc, int *shard,
 					 shard_cnt, grp_nr, req_tgts, 0);
 		if (rc != 0) {
 			D_ERROR("opc %d "DF_OID", obj_shards_2_fwtgts failed "
-				"%d.\n", opc, DP_OID(obj->cob_md.omd_id), rc);
+				"%s.\n", opc, DP_OID(obj->cob_md.omd_id),
+				d_errstr(rc));
 			goto out;
 		}
 		break;
@@ -1554,7 +1557,8 @@ obj_req_get_tgts(struct dc_object *obj, enum obj_rpc_opc opc, int *shard,
 					 OBJ_TGT_FLAG_LEADER_ONLY);
 		if (rc != 0)
 			D_ERROR("opc %d "DF_OID", obj_shards_2_fwtgts failed "
-				"%d.\n", opc, DP_OID(obj->cob_md.omd_id), rc);
+				"%s.\n", opc, DP_OID(obj->cob_md.omd_id),
+				d_errstr(rc));
 		break;
 	default:
 		D_ERROR("bad opc %d.\n", opc);
@@ -1893,7 +1897,7 @@ out_task:
 	if (d_list_empty(task_list)) {
 		tse_task_complete(obj_task, rc);
 	} else {
-		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %d\n", rc);
+		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n", d_errstr(rc));
 
 		tse_task_list_traverse(task_list, shard_task_abort, &rc);
 	}
@@ -2251,8 +2255,8 @@ do_dc_obj_fetch(tse_task_t *task, daos_obj_fetch_t *args,
 	rc = obj_rw_bulk_prep(obj, args->iods, args->sgls, args->nr,
 			      false, false, task, obj_auxi);
 	if (rc != 0) {
-		D_ERROR("fetch "DF_OID", obj_rw_bulk_prep failed %d.\n",
-			DP_OID(obj->cob_md.omd_id), rc);
+		D_ERROR("fetch "DF_OID", obj_rw_bulk_prep failed %s.\n",
+			DP_OID(obj->cob_md.omd_id), d_errstr(rc));
 		goto out_task;
 	}
 	obj_null_csum(args);
@@ -2347,8 +2351,8 @@ dc_obj_update(tse_task_t *task)
 	rc = obj_rw_bulk_prep(obj, args->iods, args->sgls, args->nr, true,
 			      obj_auxi->req_tgts.ort_srv_disp, task, obj_auxi);
 	if (rc != 0) {
-		D_ERROR("update "DF_OID", bulk_prep failed %d.\n",
-			DP_OID(obj->cob_md.omd_id), rc);
+		D_ERROR("update "DF_OID", bulk_prep failed %s.\n",
+			DP_OID(obj->cob_md.omd_id), d_errstr(rc));
 		goto out_task;
 	}
 
@@ -2917,7 +2921,7 @@ out_task:
 	if (head == NULL || d_list_empty(head)) {/* nothing has been started */
 		tse_task_complete(api_task, rc);
 	} else {
-		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %d\n", rc);
+		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n", d_errstr(rc));
 
 		tse_task_list_traverse(head, shard_task_abort, &rc);
 	}

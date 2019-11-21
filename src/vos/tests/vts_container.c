@@ -258,7 +258,7 @@ co_uuid_iter_test(struct vc_test_args *arg)
 
 	rc = vos_iter_probe(ih, NULL);
 	if (rc != 0) {
-		print_error("Failed to set iterator cursor: %d\n", rc);
+		print_error("Failed to set iterator cursor: %s\n", d_errstr(rc));
 		goto out;
 	}
 
@@ -273,7 +273,7 @@ co_uuid_iter_test(struct vc_test_args *arg)
 		}
 
 		if (rc != 0) {
-			print_error("Failed to fetch co uuid: %d\n", rc);
+			print_error("Failed to fetch co uuid: %s\n", d_errstr(rc));
 			goto out;
 		}
 
@@ -289,7 +289,7 @@ co_uuid_iter_test(struct vc_test_args *arg)
 			break;
 
 		if (rc != 0) {
-			print_error("Failed to move cursor: %d\n", rc);
+			print_error("Failed to move cursor: %s\n", d_errstr(rc));
 			goto out;
 		}
 
@@ -299,14 +299,14 @@ co_uuid_iter_test(struct vc_test_args *arg)
 		rc = vos_iter_fetch(ih, &ent, &anchor);
 		if (rc != 0) {
 			assert_true(rc != -DER_NONEXIST);
-			print_error("Failed to fetch anchor: %d\n", rc);
+			print_error("Failed to fetch anchor: %s\n", d_errstr(rc));
 			goto out;
 		}
 
 		rc = vos_iter_probe(ih, &anchor);
 		if (rc != 0) {
 			assert_true(rc != -DER_NONEXIST);
-			print_error("Failed to probe anchor: %d\n", rc);
+			print_error("Failed to probe anchor: %s\n", d_errstr(rc));
 			goto out;
 		}
 	}

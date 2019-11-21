@@ -57,7 +57,7 @@ cont_svc_init(struct cont_svc *svc, const uuid_t pool_uuid, uint64_t id,
 
 	rc = ABT_rwlock_create(&svc->cs_lock);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("failed to create cs_lock: %d\n", rc);
+		D_ERROR("failed to create cs_lock: %s\n", d_errstr(rc));
 		D_GOTO(err, rc = dss_abterr2der(rc));
 	}
 
@@ -442,7 +442,7 @@ cont_create(struct rdb_tx *tx, struct ds_pool_hdl *pool_hdl,
 	rc = rdb_tx_create_kvs(tx, &svc->cs_conts, &key, &attr);
 	if (rc != 0) {
 		D_ERROR("failed to create container attribute KVS: "
-			"%d\n", rc);
+			"%s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1189,7 +1189,7 @@ cont_query(struct rdb_tx *tx, struct ds_pool_hdl *pool_hdl, struct cont *cont,
 		rc = cont_iv_prop_fetch(pool_hdl->sph_pool->sp_iv_ns,
 					in->cqi_op.ci_hdl, iv_prop);
 		if (rc) {
-			D_ERROR("cont_iv_prop_fetch failed %d.\n", rc);
+			D_ERROR("cont_iv_prop_fetch failed %s\n", d_errstr(rc));
 			return rc;
 		}
 

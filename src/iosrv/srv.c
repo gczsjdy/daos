@@ -165,7 +165,7 @@ dss_xstream_exiting(struct dss_xstream *dxs)
 	int	 rc;
 
 	rc = ABT_future_test(dxs->dx_shutdown, &state);
-	D_ASSERTF(rc == ABT_SUCCESS, "%d\n", rc);
+	D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
 	return state == ABT_TRUE;
 }
 
@@ -496,7 +496,7 @@ dss_srv_handler(void *arg)
 		/* create private transport context */
 		rc = crt_context_create(&dmi->dmi_ctx);
 		if (rc != 0) {
-			D_ERROR("failed to create crt ctxt: %d\n", rc);
+			D_ERROR("failed to create crt ctxt: %s\n", d_errstr(rc));
 			goto tls_fini;
 		}
 
@@ -504,14 +504,14 @@ dss_srv_handler(void *arg)
 						   dss_process_rpc,
 						   dx->dx_pools);
 		if (rc != 0) {
-			D_ERROR("failed to register process cb %d\n", rc);
+			D_ERROR("failed to register process cb %s\n", d_errstr(rc));
 			goto crt_destroy;
 		}
 
 		/** Get context index from cart */
 		rc = crt_context_idx(dmi->dmi_ctx, &dmi->dmi_ctx_id);
 		if (rc != 0) {
-			D_ERROR("failed to get xtream index: rc %d\n", rc);
+			D_ERROR("failed to get xtream index: rc %s\n", d_errstr(rc));
 			goto crt_destroy;
 		}
 		dx->dx_ctx_id = dmi->dmi_ctx_id;
@@ -554,7 +554,7 @@ dss_srv_handler(void *arg)
 				       dss_gc_ult, NULL,
 				       ABT_THREAD_ATTR_NULL, NULL);
 		if (rc != ABT_SUCCESS) {
-			D_ERROR("create GC ULT failed: %d\n", rc);
+			D_ERROR("create GC ULT failed: %s\n", d_errstr(rc));
 			D_GOTO(nvme_fini, rc = dss_abterr2der(rc));
 		}
 	}
@@ -614,7 +614,7 @@ dss_srv_handler(void *arg)
 
 			rc = ABT_pool_get_total_size(dx->dx_pools[i],
 						     &pool_size);
-			D_ASSERTF(rc == ABT_SUCCESS, "%d\n", rc);
+			D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
 			total_size += pool_size;
 		}
 		if (total_size == 0)
@@ -758,7 +758,7 @@ dss_start_one_xstream(hwloc_cpuset_t cpus, int xs_id)
 
 	rc = dss_sched_create(dx->dx_pools, DSS_POOL_CNT, &dx->dx_sched);
 	if (rc != 0) {
-		D_ERROR("create scheduler fails: %d\n", rc);
+		D_ERROR("create scheduler fails: %s\n", d_errstr(rc));
 		D_GOTO(out_pool, rc);
 	}
 
@@ -766,19 +766,19 @@ dss_start_one_xstream(hwloc_cpuset_t cpus, int xs_id)
 	rc = ABT_xstream_create_with_rank(dx->dx_sched, xs_id + 1,
 					  &dx->dx_xstream);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("create xstream fails %d\n", rc);
+		D_ERROR("create xstream fails %s\n", d_errstr(rc));
 		D_GOTO(out_sched, rc = dss_abterr2der(rc));
 	}
 
 	rc = ABT_thread_attr_create(&attr);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("ABT_thread_attr_create fails %d\n", rc);
+		D_ERROR("ABT_thread_attr_create fails %s\n", d_errstr(rc));
 		D_GOTO(out_xstream, rc = dss_abterr2der(rc));
 	}
 
 	rc = ABT_thread_attr_set_stacksize(attr, 65536);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("ABT_thread_attr_set_stacksize fails %d\n", rc);
+		D_ERROR("ABT_thread_attr_set_stacksize fails %s\n", d_errstr(rc));
 		D_GOTO(out_xstream, rc = dss_abterr2der(rc));
 	}
 
@@ -787,7 +787,7 @@ dss_start_one_xstream(hwloc_cpuset_t cpus, int xs_id)
 			       dss_srv_handler, dx, attr,
 			       &dx->dx_progress);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("create progress ULT failed: %d\n", rc);
+		D_ERROR("create progress ULT failed: %s\n", d_errstr(rc));
 		D_GOTO(out_xstream, rc = dss_abterr2der(rc));
 	}
 
@@ -880,7 +880,7 @@ dss_xstreams_fini(bool force)
 	/* release local storage */
 	rc = pthread_key_delete(dss_tls_key);
 	if (rc)
-		D_ERROR("failed to delete dtc: %d\n", rc);
+		D_ERROR("failed to delete dtc: %s\n", d_errstr(rc));
 
 	D_DEBUG(DB_TRACE, "Execution streams stopped\n");
 }
@@ -970,7 +970,7 @@ dss_xstreams_init()
 	/* initialize xstream-local storage */
 	rc = pthread_key_create(&dss_tls_key, NULL);
 	if (rc) {
-		D_ERROR("failed to create dtc: %d\n", rc);
+		D_ERROR("failed to create dtc: %s\n", d_errstr(rc));
 		return -DER_NOMEM;
 	}
 
@@ -1272,7 +1272,7 @@ collective_func(void *varg)
 
 	rc = ABT_future_set(f_arg->dfa_future, (void *)a_args);
 	if (rc != ABT_SUCCESS)
-		D_ERROR("future set failure %d\n", rc);
+		D_ERROR("future set failure %s\n", d_errstr(rc));
 }
 
 /* Reduce the return codes into the first element. */
@@ -1370,7 +1370,7 @@ dss_collective_reduce_internal(struct dss_coll_ops *ops,
 		}
 
 	rc = ABT_future_set(future, (void *)&aggregator);
-	D_ASSERTF(rc == ABT_SUCCESS, "%d\n", rc);
+	D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
 
 	for (tid = 0; tid < xs_nr; tid++) {
 		stream			= &stream_args->csa_streams[tid];
@@ -1386,7 +1386,7 @@ dss_collective_reduce_internal(struct dss_coll_ops *ops,
 			if (i < args->ca_exclude_tgts_cnt) {
 				D_DEBUG(DB_TRACE, "Skip tgt %d\n", tid);
 				rc = ABT_future_set(future, (void *)stream);
-				D_ASSERTF(rc == ABT_SUCCESS, "%d\n", rc);
+				D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
 				continue;
 			}
 		}
@@ -1403,7 +1403,7 @@ dss_collective_reduce_internal(struct dss_coll_ops *ops,
 		if (rc != ABT_SUCCESS) {
 			stream->st_rc = dss_abterr2der(rc);
 			rc = ABT_future_set(future, (void *)stream);
-			D_ASSERTF(rc == ABT_SUCCESS, "%d\n", rc);
+			D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
 		}
 	}
 
@@ -1748,7 +1748,7 @@ dss_dump_ABT_state()
 
 	rc = ABT_info_print_all_xstreams(stderr);
 	if (rc != ABT_SUCCESS)
-		D_ERROR("ABT_info_print_all_xstreams() error, rc = %d\n", rc);
+		D_ERROR("ABT_info_print_all_xstreams() error, rc = %s\n", d_errstr(rc));
 
 	ABT_mutex_lock(xstream_data.xd_mutex);
 	for (idx = 0; idx < xstream_data.xd_xs_nr; idx++) {
@@ -1831,9 +1831,9 @@ dss_dump_ABT_state()
 			}
 			rc = ABT_info_print_pool(stderr, pools[i]);
 			if (rc != ABT_SUCCESS)
-				D_ERROR("ABT_info_print_pool() error, rc = %d, "
+				D_ERROR("ABT_info_print_pool() error, rc = %s, "
 					"for DAOS xstream %p, ABT xstream %p, "
-					"sched %p, pool[%d]\n", rc, dx,
+					"sched %p, pool[%d]\n", d_errstr(rc), dx,
 					dx->dx_xstream, dx->dx_sched, i);
 		}
 		/* XXX last, each pool's ULTs infos (and stacks?!) will need to

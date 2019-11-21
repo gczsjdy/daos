@@ -106,7 +106,7 @@ obj_rw_reply(crt_rpc_t *rpc, int status, uint32_t map_version,
 
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed: %d\n", rc);
+		D_ERROR("send reply failed: %s\n", d_errstr(rc));
 
 	if (obj_rpc_is_fetch(rpc)) {
 		struct obj_rw_out	*orwo = crt_reply_get(rpc);
@@ -1226,7 +1226,7 @@ ds_obj_rw_handler(crt_rpc_t *rpc)
 			    orw->orw_co_uuid, opc_get(rpc->cr_opc),
 			    &cont_hdl, &cont, &map_ver);
 	if (rc != 0) {
-		D_ASSERTF(rc < 0, "unexpected error# %d\n", rc);
+		D_ASSERTF(rc < 0, "unexpected error# %s\n", d_errstr(rc));
 
 		goto reply;
 	}
@@ -1353,7 +1353,7 @@ obj_enum_complete(crt_rpc_t *rpc, int status, int map_version)
 	obj_reply_map_version_set(rpc, map_version);
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed: %d\n", rc);
+		D_ERROR("send reply failed: %s\n", d_errstr(rc));
 
 	oei = crt_req_get(rpc);
 	D_ASSERT(oei != NULL);
@@ -1658,7 +1658,7 @@ obj_punch_complete(crt_rpc_t *rpc, int status, uint32_t map_version,
 
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed: %d\n", rc);
+		D_ERROR("send reply failed: %s\n", d_errstr(rc));
 }
 
 static int
@@ -1985,7 +1985,7 @@ out:
 
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed: %d\n", rc);
+		D_ERROR("send reply failed: %s\n", d_errstr(rc));
 }
 
 void
@@ -2037,7 +2037,7 @@ out:
 
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed: %d\n", rc);
+		D_ERROR("send reply failed: %s\n", d_errstr(rc));
 }
 
 /**

@@ -71,7 +71,7 @@ credit_poll(struct dts_context *tsc, bool drain)
 		rc = daos_eq_poll(tsc->tsc_eqh, 0, DAOS_EQ_WAIT, DTS_CRED_MAX,
 				  evs);
 		if (rc < 0) {
-			fprintf(stderr, "failed to pool event: %d\n", rc);
+			fprintf(stderr, "failed to pool event: %s\n", d_errstr(rc));
 			return rc;
 		}
 
@@ -163,7 +163,7 @@ credits_init(struct dts_context *tsc)
 
 		if (!daos_handle_is_inval(tsc->tsc_eqh)) {
 			rc = daos_event_init(&cred->tc_ev, tsc->tsc_eqh, NULL);
-			D_ASSERTF(!rc, "rc=%d\n", rc);
+			D_ASSERTF(!rc, "rc=%s\n", d_errstr(rc));
 			cred->tc_evp = &cred->tc_ev;
 		}
 		tsc->tsc_credits[i] = cred;
@@ -261,7 +261,7 @@ pool_fini(struct dts_context *tsc)
 	if (tsc->tsc_pmem_file) { /* VOS mode */
 		vos_pool_close(tsc->tsc_poh);
 		rc = vos_pool_destroy(tsc->tsc_pmem_file, tsc->tsc_pool_uuid);
-		D_ASSERTF(rc == 0 || rc == -DER_NONEXIST, "rc=%d\n", rc);
+		D_ASSERTF(rc == 0 || rc == -DER_NONEXIST, "rc=%s\n", d_errstr(rc));
 
 	} else { /* DAOS mode */
 		daos_pool_disconnect(tsc->tsc_poh, NULL);
@@ -270,7 +270,7 @@ pool_fini(struct dts_context *tsc)
 			rc = daos_pool_destroy(tsc->tsc_pool_uuid, NULL, true,
 					       NULL);
 			D_ASSERTF(rc == 0 || rc == -DER_NONEXIST ||
-				  rc == -DER_TIMEDOUT, "rc=%d\n", rc);
+				  rc == -DER_TIMEDOUT, "rc=%s\n", d_errstr(rc));
 		}
 	}
 }

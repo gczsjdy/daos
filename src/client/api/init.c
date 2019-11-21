@@ -155,7 +155,7 @@ daos_init(void)
 	/** set up event queue */
 	rc = daos_eq_lib_init();
 	if (rc != 0) {
-		D_ERROR("failed to initialize eq_lib: %d\n", rc);
+		D_ERROR("failed to initialize eq_lib: %s\n", d_errstr(rc));
 		D_GOTO(out_hhash, rc);
 	}
 
@@ -227,7 +227,7 @@ daos_fini(void)
 
 	rc = daos_eq_lib_fini();
 	if (rc != 0) {
-		D_ERROR("failed to finalize eq: %d\n", rc);
+		D_ERROR("failed to finalize eq: %s\n", d_errstr(rc));
 		D_GOTO(unlock, rc);
 	}
 

@@ -190,7 +190,7 @@ daos_acl_uid_to_principal(uid_t uid, char **name)
 	} while (rc == ERANGE);
 
 	if (rc != 0) {
-		D_ERROR("Error from getpwuid_r: %d\n", rc);
+		D_ERROR("Error from getpwuid_r: %s\n", d_errstr(rc));
 		D_GOTO(out, rc = d_errno2der(rc));
 	}
 
@@ -240,7 +240,7 @@ daos_acl_gid_to_principal(gid_t gid, char **name)
 	} while (rc == ERANGE);
 
 	if (rc != 0) {
-		D_ERROR("Error from getgrgid_r: %d\n", rc);
+		D_ERROR("Error from getgrgid_r: %s\n", d_errstr(rc));
 		D_GOTO(out, rc = d_errno2der(rc));
 	}
 
@@ -318,7 +318,7 @@ daos_acl_principal_to_uid(const char *principal, uid_t *uid)
 	} while (rc == ERANGE);
 
 	if (rc != 0) {
-		D_ERROR("Error from getpwnam_r: %d\n", rc);
+		D_ERROR("Error from getpwnam_r: %s\n", d_errstr(rc));
 		D_GOTO(out, rc = d_errno2der(rc));
 	}
 
@@ -369,7 +369,7 @@ daos_acl_principal_to_gid(const char *principal, gid_t *gid)
 	} while (rc == ERANGE);
 
 	if (rc != 0) {
-		D_ERROR("Error from getgrnam_r: %d\n", rc);
+		D_ERROR("Error from getgrnam_r: %s\n", d_errstr(rc));
 		D_GOTO(out, rc = d_errno2der(rc));
 	}
 
@@ -804,7 +804,7 @@ alloc_str_for_ace(struct daos_ace *current, char **result)
 
 	rc = daos_ace_to_str(current, buf, sizeof(buf));
 	if (rc != 0) {
-		D_ERROR("Couldn't convert ACE to string: %d\n", rc);
+		D_ERROR("Couldn't convert ACE to string: %s\n", d_errstr(rc));
 		return rc;
 	}
 

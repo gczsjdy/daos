@@ -48,7 +48,7 @@ dc_cont_init(void)
 	rc = daos_rpc_register(&cont_proto_fmt, CONT_PROTO_CLI_COUNT,
 				NULL, DAOS_CONT_MODULE);
 	if (rc != 0)
-		D_ERROR("failed to register cont RPCs: %d\n", rc);
+		D_ERROR("failed to register cont RPCs: %s\n", d_errstr(rc));
 
 	return rc;
 }
@@ -111,13 +111,13 @@ cont_create_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while creating container: %d\n", rc);
+		D_ERROR("RPC error while creating container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
 	rc = out->cco_op.co_rc;
 	if (rc != 0) {
-		D_DEBUG(DF_DSMC, "failed to create container: %d\n", rc);
+		D_DEBUG(DF_DSMC, "failed to create container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -160,7 +160,7 @@ dc_cont_create(tse_task_t *task)
 	D_MUTEX_UNLOCK(&pool->dp_client_lock);
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_CREATE, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_pool, rc);
 	}
 
@@ -206,13 +206,13 @@ cont_destroy_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while destroying container: %d\n", rc);
+		D_ERROR("RPC error while destroying container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
 	rc = out->cdo_op.co_rc;
 	if (rc != 0) {
-		D_ERROR("failed to destroy container: %d\n", rc);
+		D_ERROR("failed to destroy container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -259,7 +259,7 @@ dc_cont_destroy(tse_task_t *task)
 	D_MUTEX_UNLOCK(&pool->dp_client_lock);
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_DESTROY, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_pool, rc);
 	}
 
@@ -393,7 +393,7 @@ cont_open_complete(tse_task_t *task, void *data)
 	}
 
 	if (rc != 0) {
-		D_ERROR("RPC error while opening container: %d\n", rc);
+		D_ERROR("RPC error while opening container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -566,7 +566,7 @@ dc_cont_open(tse_task_t *task)
 	D_MUTEX_UNLOCK(&pool->dp_client_lock);
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_OPEN, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_cont, rc);
 	}
 
@@ -605,7 +605,7 @@ err_pool:
 	dc_pool_put(pool);
 err:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "failed to open container: %d\n", rc);
+	D_DEBUG(DF_DSMC, "failed to open container: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -633,7 +633,7 @@ cont_close_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while closing container: %d\n", rc);
+		D_ERROR("RPC error while closing container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -646,7 +646,7 @@ cont_close_complete(tse_task_t *task, void *data)
 			DP_UUID(cont->dc_cont_hdl), DP_UUID(pool->dp_pool_hdl));
 		rc = 0;
 	} else if (rc != 0) {
-		D_ERROR("failed to close container: %d\n", rc);
+		D_ERROR("failed to close container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -733,7 +733,7 @@ dc_cont_close(tse_task_t *task)
 	D_MUTEX_UNLOCK(&pool->dp_client_lock);
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_CLOSE, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_pool, rc);
 	}
 
@@ -796,7 +796,7 @@ cont_query_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while querying container: %d\n", rc);
+		D_ERROR("RPC error while querying container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -923,7 +923,7 @@ dc_cont_query(tse_task_t *task)
 	D_MUTEX_UNLOCK(&pool->dp_client_lock);
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_QUERY, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_cont, rc);
 	}
 
@@ -956,7 +956,7 @@ err_cont:
 	dc_pool_put(pool);
 err:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to query container: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to query container: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1033,13 +1033,13 @@ cont_oid_alloc_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 	} else if (rc != 0) {
 		/** error but non retryable RPC */
-		D_ERROR("failed to allocate oids: %d\n", rc);
+		D_ERROR("failed to allocate oids: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
 	rc = out->coao_op.co_rc;
 	if (rc != 0) {
-		D_ERROR("failed to allocate oids: %d\n", rc);
+		D_ERROR("failed to allocate oids: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1116,7 +1116,7 @@ dc_cont_alloc_oids(tse_task_t *task)
 
 	rc = cont_req_create(daos_task2ctx(task), &ep, CONT_OID_ALLOC, &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		D_GOTO(err_cont, rc);
 	}
 
@@ -1149,7 +1149,7 @@ err_cont:
 	dc_pool_put(pool);
 err:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to allocate OIDs: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to allocate OIDs: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1233,7 +1233,7 @@ out_cont:
 	dc_cont_put(cont);
 out:
 	if (rc)
-		D_ERROR("daos_cont_l2g failed, rc: %d\n", rc);
+		D_ERROR("daos_cont_l2g failed, rc: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1359,7 +1359,7 @@ dc_cont_global2local(daos_handle_t poh, d_iov_t glob, daos_handle_t *coh)
 
 	rc = dc_cont_g2l(poh, cont_glob, coh);
 	if (rc != 0)
-		D_ERROR("dc_cont_g2l failed, rc: %d.\n", rc);
+		D_ERROR("dc_cont_g2l failed, rc: %s\n", d_errstr(rc));
 
 out:
 	return rc;
@@ -1416,7 +1416,7 @@ cont_req_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while querying container: %d\n", rc);
+		D_ERROR("RPC error while querying container: %s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1460,7 +1460,7 @@ cont_req_prepare(daos_handle_t coh, enum cont_operation opcode,
 
 	rc = cont_req_create(ctx, &ep, opcode, &args->cra_rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create rpc: %d\n", rc);
+		D_ERROR("failed to create rpc: %s\n", d_errstr(rc));
 		cont_req_cleanup(CLEANUP_POOL, args);
 		D_GOTO(out, rc);
 	}
@@ -1550,7 +1550,7 @@ dc_cont_list_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to list container attributes: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to list container attributes: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1694,7 +1694,7 @@ dc_cont_get_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to get container attributes: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to get container attributes: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1752,7 +1752,7 @@ dc_cont_set_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to set container attributes: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to set container attributes: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -1974,7 +1974,7 @@ dc_cont_list_snap(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to list container snapshots: %d\n", rc);
+	D_DEBUG(DF_DSMC, "Failed to list container snapshots: %s\n", d_errstr(rc));
 	return rc;
 }
 

@@ -339,7 +339,7 @@ oi_iter_fini(struct vos_iterator *iter)
 	if (!daos_handle_is_inval(oiter->oit_hdl)) {
 		rc = dbtree_iter_finish(oiter->oit_hdl);
 		if (rc)
-			D_ERROR("oid_iter_fini failed:%d\n", rc);
+			D_ERROR("oid_iter_fini failed:%s\n", d_errstr(rc));
 	}
 
 	if (oiter->oit_cont != NULL)
@@ -508,7 +508,7 @@ oi_iter_match_probe(struct vos_iterator *iter)
 		return 0; /* end of iteration, not a failure */
 
 	D_CDEBUG(rc == -DER_INPROGRESS, DB_TRACE, DLOG_ERR,
-		 "iterator %s failed, rc=%d\n", str, rc);
+		 "iterator %s failed, rc=%s\n", str, d_errstr(rc));
 
 	return rc;
 }
@@ -569,9 +569,9 @@ oi_iter_fetch(struct vos_iterator *iter, vos_iter_entry_t *it_entry,
 	if (rc != 0) {
 		if (rc == -DER_INPROGRESS)
 			D_DEBUG(DB_TRACE, "Cannot fetch oid info because of "
-				"conflict modification: %d\n", rc);
+				"conflict modification: %s\n", d_errstr(rc));
 		else
-			D_ERROR("Error while fetching oid info: %d\n", rc);
+			D_ERROR("Error while fetching oid info: %s\n", d_errstr(rc));
 		return rc;
 	}
 
@@ -611,7 +611,7 @@ oi_iter_delete(struct vos_iterator *iter, void *args)
 	rc = vos_tx_end(vos_cont2umm(oiter->oit_cont), rc);
 
 	if (rc != 0)
-		D_ERROR("Failed to delete oid entry: %d\n", rc);
+		D_ERROR("Failed to delete oid entry: %s\n", d_errstr(rc));
 exit:
 	return rc;
 }

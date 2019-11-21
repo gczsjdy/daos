@@ -92,7 +92,7 @@ bio_nvme_init(const char *storage_path, const char *nvme_conf, int shm_id)
 
 	rc = smd_init(storage_path);
 	if (rc != 0) {
-		D_ERROR("Initialize SMD store failed. %d\n", rc);
+		D_ERROR("Initialize SMD store failed. %s\n", d_errstr(rc));
 		return rc;
 	}
 
@@ -1010,7 +1010,7 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 
 		rc = spdk_env_init(&opts);
 		if (rc != 0) {
-			D_ERROR("failed to initialize SPDK env, rc:%d\n", rc);
+			D_ERROR("failed to initialize SPDK env, rc:%s\n", d_errstr(rc));
 			rc = -DER_INVAL; /* spdk_env_init() returns -1 */
 			goto out;
 		}
@@ -1050,7 +1050,7 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 		/* The SPDK 'Malloc' device relies on copy engine. */
 		rc = spdk_copy_engine_initialize();
 		if (rc != 0) {
-			D_ERROR("failed to init SPDK copy engine, rc:%d\n", rc);
+			D_ERROR("failed to init SPDK copy engine, rc:%s\n", d_errstr(rc));
 			goto out;
 		}
 
@@ -1061,7 +1061,7 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 
 		if (cp_arg.cca_rc != 0) {
 			rc = cp_arg.cca_rc;
-			D_ERROR("failed to init bdevs, rc:%d\n", rc);
+			D_ERROR("failed to init bdevs, rc:%s\n", d_errstr(rc));
 			common_prep_arg(&cp_arg);
 			spdk_copy_engine_finish(common_fini_cb, &cp_arg);
 			xs_poll_completion(ctxt, &cp_arg.cca_inflights);
@@ -1071,7 +1071,7 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 		nvme_glb.bd_init_thread = ctxt->bxc_thread;
 		rc = init_bio_bdevs(ctxt);
 		if (rc != 0) {
-			D_ERROR("failed to init bio_bdevs, rc:%d\n", rc);
+			D_ERROR("failed to init bio_bdevs, rc:%s\n", d_errstr(rc));
 			goto out;
 		}
 	}

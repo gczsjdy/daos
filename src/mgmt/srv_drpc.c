@@ -139,7 +139,8 @@ ds_mgmt_drpc_set_rank(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = crt_rank_self_set(req->rank);
 	if (rc != 0) {
-		D_ERROR("Failed to set self rank %u: %d\n", req->rank, rc);
+		D_ERROR("Failed to set self rank %u: %s\n", req->rank,
+			d_errstr(rc));
 		resp->status = rc;
 	}
 
@@ -197,8 +198,8 @@ ds_mgmt_drpc_create_mgmt_svc(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	rc = ds_mgmt_svc_start(true /* create */, ds_rsvc_get_md_cap(),
 			       req->bootstrap, uuid, req->addr);
 	if (rc != 0)
-		D_ERROR("Failed to create MS (bootstrap=%d): %d\n",
-			req->bootstrap, rc);
+		D_ERROR("Failed to create MS (bootstrap=%d): %s\n",
+			req->bootstrap, d_errstr(rc));
 
 out:
 	mgmt__create_ms_req__free_unpacked(req, NULL);
@@ -235,7 +236,7 @@ ds_mgmt_drpc_start_mgmt_svc(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	if (rc == -DER_ALREADY) {
 		D_DEBUG(DB_MGMT, "MS already started\n");
 	} else if (rc != 0) {
-		D_ERROR("Failed to start MS: %d\n", rc);
+		D_ERROR("Failed to start MS: %s\n", d_errstr(rc));
 		resp->status = rc;
 	}
 
@@ -277,7 +278,7 @@ ds_mgmt_drpc_get_attach_info(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_get_attach_info_handler(resp);
 	if (rc != 0) {
-		D_ERROR("Failed to get attach info: %d\n", rc);
+		D_ERROR("Failed to get attach info: %s\n", d_errstr(rc));
 		resp->status = rc;
 	}
 
@@ -357,7 +358,7 @@ ds_mgmt_drpc_join(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_join_handler(&in, &out);
 	if (rc != 0) {
-		D_ERROR("Failed to join: %d\n", rc);
+		D_ERROR("Failed to join: %s\n", d_errstr(rc));
 		goto out;
 	}
 
@@ -519,8 +520,8 @@ ds_mgmt_drpc_pool_create(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = uuid_parse(req->uuid, pool_uuid);
 	if (rc != 0) {
-		D_ERROR("Unable to parse pool UUID %s: %d\n", req->uuid,
-			rc);
+		D_ERROR("Unable to parse pool UUID %s: %s\n", req->uuid,
+			d_errstr(rc));
 		goto out;
 	}
 	D_DEBUG(DB_MGMT, DF_UUID": creating pool\n", DP_UUID(pool_uuid));
@@ -537,7 +538,7 @@ ds_mgmt_drpc_pool_create(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	if (targets != NULL)
 		d_rank_list_free(targets);
 	if (rc != 0) {
-		D_ERROR("failed to create pool: %d\n", rc);
+		D_ERROR("failed to create pool: %s\n", d_errstr(rc));
 		goto out;
 	}
 
@@ -639,8 +640,8 @@ ds_mgmt_drpc_pool_destroy(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = uuid_parse(req->uuid, uuid);
 	if (rc != 0) {
-		D_ERROR("Unable to parse pool UUID %s: %d\n", req->uuid,
-			rc);
+		D_ERROR("Unable to parse pool UUID %s: %s\n", req->uuid,
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -648,7 +649,8 @@ ds_mgmt_drpc_pool_destroy(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	rc = ds_mgmt_destroy_pool(uuid, req->sys,
 				  (req->force == true) ? 1 : 0);
 	if (rc != 0) {
-		D_ERROR("Failed to destroy pool %s: %d\n", req->uuid, rc);
+		D_ERROR("Failed to destroy pool %s: %s\n", req->uuid,
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -714,13 +716,14 @@ ds_mgmt_drpc_pool_get_acl(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_pool_get_acl(pool_uuid, &acl);
 	if (rc != 0) {
-		D_ERROR("Couldn't get pool ACL, rc=%d\n", rc);
+		D_ERROR("Couldn't get pool ACL, rc=%s\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
 	rc = daos_acl_to_strs(acl, &ace_list, &ace_nr);
 	if (rc != 0) {
-		D_ERROR("Couldn't convert ACL to string list, rc=%d", rc);
+		D_ERROR("Couldn't convert ACL to string list, rc=%s",
+			d_errstr(rc));
 		D_GOTO(out_acl, rc);
 	}
 
@@ -818,7 +821,8 @@ ds_mgmt_drpc_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	npools = req->numpools;
 	rc = ds_mgmt_list_pools(req->sys, &npools, &pools, &pools_len);
 	if (rc != 0) {
-		D_ERROR("Failed to list pools in %s :%d\n", req->sys, rc);
+		D_ERROR("Failed to list pools in %s :%s\n", req->sys,
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -912,7 +916,7 @@ ds_mgmt_drpc_smd_list_devs(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_smd_list_devs(resp);
 	if (rc != 0)
-		D_ERROR("Failed to list SMD devices :%d\n", rc);
+		D_ERROR("Failed to list SMD devices :%s\n", d_errstr(rc));
 
 	resp->status = rc;
 	len = mgmt__smd_dev_resp__get_packed_size(resp);
@@ -981,7 +985,7 @@ ds_mgmt_drpc_smd_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_smd_list_pools(resp);
 	if (rc != 0)
-		D_ERROR("Failed to list SMD pools :%d\n", rc);
+		D_ERROR("Failed to list SMD pools :%s\n", d_errstr(rc));
 
 	resp->status = rc;
 	len = mgmt__smd_pool_resp__get_packed_size(resp);
@@ -1054,8 +1058,8 @@ ds_mgmt_drpc_bio_health_query(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	if (strlen(req->dev_uuid) != 0) {
 		rc = uuid_parse(req->dev_uuid, uuid);
 		if (rc != 0) {
-			D_ERROR("Unable to parse device UUID %s: %d\n",
-				req->dev_uuid, rc);
+			D_ERROR("Unable to parse device UUID %s: %s\n",
+				req->dev_uuid, d_errstr(rc));
 			goto out;
 		}
 	} else
@@ -1070,7 +1074,7 @@ ds_mgmt_drpc_bio_health_query(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 	rc = ds_mgmt_bio_health_query(bio_health, uuid, req->tgt_id);
 	if (rc != 0) {
-		D_ERROR("Failed to query BIO health data :%d\n", rc);
+		D_ERROR("Failed to query BIO health data :%s\n", d_errstr(rc));
 		goto out;
 	}
 

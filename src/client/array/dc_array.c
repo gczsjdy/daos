@@ -198,7 +198,7 @@ create_handle_cb(tse_task_t *task, void *data)
 	int			rc = task->dt_result;
 
 	if (rc != 0) {
-		D_ERROR("Failed to create array obj (%d)\n", rc);
+		D_ERROR("Failed to create array obj (%s)\n", d_errstr(rc));
 		D_GOTO(err_obj, rc);
 	}
 
@@ -337,7 +337,7 @@ out_array:
 	array_decref(array);
 out:
 	if (rc)
-		D_ERROR("daos_array_l2g failed, rc: %d\n", rc);
+		D_ERROR("daos_array_l2g failed, rc: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -497,7 +497,7 @@ write_md_cb(tse_task_t *task, void *data)
 	int rc = task->dt_result;
 
 	if (rc != 0) {
-		D_ERROR("Failed to open object (%d)\n", rc);
+		D_ERROR("Failed to open object (%s)\n", d_errstr(rc));
 		return rc;
 	}
 
@@ -682,7 +682,7 @@ fetch_md_cb(tse_task_t *task, void *data)
 	int			rc = task->dt_result;
 
 	if (rc != 0) {
-		D_ERROR("Failed to open object (%d)\n", rc);
+		D_ERROR("Failed to open object (%s)\n", d_errstr(rc));
 		return rc;
 	}
 
@@ -1447,7 +1447,7 @@ get_array_size_cb(tse_task_t *task, void *data)
 	int			rc = task->dt_result;
 
 	if (rc != 0) {
-		D_ERROR("Array size query Failed (%d)\n", rc);
+		D_ERROR("Array size query Failed (%s)\n", d_errstr(rc));
 		return rc;
 	}
 
@@ -1603,7 +1603,7 @@ punch_key(daos_handle_t oh, daos_handle_t th, daos_size_t dkey_val,
 
 	rc = daos_task_create(opc, tse_task2sched(task), 0, NULL, &io_task);
 	if (rc) {
-		D_ERROR("daos_task_create() failed (%d)\n", rc);
+		D_ERROR("daos_task_create() failed (%s)\n", d_errstr(rc));
 		D_GOTO(err, rc);
 	}
 
@@ -1750,7 +1750,7 @@ check_record_cb(tse_task_t *task, void *data)
 	rc = daos_task_create(DAOS_OPC_OBJ_UPDATE, tse_task2sched(task), 0,
 			      NULL, &io_task);
 	if (rc) {
-		D_ERROR("Task create failed (%d)\n", rc);
+		D_ERROR("Task create failed (%s)\n", d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1839,7 +1839,7 @@ check_record(daos_handle_t oh, daos_handle_t th, daos_size_t dkey_val,
 	rc = daos_task_create(DAOS_OPC_OBJ_FETCH, tse_task2sched(task), 0, NULL,
 			      &io_task);
 	if (rc) {
-		D_ERROR("Task create failed (%d)\n", rc);
+		D_ERROR("Task create failed (%s)\n", d_errstr(rc));
 		D_GOTO(err, rc);
 	}
 
@@ -1968,7 +1968,7 @@ adjust_array_size_cb(tse_task_t *task, void *data)
 	int			rc = task->dt_result;
 
 	if (rc != 0) {
-		D_ERROR("Array DKEY enumermation Failed (%d)\n", rc);
+		D_ERROR("Array DKEY enumermation Failed (%s)\n", d_errstr(rc));
 		return rc;
 	}
 

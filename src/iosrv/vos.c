@@ -295,7 +295,7 @@ fill_rec(daos_handle_t ih, vos_iter_entry_t *key_ent, struct dss_enum_arg *arg,
 				       iovs[arg->sgl_idx].iov_len, data_size);
 		rc = vos_iter_copy(ih, key_ent, &iov_out);
 		if (rc != 0) {
-			D_ERROR("Copy recx data failed %d\n", rc);
+			D_ERROR("Copy recx data failed %s\n", d_errstr(rc));
 		} else {
 			rec->rec_flags |= RECX_INLINE;
 			iovs[arg->sgl_idx].iov_len += data_size;
@@ -853,7 +853,7 @@ enum_unpack_recxs(daos_key_desc_t *kds, void *data,
 	}
 free:
 	daos_iov_free(&iod_akey);
-	D_DEBUG(DB_IO, "unpack recxs: %d\n", rc);
+	D_DEBUG(DB_IO, "unpack recxs: %s\n", d_errstr(rc));
 	return rc;
 }
 
@@ -976,7 +976,7 @@ dss_enum_unpack(vos_iter_type_t vos_type, struct dss_enum_arg *arg,
 		if (io.ui_iods_top == io.ui_iods_cap - 1) {
 			rc = complete_io(&io, cb, cb_arg);
 			if (rc != 0) {
-				D_ERROR("complete io failed: rc %d\n", rc);
+				D_ERROR("complete io failed: rc %s\n", d_errstr(rc));
 				goto out;
 			}
 		}
