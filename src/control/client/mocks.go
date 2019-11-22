@@ -75,6 +75,10 @@ var (
 			"A::GROUP@:r",
 		},
 	}
+	MockPoolList = []*mgmtpb.ListPoolsResp_Pool{
+		{Uuid: "12345678-1234-1234-1234-123456789abc", Svcreps: "1,2"},
+		{Uuid: "12345678-1234-1234-1234-cba987654321", Svcreps: "0"},
+	}
 	MockErr = errors.New("unknown failure")
 )
 
@@ -195,7 +199,8 @@ func (m *mockACLResult) ACL() *AccessControlList {
 }
 
 type mockMgmtSvcClient struct {
-	ACLRet *mockACLResult
+	ACLRet       *mockACLResult
+	ListPoolsErr error
 }
 
 func (m *mockMgmtSvcClient) PoolCreate(ctx context.Context, req *mgmtpb.PoolCreateReq, o ...grpc.CallOption) (*mgmtpb.PoolCreateResp, error) {
@@ -276,15 +281,17 @@ func (m *mockMgmtSvcClient) KillRank(ctx context.Context, req *mgmtpb.KillRankRe
 	return &mgmtpb.DaosResp{}, nil
 }
 
-func newMockMgmtSvcClient(getACLResult *mockACLResult) mgmtpb.MgmtSvcClient {
-	return &mockMgmtSvcClient{
-		getACLResult,
+func (m *mockMgmtSvcClient) ListPools(ctx context.Context, req *mgmtpb.ListPoolsReq, o ...grpc.CallOption) (*mgmtpb.ListPoolsResp, error) {
+	if m.ListPoolsErr != nil {
+		return nil, m.ListPoolsErr
 	}
+	return &mgmtpb.ListPoolsResp{Pools: MockPoolList}, nil
 }
 
-func (m *mockMgmtSvcClient) ListPools(ctx context.Context, req *mgmtpb.ListPoolsReq, o ...grpc.CallOption) (*mgmtpb.ListPoolsResp, error) {
-	// return successful list pools results
-	return &mgmtpb.ListPoolsResp{}, nil
+func newMockMgmtSvcClient(getACLResult *mockACLResult) mgmtpb.MgmtSvcClient {
+	return &mockMgmtSvcClient{
+		ACLRet: getACLResult,
+	}
 }
 
 // implement mock/stub behaviour for Control

@@ -100,3 +100,32 @@ func (c *connList) KillRank(rank uint32) ResultMap {
 
 	return results
 }
+
+// ListPoolsReq encapsulates a request to list pools in a given DAOS system.
+type ListPoolsReq struct {
+	System string // DAOS system identifier
+}
+
+// PoolDiscovery represents the basic discovery information for a pool.
+type PoolDiscovery struct {
+	UUID        string // Unique identifier
+	SvcReplicas []int  // Ranks of pool service replicas
+}
+
+// ListPoolsResp contains the status of the request and, if successful, the list
+// of pools in the system.
+type ListPoolsResp struct {
+	Status int32
+	Pools  []PoolDiscovery
+}
+
+// ListPools fetches the list of all pools and their service replicas from the
+// system.
+func (c *connList) ListPools(req *ListPoolsReq) (*ListPoolsResp, error) {
+	_, err := chooseServiceLeader(c.controllers)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}

@@ -488,3 +488,64 @@ func TestPoolUpdateACL(t *testing.T) {
 		})
 	}
 }
+
+func TestListPools(t *testing.T) {
+	log, buf := logging.NewTestLogger(t.Name())
+	defer ShowBufferOnFailure(t, buf)
+
+	for name, tt := range map[string]struct {
+		addr                Addresses
+		listPoolsRespStatus int32
+		listPoolsErr        error
+		expectedResp        *ListPoolsResp
+		expectedErr         string
+	}{
+		"no service leader": {
+			addr:         nil,
+			expectedResp: nil,
+			expectedErr:  "no active connections",
+		},
+		// "gRPC call failed": {
+		// 	addr:         MockServers,
+		// 	listPoolsErr: MockErr,
+		// 	expectedResp: nil,
+		// 	expectedErr:  MockErr.Error(),
+		// },
+		// "gRPC resp bad status": {
+		// 	addr:                MockServers,
+		// 	listPoolsRespStatus: -1000,
+		// 	expectedResp:        nil,
+		// 	expectedErr:         "DAOS returned error code: -5001",
+		// },
+		// "success": {
+		// 	addr:                MockServers,
+		// 	listPoolsRespStatus: 0,
+		// 	expectedResp:        &ListPoolsResp{Pools: },
+		// 	expectedErr:         "",
+		// },
+	} {
+		t.Run(name, func(t *testing.T) {
+
+			cc := connectSetupServers(tt.addr, log, Ready,
+				MockCtrlrs, MockCtrlrResults, MockScmModules,
+				MockModuleResults, MockScmNamespaces, MockMountResults,
+				nil, nil, nil, nil, MockACL)
+
+			req := &ListPoolsReq{
+				System: "daos",
+			}
+
+			resp, err := cc.ListPools(req)
+
+			if tt.expectedErr != "" {
+				ExpectError(t, err, tt.expectedErr, name)
+			} else if err != nil {
+				t.Fatalf("expected nil error, got %v", err)
+			}
+
+			if diff := cmp.Diff(tt.expectedResp, resp); diff != "" {
+				t.Fatalf("unexpected response (-want, +got):\n%s\n", diff)
+			}
+		})
+	}
+}
