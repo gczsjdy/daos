@@ -351,7 +351,7 @@ fetch_entry(daos_handle_t oh, daos_handle_t th, const char *name,
 
 	rc = daos_obj_fetch(oh, th, &dkey, akeys_nr, iods, sgls, NULL, NULL);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%d)\n", name, rc);
+		D_ERROR("Failed to fetch entry %s (%s)\n", name, d_errstr(rc));
 		D_GOTO(out, rc = daos_der2errno(rc));
 	}
 
@@ -485,7 +485,7 @@ insert_entry(daos_handle_t oh, daos_handle_t th, const char *name,
 
 	rc = daos_obj_update(oh, th, &dkey, akeys_nr, iods, sgls, NULL);
 	if (rc) {
-		D_ERROR("Failed to insert entry %s (%d)\n", name, rc);
+		D_ERROR("Failed to insert entry %s (%s)\n", name, d_errstr(rc));
 		return daos_der2errno(rc);
 	}
 
@@ -673,7 +673,8 @@ open_file(dfs_t *dfs, daos_handle_t th, dfs_obj_t *parent, int flags,
 	/* Check if parent has the filename entry */
 	rc = fetch_entry(parent->oh, th, file->name, false, &exists, &entry);
 	if (rc) {
-		D_ERROR("fetch_entry %s failed %d.\n", file->name, rc);
+		D_ERROR("fetch_entry %s failed %s.\n", file->name,
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -716,8 +717,8 @@ open_file(dfs_t *dfs, daos_handle_t th, dfs_obj_t *parent, int flags,
 		rc = insert_entry(parent->oh, th, file->name, entry);
 		if (rc != 0) {
 			daos_obj_close(file->oh, NULL);
-			D_ERROR("Inserting file entry %s failed (%d)\n",
-				file->name, rc);
+			D_ERROR("Inserting file entry %s failed (%s)\n",
+				file->name, d_errstr(rc));
 			return rc;
 		}
 
@@ -820,8 +821,8 @@ open_dir(dfs_t *dfs, daos_handle_t th, daos_handle_t parent_oh, int flags,
 		rc = insert_entry(parent_oh, th, dir->name, entry);
 		if (rc != 0) {
 			daos_obj_close(dir->oh, NULL);
-			D_ERROR("Inserting dir entry %s failed (%d)\n",
-				dir->name, rc);
+			D_ERROR("Inserting dir entry %s failed (%s)\n",
+				dir->name, d_errstr(rc));
 		}
 
 		return rc;
@@ -891,8 +892,8 @@ open_symlink(dfs_t *dfs, daos_handle_t th, dfs_obj_t *parent, int flags,
 		rc = insert_entry(parent->oh, th, sym->name, entry);
 		if (rc) {
 			D_FREE(sym->value);
-			D_ERROR("Inserting entry %s failed (rc = %d)\n",
-				sym->name, rc);
+			D_ERROR("Inserting entry %s failed (rc = %s)\n",
+				sym->name, d_errstr(rc));
 		}
 		return rc;
 	}
@@ -1091,7 +1092,7 @@ dfs_cont_create(daos_handle_t poh, uuid_t co_uuid, dfs_attr_t *attr,
 
 	rc = insert_entry(super_oh, DAOS_TX_NONE, "/", entry);
 	if (rc) {
-		D_ERROR("Failed to insert root entry (%d).", rc);
+		D_ERROR("Failed to insert root entry (%s).", d_errstr(rc));
 		D_GOTO(err_super, rc);
 	}
 
@@ -2900,7 +2901,7 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 
 	rc = fetch_entry(parent->oh, th, name, true, &exists, &entry);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%d)\n", name, rc);
+		D_ERROR("Failed to fetch entry %s (%s)\n", name, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 	if (exists == false)
@@ -2909,7 +2910,7 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 	rc = fetch_entry(new_parent->oh, th, new_name, true, &exists,
 			 &new_entry);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%d)\n", new_name, rc);
+		D_ERROR("Failed to fetch entry %s (%s)\n", new_name, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -2983,7 +2984,7 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 	/** insert old entry in new parent object */
 	rc = insert_entry(new_parent->oh, th, new_name, entry);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%d)\n", new_name, rc);
+		D_ERROR("Inserting entry %s failed (%s)\n", new_name, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -2991,7 +2992,7 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 	d_iov_set(&dkey, (void *)name, strlen(name));
 	rc = daos_obj_punch_dkeys(parent->oh, th, 1, &dkey, NULL);
 	if (rc) {
-		D_ERROR("Punch entry %s failed (%d)\n", name, rc);
+		D_ERROR("Punch entry %s failed (%s)\n", name, d_errstr(rc));
 		D_GOTO(out, rc = daos_der2errno(rc));
 	}
 
@@ -3047,7 +3048,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 
 	rc = fetch_entry(parent1->oh, th, name1, true, &exists, &entry1);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%d)\n", name1, rc);
+		D_ERROR("Failed to fetch entry %s (%s)\n", name1, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 	if (exists == false)
@@ -3055,7 +3056,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 
 	rc = fetch_entry(parent2->oh, th, name2, true, &exists, &entry2);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%d)\n", name2, rc);
+		D_ERROR("Failed to fetch entry %s (%s)\n", name2, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -3066,7 +3067,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	d_iov_set(&dkey, (void *)name1, strlen(name1));
 	rc = daos_obj_punch_dkeys(parent1->oh, th, 1, &dkey, NULL);
 	if (rc) {
-		D_ERROR("Punch entry %s failed (%d)\n", name1, rc);
+		D_ERROR("Punch entry %s failed (%s)\n", name1, d_errstr(rc));
 		D_GOTO(out, rc = daos_der2errno(rc));
 	}
 
@@ -3074,7 +3075,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	d_iov_set(&dkey, (void *)name2, strlen(name2));
 	rc = daos_obj_punch_dkeys(parent2->oh, th, 1, &dkey, NULL);
 	if (rc) {
-		D_ERROR("Punch entry %s failed (%d)\n", name2, rc);
+		D_ERROR("Punch entry %s failed (%s)\n", name2, d_errstr(rc));
 		D_GOTO(out, rc = daos_der2errno(rc));
 	}
 
@@ -3082,7 +3083,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	/** insert entry1 in parent2 object */
 	rc = insert_entry(parent2->oh, th, name1, entry1);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%d)\n", name1, rc);
+		D_ERROR("Inserting entry %s failed (%s)\n", name1, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -3090,7 +3091,7 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	/** insert entry2 in parent1 object */
 	rc = insert_entry(parent1->oh, th, name2, entry2);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%d)\n", name2, rc);
+		D_ERROR("Inserting entry %s failed (%s)\n", name2, d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -3282,7 +3283,7 @@ dfs_getxattr(dfs_t *dfs, dfs_obj_t *obj, const char *name, void *value,
 				    NULL, NULL);
 	}
 	if (rc) {
-		D_ERROR("Failed to fetch xattr %s (%d)\n", name, rc);
+		D_ERROR("Failed to fetch xattr %s (%s)\n", name, d_errstr(rc));
 		D_GOTO(close, rc = daos_der2errno(rc));
 	}
 

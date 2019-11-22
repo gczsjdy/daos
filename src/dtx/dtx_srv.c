@@ -45,8 +45,8 @@ dtx_handler(crt_rpc_t *rpc)
 	rc = ds_cont_child_lookup(din->di_po_uuid, din->di_co_uuid, &cont);
 	if (rc != 0) {
 		D_ERROR("Failed to locate pool="DF_UUID" cont="DF_UUID
-			" for DTX rpc %u: rc = %d\n", DP_UUID(din->di_po_uuid),
-			DP_UUID(din->di_co_uuid), opc, rc);
+			" for DTX rpc %u: rc = %s\n", DP_UUID(din->di_po_uuid),
+			DP_UUID(din->di_co_uuid), opc, d_errstr(rc));
 		goto out;
 	}
 
@@ -75,14 +75,15 @@ dtx_handler(crt_rpc_t *rpc)
 
 out:
 	D_DEBUG(DB_TRACE, "Handle DTX ("DF_DTI") rpc %u, count %d, epoch "
-		DF_X64" : rc = %d\n",
+		DF_X64" : rc = %s\n",
 		DP_DTI(din->di_dtx_array.ca_arrays), opc,
-		(int)din->di_dtx_array.ca_count, din->di_epoch, rc);
+		(int)din->di_dtx_array.ca_count, din->di_epoch, d_errstr(rc));
 
 	dout->do_status = rc;
 	rc = crt_reply_send(rpc);
 	if (rc != 0)
-		D_ERROR("send reply failed for DTX rpc %u: rc = %d\n", opc, rc);
+		D_ERROR("send reply failed for DTX rpc %u: rc = %s\n", opc,
+			d_errstr(rc));
 
 	if (cont != NULL)
 		ds_cont_child_put(cont);

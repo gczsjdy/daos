@@ -624,8 +624,8 @@ assign_device(int tgt_id)
 	/* Update mapping for this target in NVMe device table */
 	rc = smd_dev_assign(chosen_bdev->bb_uuid, tgt_id);
 	if (rc) {
-		D_ERROR("Failed to map dev "DF_UUID" to tgt %d. %d\n",
-			DP_UUID(chosen_bdev->bb_uuid), tgt_id, rc);
+		D_ERROR("Failed to map dev "DF_UUID" to tgt %d. %s\n",
+			DP_UUID(chosen_bdev->bb_uuid), tgt_id, d_errstr(rc));
 		return rc;
 	}
 
@@ -668,12 +668,12 @@ init_blobstore_ctxt(struct bio_xs_context *ctxt, int tgt_id)
 
 		rc = smd_dev_get_by_tgt(tgt_id, &dev_info);
 		if (rc) {
-			D_ERROR("Failed to get dev mapped to tgt %d. %d\n",
-				tgt_id, rc);
+			D_ERROR("Failed to get dev mapped to tgt %d. %s\n",
+				tgt_id, d_errstr(rc));
 			return rc;
 		}
 	} else if (rc) {
-		D_ERROR("Failed to get dev for tgt %d. %d\n", tgt_id, rc);
+		D_ERROR("Failed to get dev for tgt %d. %s\n", tgt_id, d_errstr(rc));
 		return rc;
 	}
 
@@ -706,8 +706,8 @@ init_blobstore_ctxt(struct bio_xs_context *ctxt, int tgt_id)
 	rc = spdk_bdev_open(d_bdev->bb_bdev, false, NULL, NULL,
 			    &ctxt->bxc_desc);
 	if (rc != 0) {
-		D_ERROR("Failed to open bdev %s, %d\n",
-			spdk_bdev_get_name(d_bdev->bb_bdev), rc);
+		D_ERROR("Failed to open bdev %s, %s\n",
+			spdk_bdev_get_name(d_bdev->bb_bdev), d_errstr(rc));
 		return daos_errno2der(-rc);
 	}
 
@@ -897,15 +897,15 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 
 		rc = spdk_conf_read(config, nvme_glb.bd_nvme_conf);
 		if (rc != 0) {
-			D_ERROR("failed to read %s, rc:%d\n",
-				nvme_glb.bd_nvme_conf, rc);
+			D_ERROR("failed to read %s, rc:%s\n",
+				nvme_glb.bd_nvme_conf, d_errstr(rc));
 			rc = -DER_INVAL; /* spdk_conf_read() returns -1 */
 			goto out;
 		}
 
 		if (spdk_conf_first_section(config) == NULL) {
-			D_ERROR("invalid format %s, rc:%d\n",
-				nvme_glb.bd_nvme_conf, rc);
+			D_ERROR("invalid format %s, rc:%s\n",
+				nvme_glb.bd_nvme_conf, d_errstr(rc));
 			rc = -DER_INVAL;
 			goto out;
 		}
@@ -926,7 +926,7 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 
 		rc = spdk_thread_lib_init(NULL, 0);
 		if (rc != 0) {
-			D_ERROR("failed to init SPDK thread lib, rc:%d\n", rc);
+			D_ERROR("failed to init SPDK thread lib, rc:%s\n", d_errstr(rc));
 			rc = -DER_INVAL;
 			spdk_env_fini();
 			goto out;

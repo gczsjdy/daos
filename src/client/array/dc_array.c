@@ -398,7 +398,7 @@ dc_array_g2l(daos_handle_t coh, struct dc_array_glob *array_glob,
 	rc = daos_obj_open(coh, array_glob->oid, array_mode, &array->daos_oh,
 			   NULL);
 	if (rc) {
-		D_ERROR("Failed local object open (%d).\n", rc);
+		D_ERROR("Failed local object open (%s).\n", d_errstr(rc));
 		D_GOTO(out_array, rc);
 	}
 
@@ -457,7 +457,7 @@ dc_array_global2local(daos_handle_t coh, d_iov_t glob, unsigned int mode,
 
 	rc = dc_array_g2l(coh, array_glob, mode, oh);
 	if (rc != 0)
-		D_ERROR("dc_array_g2l failed (%d).\n", rc);
+		D_ERROR("dc_array_g2l failed (%s).\n", d_errstr(rc));
 
 out:
 	return rc;

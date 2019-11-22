@@ -138,7 +138,7 @@ dss_module_load(const char *modname, uint64_t *mod_facs)
 	/* initialize the module */
 	rc = smod->sm_init();
 	if (rc) {
-		D_ERROR("failed to init %s: %d\n", modname, rc);
+		D_ERROR("failed to init %s: %s\n", modname, d_errstr(rc));
 		D_GOTO(err_hdl, rc = -DER_INVAL);
 	}
 
@@ -149,16 +149,16 @@ dss_module_load(const char *modname, uint64_t *mod_facs)
 	rc = daos_rpc_register(smod->sm_proto_fmt, smod->sm_cli_count,
 			       smod->sm_handlers, smod->sm_mod_id);
 	if (rc) {
-		D_ERROR("failed to register RPC for %s: %d\n",
-			modname, rc);
+		D_ERROR("failed to register RPC for %s: %s\n",
+			modname, d_errstr(rc));
 		D_GOTO(err_mod_init, rc);
 	}
 
 	/* register dRPC handlers */
 	rc = drpc_hdlr_register_all(smod->sm_drpc_handlers);
 	if (rc) {
-		D_ERROR("failed to register dRPC for %s: %d\n",
-			modname, rc);
+		D_ERROR("failed to register dRPC for %s: %s\n",
+			modname, d_errstr(rc));
 		D_GOTO(err_rpc, rc);
 	}
 
@@ -281,8 +281,8 @@ dss_module_cleanup_all(void)
 			continue;
 		rc = m->sm_cleanup();
 		if (rc != 0) {
-			D_ERROR("failed to clean up module %s: %d\n",
-				m->sm_name, rc);
+			D_ERROR("failed to clean up module %s: %s\n",
+				m->sm_name, d_errstr(rc));
 			break;
 		}
 	}

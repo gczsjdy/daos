@@ -117,7 +117,7 @@ unload_bs_cp(void *arg, int rc)
 	struct bio_blobstore *bbs = arg;
 
 	if (rc != 0)
-		D_ERROR("Failed to unload bs:%p, %d\n", bbs, rc);
+		D_ERROR("Failed to unload bs:%p, %s\n", bbs, d_errstr(rc));
 	else
 		bbs->bb_bs = NULL;
 }

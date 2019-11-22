@@ -379,8 +379,8 @@ dss_enum_pack(vos_iter_param_t *param, vos_iter_type_t type, bool recursive,
 
 	rc = vos_iterate(param, type, recursive, anchors, enum_pack_cb, arg);
 
-	D_DEBUG(DB_IO, "enum type %d tag %d rc %d\n", type,
-		dss_get_module_info()->dmi_tgt_id, rc);
+	D_DEBUG(DB_IO, "enum type %d tag %d rc %s\n", type,
+		dss_get_module_info()->dmi_tgt_id, d_errstr(rc));
 	return rc;
 }
 
@@ -525,8 +525,8 @@ unpack_recxs(daos_iod_t *iod, int *recxs_cap, d_sg_list_t *sgl,
 			iod->iod_eprs[iod->iod_nr - 1].epr_hi, iod->iod_size);
 	}
 
-	D_DEBUG(DB_IO, "unpacked nr %d version/type /%u/%d rc %d\n",
-		iod->iod_nr, *version, iod->iod_type, rc);
+	D_DEBUG(DB_IO, "unpacked nr %d version/type /%u/%d rc %s\n",
+		iod->iod_nr, *version, iod->iod_type, d_errstr(rc));
 	return rc;
 }
 
@@ -736,8 +736,8 @@ enum_unpack_key(daos_key_desc_t *kds, char *key_data,
 			daos_iov_free(&io->ui_dkey);
 			rc = daos_iov_copy(&io->ui_dkey, &key);
 		}
-		D_DEBUG(DB_IO, "process dkey "DF_KEY": rc %d\n",
-			DP_KEY(&key), rc);
+		D_DEBUG(DB_IO, "process dkey "DF_KEY": rc %s\n",
+			DP_KEY(&key), d_errstr(rc));
 		return rc;
 	}
 
@@ -807,7 +807,7 @@ enum_unpack_recxs(daos_key_desc_t *kds, void *data,
 	dkey = &io->ui_dkey;
 	if (dkey->iov_len == 0 || iod_akey.iov_len == 0) {
 		rc = -DER_INVAL;
-		D_ERROR("invalid list buf %c\n", rc);
+		D_ERROR("invalid list buf %s\n", d_errstr(rc));
 		D_GOTO(free, rc);
 	}
 
@@ -968,7 +968,7 @@ dss_enum_unpack(vos_iter_type_t vos_type, struct dss_enum_arg *arg,
 		}
 
 		if (rc) {
-			D_ERROR("unpack %dth failed: rc%d\n", i, rc);
+			D_ERROR("unpack %dth failed: rc%s\n", i, d_errstr(rc));
 			goto out;
 		}
 
@@ -988,8 +988,8 @@ dss_enum_unpack(vos_iter_type_t vos_type, struct dss_enum_arg *arg,
 		rc = complete_io(&io, cb, cb_arg);
 
 out:
-	D_DEBUG(DB_REBUILD, "process list buf "DF_UOID" rc %d\n",
-		DP_UOID(io.ui_oid), rc);
+	D_DEBUG(DB_REBUILD, "process list buf "DF_UOID" rc %s\n",
+		DP_UOID(io.ui_oid), d_errstr(rc));
 
 	dss_enum_unpack_io_fini(&io);
 	return rc;

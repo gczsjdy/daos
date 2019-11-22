@@ -335,7 +335,7 @@ smd_init(const char *path)
 
 	rc = smd_store_check(fname, &existing);
 	if (rc) {
-		D_ERROR("Check SMD store %s failed. %d\n", fname, rc);
+		D_ERROR("Check SMD store %s failed. %s\n", fname, d_errstr(rc));
 		goto out;
 	}
 

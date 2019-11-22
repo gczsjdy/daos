@@ -287,7 +287,7 @@ rdb_raft_load_replicas(struct rdb *db, uint64_t index)
 	rc = rdb_lc_lookup(db->d_lc, index, RDB_LC_ATTRS,
 			   &rdb_lc_replicas, &value);
 	if (rc != 0) {
-		D_ERROR(DF_DB": failed to read replicas: %d\n", DP_DB(db), rc);
+		D_ERROR(DF_DB": failed to read replicas: %s\n", DP_DB(db), d_errstr(rc));
 		goto err_replicas;
 	}
 	return 0;
@@ -2162,7 +2162,7 @@ rdb_raft_load_lc(struct rdb *db)
 		db->d_slc = DAOS_HDL_INVAL;
 		goto lc;
 	} else if (rc != 0) {
-		D_ERROR(DF_DB": failed to look up SLC: %d\n", DP_DB(db), rc);
+		D_ERROR(DF_DB": failed to look up SLC: %s\n", DP_DB(db), d_errstr(rc));
 		goto err;
 	}
 	rc = vos_cont_open(db->d_pool, db->d_slc_record.dlr_uuid, &db->d_slc);
@@ -2181,7 +2181,7 @@ lc:
 	d_iov_set(&value, &db->d_lc_record, sizeof(db->d_lc_record));
 	rc = rdb_mc_lookup(db->d_mc, RDB_MC_ATTRS, &rdb_mc_lc, &value);
 	if (rc != 0) {
-		D_ERROR(DF_DB": failed to look up LC: %d\n", DP_DB(db), rc);
+		D_ERROR(DF_DB": failed to look up LC: %s\n", DP_DB(db), d_errstr(rc));
 		goto err_slc;
 	}
 	rc = vos_cont_open(db->d_pool, db->d_lc_record.dlr_uuid, &db->d_lc);

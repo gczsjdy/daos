@@ -490,8 +490,8 @@ cont_iv_fetch(void *ns, int class_id, uuid_t key_uuid,
 	civ_key->class_id = class_id;
 	rc = ds_iv_fetch(ns, &key, cont_iv ? &sgl : NULL);
 	if (rc)
-		D_ERROR(DF_UUID" iv fetch failed %d\n",
-			DP_UUID(key_uuid), rc);
+		D_ERROR(DF_UUID" iv fetch failed %s\n",
+			DP_UUID(key_uuid), d_errstr(rc));
 
 	return rc;
 }
@@ -521,7 +521,8 @@ cont_iv_update(void *ns, int class_id, uuid_t key_uuid,
 	civ_key->class_id = class_id;
 	rc = ds_iv_update(ns, &key, &sgl, shortcut, sync_mode, 0);
 	if (rc)
-		D_ERROR(DF_UUID" iv update failed %d\n", DP_UUID(key_uuid), rc);
+		D_ERROR(DF_UUID" iv update failed %s\n", DP_UUID(key_uuid),
+			d_errstr(rc));
 
 	return rc;
 }

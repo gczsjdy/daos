@@ -788,7 +788,7 @@ ds_mgmt_get_attach_info_handler(Mgmt__GetAttachInfoResp *resp)
 		rc = crt_rank_uri_get(grp, rank, 0 /* tag */,
 				      &(resp->psrs[i]->uri));
 		if (rc != 0) {
-			D_ERROR("unable to get rank %u URI: %d\n", rank, rc);
+			D_ERROR("unable to get rank %u URI: %s\n", rank, d_errstr(rc));
 			break;
 		}
 	}

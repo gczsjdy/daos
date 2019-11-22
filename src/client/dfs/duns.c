@@ -455,7 +455,7 @@ duns_create_lustre_path(daos_handle_t poh, const char *path,
 				   LU_FOREIGN_TYPE_DAOS, 0xda05, str);
 	if (rc) {
 		D_ERROR("Failed to create Lustre dir '%s' with foreign "
-			"LMV '%s' (rc = %d).\n", path, str, rc);
+			"LMV '%s' (rc = %s).\n", path, str, d_errstr(rc));
 		D_GOTO(err_cont, rc = -DER_INVAL);
 	}
 
@@ -575,7 +575,7 @@ duns_create_path(daos_handle_t poh, const char *path, struct duns_attr_t *attrp)
 
 		rc = lsetxattr(path, DUNS_XATTR_NAME, str, len + 1, 0);
 		if (rc) {
-			D_ERROR("Failed to set DAOS xattr (rc = %d).\n", rc);
+			D_ERROR("Failed to set DAOS xattr (rc = %s).\n", d_errstr(rc));
 			D_GOTO(err_link, rc = -DER_INVAL);
 		}
 
@@ -626,8 +626,8 @@ duns_destroy_path(daos_handle_t poh, const char *path)
 	/* Resolve pool, container UUIDs from path */
 	rc = duns_resolve_path(path, &dattr);
 	if (rc) {
-		D_ERROR("duns_resolve_path() Failed on path %s (%d)\n",
-			path, rc);
+		D_ERROR("duns_resolve_path() Failed on path %s (%s)\n",
+			path, d_errstr(rc));
 		return rc;
 	}
 

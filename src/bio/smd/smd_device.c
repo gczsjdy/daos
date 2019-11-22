@@ -57,7 +57,7 @@ smd_dev_assign(uuid_t dev_id, int tgt_id)
 		rc = -DER_EXIST;
 		goto out;
 	} else if (rc != -DER_NONEXIST) {
-		D_ERROR("Get target %d failed. %d\n", tgt_id, rc);
+		D_ERROR("Get target %d failed. %s\n", tgt_id, d_errstr(rc));
 		goto out;
 	}
 
@@ -81,8 +81,8 @@ smd_dev_assign(uuid_t dev_id, int tgt_id)
 		entry.sde_tgt_cnt = 1;
 		entry.sde_tgts[0] = tgt_id;
 	} else {
-		D_ERROR("Fetch dev "DF_UUID" failed. %d\n",
-			DP_UUID(&key_dev.uuid), rc);
+		D_ERROR("Fetch dev "DF_UUID" failed. %s\n",
+			DP_UUID(&key_dev.uuid), d_errstr(rc));
 		goto out;
 	}
 
@@ -93,8 +93,8 @@ smd_dev_assign(uuid_t dev_id, int tgt_id)
 
 	rc = dbtree_update(smd_store.ss_dev_hdl, &key, &val);
 	if (rc) {
-		D_ERROR("Update dev "DF_UUID" failed. %d\n",
-			DP_UUID(&key_dev.uuid), rc);
+		D_ERROR("Update dev "DF_UUID" failed. %s\n",
+			DP_UUID(&key_dev.uuid), d_errstr(rc));
 		goto tx_end;
 	}
 
@@ -102,7 +102,7 @@ smd_dev_assign(uuid_t dev_id, int tgt_id)
 	d_iov_set(&val, &key_dev, sizeof(key_dev));
 	rc = dbtree_update(smd_store.ss_tgt_hdl, &key, &val);
 	if (rc) {
-		D_ERROR("Update target %d failed. %d\n", tgt_id, rc);
+		D_ERROR("Update target %d failed. %s\n", tgt_id, d_errstr(rc));
 		goto tx_end;
 	}
 tx_end:
@@ -137,16 +137,16 @@ smd_dev_set_state(uuid_t dev_id, enum smd_dev_state state)
 	rc = dbtree_fetch(smd_store.ss_dev_hdl, BTR_PROBE_EQ,
 			  DAOS_INTENT_DEFAULT, &key, NULL, &val);
 	if (rc) {
-		D_ERROR("Fetch dev "DF_UUID" failed. %d\n",
-			DP_UUID(&key_dev.uuid), rc);
+		D_ERROR("Fetch dev "DF_UUID" failed. %s\n",
+			DP_UUID(&key_dev.uuid), d_errstr(rc));
 		goto out;
 	}
 
 	entry.sde_state = state;
 	rc = dbtree_update(smd_store.ss_dev_hdl, &key, &val);
 	if (rc) {
-		D_ERROR("Update dev "DF_UUID" failed. %d\n",
-			DP_UUID(&key_dev.uuid), rc);
+		D_ERROR("Update dev "DF_UUID" failed. %s\n",
+			DP_UUID(&key_dev.uuid), d_errstr(rc));
 		goto out;
 	}
 out:
@@ -199,8 +199,8 @@ fetch_dev_info(uuid_t dev_id, struct smd_dev_info **dev_info)
 			  DAOS_INTENT_DEFAULT, &key, NULL, &val);
 	if (rc) {
 		D_CDEBUG(rc != -DER_NONEXIST, DLOG_ERR, DB_MGMT,
-			 "Fetch dev "DF_UUID" failed. %d\n",
-			 DP_UUID(&key_dev.uuid), rc);
+			 "Fetch dev "DF_UUID" failed. %s\n",
+			 DP_UUID(&key_dev.uuid), d_errstr(rc));
 		return rc;
 	}
 
@@ -239,7 +239,7 @@ smd_dev_get_by_tgt(int tgt_id, struct smd_dev_info **dev_info)
 			  DAOS_INTENT_DEFAULT, &key, NULL, &val);
 	if (rc) {
 		D_CDEBUG(rc != -DER_NONEXIST, DLOG_ERR, DB_MGMT,
-			 "Fetch target %d failed. %d\n", tgt_id, rc);
+			 "Fetch target %d failed. %s\n", tgt_id, d_errstr(rc));
 		goto out;
 	}
 

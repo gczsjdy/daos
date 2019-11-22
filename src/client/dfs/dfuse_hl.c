@@ -714,7 +714,7 @@ dfuse_unlink(const char *path)
 
 	rc = dfs_remove(dfs, parent, name, false, NULL);
 	if (rc) {
-		fprintf(stderr, "Failed to remove file %s (%d)\n", name, rc);
+		fprintf(stderr, "Failed to remove file %s (%s)\n", name, d_errstr(rc));
 		D_GOTO(out, rc = -rc);
 	}
 
@@ -758,7 +758,7 @@ dfuse_rmdir(const char *path)
 
 	rc = dfs_remove(dfs, parent, name, false, NULL);
 	if (rc) {
-		fprintf(stderr, "Failed to remove dir %s (%d)\n", name, rc);
+		fprintf(stderr, "Failed to remove dir %s (%s)\n", name, d_errstr(rc));
 		D_GOTO(out, rc = -rc);
 	}
 
