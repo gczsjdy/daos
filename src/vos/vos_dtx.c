@@ -185,7 +185,8 @@ vos_dtx_table_register(void)
 
 	rc = dbtree_class_register(VOS_BTR_DTX_TABLE, 0, &dtx_btr_ops);
 	if (rc != 0)
-		D_ERROR("Failed to register DTX dbtree: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to register DTX dbtree: rc = %s\n",
+			d_errstr(rc));
 
 	return rc;
 }

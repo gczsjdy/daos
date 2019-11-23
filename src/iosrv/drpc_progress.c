@@ -364,7 +364,8 @@ handle_incoming_call(struct drpc *session_ctx)
 	rc = dss_ult_create(drpc_handler_ult, (void *)call_ctx,
 			    DSS_ULT_DRPC_HANDLER, 0, 0, NULL);
 	if (rc != 0) {
-		D_ERROR("Failed to create drpc handler ULT: %s\n", d_errstr(rc));
+		D_ERROR("Failed to create drpc handler ULT: %s\n",
+			d_errstr(rc));
 		free_call_ctx(call_ctx);
 		return rc;
 	}

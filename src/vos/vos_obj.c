@@ -916,7 +916,8 @@ recx_iter_prepare(struct vos_obj_iter *oiter, daos_key_t *dkey,
 	rc = evt_iter_prepare(rx_toh, options, &filter,
 			      &oiter->it_hdl);
 	if (rc != 0) {
-		D_DEBUG(DB_IO, "Cannot prepare recx iterator : %s\n", d_errstr(rc));
+		D_DEBUG(DB_IO, "Cannot prepare recx iterator : %s\n",
+			d_errstr(rc));
 	}
 	key_tree_release(rx_toh, true);
  failed:
@@ -1257,7 +1258,8 @@ vos_obj_iter_nested_prep(vos_iter_type_t type, struct vos_iter_info *info,
 	key_tree_release(toh, type == VOS_ITER_RECX);
 
 	if (rc != 0) {
-		D_DEBUG(DB_TRACE, "Failed to prepare iterator: rc = %s\n", d_errstr(rc));
+		D_DEBUG(DB_TRACE, "Failed to prepare iterator: rc = %s\n",
+			d_errstr(rc));
 		goto failed;
 	}
 

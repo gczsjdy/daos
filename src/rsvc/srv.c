@@ -776,7 +776,8 @@ ds_rsvc_start(enum ds_rsvc_class_id class, d_iov_t *id, uuid_t db_uuid,
 	ds_rsvc_put(svc);
 out:
 	if (rc != 0 && rc != -DER_ALREADY && !(create && rc == -DER_EXIST))
-		D_ERROR("Failed to start replicated service: %s\n", d_errstr(rc));
+		D_ERROR("Failed to start replicated service: %s\n",
+			d_errstr(rc));
 	return rc;
 }
 

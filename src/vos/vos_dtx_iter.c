@@ -142,7 +142,8 @@ dtx_iter_fetch(struct vos_iterator *iter, vos_iter_entry_t *it_entry,
 	d_iov_set(&rec_iov, NULL, 0);
 	rc = dbtree_iter_fetch(oiter->oit_hdl, NULL, &rec_iov, anchor);
 	if (rc != 0) {
-		D_ERROR("Error while fetching DTX info: rc = %s\n", d_errstr(rc));
+		D_ERROR("Error while fetching DTX info: rc = %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 

@@ -755,7 +755,8 @@ open_file:
 			entry.chunk_size ? entry.chunk_size :
 			dfs->attr.da_chunk_size, &file->oh, NULL);
 	if (rc != 0) {
-		D_ERROR("daos_array_open_with_attr() failed (%s)\n", d_errstr(rc));
+		D_ERROR("daos_array_open_with_attr() failed (%s)\n",
+			d_errstr(rc));
 		return daos_der2errno(rc);
 	}
 
@@ -1115,7 +1116,8 @@ dfs_cont_create(daos_handle_t poh, uuid_t co_uuid, dfs_attr_t *attr,
 	} else {
 		rc = daos_cont_close(coh, NULL);
 		if (rc) {
-			D_ERROR("daos_cont_close() failed (%s)\n", d_errstr(rc));
+			D_ERROR("daos_cont_close() failed (%s)\n",
+				d_errstr(rc));
 			D_GOTO(err_destroy, rc);
 		}
 	}
@@ -1231,7 +1233,8 @@ dfs_mount(daos_handle_t poh, daos_handle_t coh, int flags, dfs_t **_dfs)
 	if (amode == O_RDWR) {
 		rc = daos_cont_alloc_oids(coh, 1, &dfs->oid.lo, NULL);
 		if (rc) {
-			D_ERROR("daos_cont_alloc_oids() Failed (%s)\n", d_errstr(rc));
+			D_ERROR("daos_cont_alloc_oids() Failed (%s)\n",
+				d_errstr(rc));
 			D_GOTO(err_root, rc = daos_der2errno(rc));
 		}
 
@@ -1625,7 +1628,8 @@ dfs_lookup_loop:
 				entry.chunk_size : dfs->attr.da_chunk_size,
 				&obj->oh, NULL);
 			if (rc != 0) {
-				D_ERROR("daos_array_open() Failed (%s)\n", d_errstr(rc));
+				D_ERROR("daos_array_open() Failed (%s)\n",
+					d_errstr(rc));
 				D_GOTO(err_obj, rc = daos_der2errno(rc));
 			}
 

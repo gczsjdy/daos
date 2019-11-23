@@ -976,7 +976,8 @@ dss_enum_unpack(vos_iter_type_t vos_type, struct dss_enum_arg *arg,
 		if (io.ui_iods_top == io.ui_iods_cap - 1) {
 			rc = complete_io(&io, cb, cb_arg);
 			if (rc != 0) {
-				D_ERROR("complete io failed: rc %s\n", d_errstr(rc));
+				D_ERROR("complete io failed: rc %s\n",
+					d_errstr(rc));
 				goto out;
 			}
 		}

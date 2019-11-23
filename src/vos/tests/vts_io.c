@@ -259,13 +259,15 @@ io_recx_iterate(struct io_test_args *arg, vos_iter_param_t *param,
 		if (rc == -DER_NONEXIST)
 			rc = 0;
 		else
-			print_error("Failed to create recx iterator: %s\n", d_errstr(rc));
+			print_error("Failed to create recx iterator: %s\n",
+				d_errstr(rc));
 		return rc;
 	}
 
 	rc = vos_iter_probe(ih, NULL);
 	if (rc != 0 && rc != -DER_NONEXIST) {
-		print_error("Failed to set iterator cursor: %s\n", d_errstr(rc));
+		print_error("Failed to set iterator cursor: %s\n",
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -309,7 +311,8 @@ io_recx_iterate(struct io_test_args *arg, vos_iter_param_t *param,
 
 		rc = vos_iter_next(ih);
 		if (rc != 0 && rc != -DER_NONEXIST) {
-			print_error("Failed to move cursor: %s\n", d_errstr(rc));
+			print_error("Failed to move cursor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 	}
@@ -332,7 +335,8 @@ io_akey_iterate(struct io_test_args *arg, vos_iter_param_t *param,
 	param->ip_dkey = *dkey;
 	rc = vos_iter_prepare(VOS_ITER_AKEY, param, &ih);
 	if (rc != 0) {
-		print_error("Failed to create akey iterator: %s\n", d_errstr(rc));
+		print_error("Failed to create akey iterator: %s\n",
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -342,7 +346,8 @@ io_akey_iterate(struct io_test_args *arg, vos_iter_param_t *param,
 		goto out;
 	}
 	if (rc != 0) {
-		print_error("Failed to set iterator cursor: %s\n", d_errstr(rc));
+		print_error("Failed to set iterator cursor: %s\n",
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -373,7 +378,8 @@ io_akey_iterate(struct io_test_args *arg, vos_iter_param_t *param,
 		nr++;
 		rc = vos_iter_next(ih);
 		if (rc != 0 && rc != -DER_NONEXIST) {
-			print_error("Failed to move cursor: %s\n", d_errstr(rc));
+			print_error("Failed to move cursor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 	}
@@ -456,7 +462,8 @@ io_obj_iter_test(struct io_test_args *arg, daos_epoch_range_t *epr,
 		}
 
 		if (rc != 0) {
-			print_error("Failed to move cursor: %s\n", d_errstr(rc));
+			print_error("Failed to move cursor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 
@@ -515,7 +522,8 @@ io_test_obj_update(struct io_test_args *arg, daos_epoch_t epoch,
 			      1, iod, &ioh, dth);
 	if (rc != 0) {
 		if (verbose && rc != -DER_INPROGRESS)
-			print_error("Failed to prepare ZC update: %s\n", d_errstr(rc));
+			print_error("Failed to prepare ZC update: %s\n",
+				d_errstr(rc));
 		return rc;
 	}
 
@@ -570,7 +578,8 @@ io_test_obj_fetch(struct io_test_args *arg, daos_epoch_t epoch,
 			     1, iod, false, &ioh);
 	if (rc != 0) {
 		if (verbose && rc != -DER_INPROGRESS)
-			print_error("Failed to prepare ZC update: %s\n", d_errstr(rc));
+			print_error("Failed to prepare ZC update: %s\n",
+				d_errstr(rc));
 		return rc;
 	}
 
@@ -1291,7 +1300,8 @@ io_oid_iter_test(struct io_test_args *arg)
 
 	rc = vos_iter_probe(ih, NULL);
 	if (rc != 0) {
-		print_error("Failed to set iterator cursor: %s\n", d_errstr(rc));
+		print_error("Failed to set iterator cursor: %s\n",
+			d_errstr(rc));
 		goto out;
 	}
 
@@ -1306,7 +1316,8 @@ io_oid_iter_test(struct io_test_args *arg)
 		}
 
 		if (rc != 0) {
-			print_error("Failed to fetch objid: %s\n", d_errstr(rc));
+			print_error("Failed to fetch objid: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 
@@ -1319,7 +1330,8 @@ io_oid_iter_test(struct io_test_args *arg)
 			break;
 
 		if (rc != 0) {
-			print_error("Failed to move cursor: %s\n", d_errstr(rc));
+			print_error("Failed to move cursor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 
@@ -1329,14 +1341,16 @@ io_oid_iter_test(struct io_test_args *arg)
 		rc = vos_iter_fetch(ih, &ent, &anchor);
 		if (rc != 0) {
 			assert_true(rc != -DER_NONEXIST);
-			print_error("Failed to fetch anchor: %s\n", d_errstr(rc));
+			print_error("Failed to fetch anchor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 
 		rc = vos_iter_probe(ih, &anchor);
 		if (rc != 0) {
 			assert_true(rc != -DER_NONEXIST);
-			print_error("Failed to probe anchor: %s\n", d_errstr(rc));
+			print_error("Failed to probe anchor: %s\n",
+				d_errstr(rc));
 			goto out;
 		}
 	}

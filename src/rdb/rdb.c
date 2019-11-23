@@ -246,14 +246,16 @@ rdb_start(const char *path, const uuid_t uuid, struct rdb_cbs *cbs, void *arg,
 
 	rc = ABT_mutex_create(&db->d_mutex);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR(DF_DB": failed to create mutex: %s\n", DP_DB(db), d_errstr(rc));
+		D_ERROR(DF_DB": failed to create mutex: %s\n", DP_DB(db),
+			d_errstr(rc));
 		rc = dss_abterr2der(rc);
 		goto err_db;
 	}
 
 	rc = ABT_cond_create(&db->d_ref_cv);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR(DF_DB": failed to create ref CV: %s\n", DP_DB(db), d_errstr(rc));
+		D_ERROR(DF_DB": failed to create ref CV: %s\n", DP_DB(db),
+			d_errstr(rc));
 		rc = dss_abterr2der(rc);
 		goto err_mutex;
 	}
@@ -283,7 +285,8 @@ rdb_start(const char *path, const uuid_t uuid, struct rdb_cbs *cbs, void *arg,
 		D_ERROR(DF_DB": not fully initialized\n", DP_DB(db));
 		goto err_mc;
 	} else if (rc != 0) {
-		D_ERROR(DF_DB": failed to look up UUID: %s\n", DP_DB(db), d_errstr(rc));
+		D_ERROR(DF_DB": failed to look up UUID: %s\n", DP_DB(db),
+			d_errstr(rc));
 		goto err_mc;
 	}
 
