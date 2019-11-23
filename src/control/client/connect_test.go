@@ -40,12 +40,12 @@ func connectSetupServers(
 	ctrlrResults NvmeControllerResults, modules ScmModules,
 	moduleResults ScmModuleResults, pmems ScmNamespaces, mountResults ScmMountResults,
 	scanRet error, formatRet error, killRet error, connectRet error,
-	ACLRet *mockACLResult) Connect {
+	ACLRet *mockACLResult, listPoolsRet *mockListPoolsResult) Connect {
 
 	connect := newMockConnect(
 		log, state, ctrlrs, ctrlrResults, modules,
 		moduleResults, pmems, mountResults, scanRet, formatRet,
-		killRet, connectRet, ACLRet)
+		killRet, connectRet, ACLRet, listPoolsRet)
 
 	_ = connect.ConnectClients(servers)
 
@@ -57,11 +57,12 @@ func connectSetup(
 	state State, ctrlrs NvmeControllers, ctrlrResults NvmeControllerResults,
 	modules ScmModules, moduleResults ScmModuleResults, pmems ScmNamespaces,
 	mountResults ScmMountResults, scanRet error, formatRet error,
-	killRet error, connectRet error, ACLRet *mockACLResult) Connect {
+	killRet error, connectRet error, ACLRet *mockACLResult,
+	listPoolsRet *mockListPoolsResult) Connect {
 
 	return connectSetupServers(MockServers, log, state, ctrlrs,
 		ctrlrResults, modules, moduleResults, pmems, mountResults, scanRet,
-		formatRet, killRet, connectRet, ACLRet)
+		formatRet, killRet, connectRet, ACLRet, listPoolsRet)
 }
 
 func defaultClientSetup(log logging.Logger) Connect {
@@ -108,7 +109,7 @@ func TestConnectClients(t *testing.T) {
 		cc := newMockConnect(
 			log, tt.state, MockCtrlrs, MockCtrlrResults, MockScmModules,
 			MockModuleResults, MockScmNamespaces, MockMountResults,
-			nil, nil, nil, tt.connRet, nil)
+			nil, nil, nil, tt.connRet, nil, nil)
 
 		results := cc.ConnectClients(tt.addrsIn)
 
@@ -191,7 +192,7 @@ func TestStorageFormat(t *testing.T) {
 			cc := connectSetup(
 				log, Ready, MockCtrlrs, MockCtrlrResults, MockScmModules,
 				MockModuleResults, MockScmNamespaces, MockMountResults,
-				nil, tt.formatRet, nil, nil, MockACL)
+				nil, tt.formatRet, nil, nil, MockACL, nil)
 
 			cNvmeMap, cMountMap := cc.StorageFormat(tt.reformat)
 
@@ -235,7 +236,7 @@ func TestKillRank(t *testing.T) {
 	for _, tt := range tests {
 		cc := connectSetup(log, Ready, MockCtrlrs, MockCtrlrResults, MockScmModules,
 			MockModuleResults, MockScmNamespaces, MockMountResults, nil,
-			nil, tt.killRet, nil, MockACL)
+			nil, tt.killRet, nil, MockACL, nil)
 
 		resultMap := cc.KillRank(0)
 
@@ -291,7 +292,7 @@ func TestPoolGetACL(t *testing.T) {
 			cc := connectSetupServers(tt.addr, log, Ready,
 				MockCtrlrs, MockCtrlrResults, MockScmModules,
 				MockModuleResults, MockScmNamespaces, MockMountResults,
-				nil, nil, nil, nil, aclResult)
+				nil, nil, nil, nil, aclResult, nil)
 
 			req := &PoolGetACLReq{
 				UUID: "TestUUID",
@@ -376,7 +377,7 @@ func TestPoolOverwriteACL(t *testing.T) {
 			cc := connectSetupServers(tt.addr, log, Ready,
 				MockCtrlrs, MockCtrlrResults, MockScmModules,
 				MockModuleResults, MockScmNamespaces, MockMountResults,
-				nil, nil, nil, nil, aclResult)
+				nil, nil, nil, nil, aclResult, nil)
 
 			req := &PoolOverwriteACLReq{
 				UUID: "TestUUID",
@@ -505,31 +506,35 @@ func TestListPools(t *testing.T) {
 			expectedResp: nil,
 			expectedErr:  "no active connections",
 		},
-		// "gRPC call failed": {
-		// 	addr:         MockServers,
-		// 	listPoolsErr: MockErr,
-		// 	expectedResp: nil,
-		// 	expectedErr:  MockErr.Error(),
-		// },
-		// "gRPC resp bad status": {
-		// 	addr:                MockServers,
-		// 	listPoolsRespStatus: -1000,
-		// 	expectedResp:        nil,
-		// 	expectedErr:         "DAOS returned error code: -5001",
-		// },
-		// "success": {
-		// 	addr:                MockServers,
-		// 	listPoolsRespStatus: 0,
-		// 	expectedResp:        &ListPoolsResp{Pools: },
-		// 	expectedErr:         "",
-		// },
+		"gRPC call failed": {
+			addr:         MockServers,
+			listPoolsErr: MockErr,
+			expectedResp: nil,
+			expectedErr:  MockErr.Error(),
+		},
+		"gRPC resp bad status": {
+			addr:                MockServers,
+			listPoolsRespStatus: -1000,
+			expectedResp:        nil,
+			expectedErr:         "DAOS returned error code: -1000",
+		},
+		"success": {
+			addr:                MockServers,
+			listPoolsRespStatus: 0,
+			expectedResp:        &ListPoolsResp{Pools: poolDiscoveriesFromProtobuf(MockPoolList)},
+			expectedErr:         "",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 
 			cc := connectSetupServers(tt.addr, log, Ready,
 				MockCtrlrs, MockCtrlrResults, MockScmModules,
 				MockModuleResults, MockScmNamespaces, MockMountResults,
-				nil, nil, nil, nil, MockACL)
+				nil, nil, nil, nil, MockACL,
+				&mockListPoolsResult{
+					err:    tt.listPoolsErr,
+					status: tt.listPoolsRespStatus,
+				})
 
 			req := &ListPoolsReq{
 				System: "daos",

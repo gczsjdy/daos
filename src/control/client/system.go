@@ -24,6 +24,7 @@
 package client
 
 import (
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 
 	"github.com/daos-stack/daos/src/control/common"
@@ -106,26 +107,38 @@ type ListPoolsReq struct {
 	System string // DAOS system identifier
 }
 
-// PoolDiscovery represents the basic discovery information for a pool.
-type PoolDiscovery struct {
-	UUID        string // Unique identifier
-	SvcReplicas []int  // Ranks of pool service replicas
-}
-
 // ListPoolsResp contains the status of the request and, if successful, the list
 // of pools in the system.
 type ListPoolsResp struct {
 	Status int32
-	Pools  []PoolDiscovery
+	Pools  []*PoolDiscovery
 }
 
 // ListPools fetches the list of all pools and their service replicas from the
 // system.
 func (c *connList) ListPools(req *ListPoolsReq) (*ListPoolsResp, error) {
-	_, err := chooseServiceLeader(c.controllers)
+	mc, err := chooseServiceLeader(c.controllers)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	pbReq := &mgmtpb.ListPoolsReq{Sys: req.System}
+
+	c.log.Debugf("List DAOS pools request: %v", pbReq)
+
+	pbResp, err := mc.getSvcClient().ListPools(context.Background(), pbReq)
+	if err != nil {
+		return nil, err
+	}
+
+	c.log.Debugf("List DAOS pools response: %v", pbResp)
+
+	if pbResp.GetStatus() != 0 {
+		return nil, errors.Errorf("DAOS returned error code: %d",
+			pbResp.GetStatus())
+	}
+
+	return &ListPoolsResp{
+		
+	}, nil
 }

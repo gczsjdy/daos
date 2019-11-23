@@ -198,9 +198,14 @@ func (m *mockACLResult) ACL() *AccessControlList {
 	}
 }
 
+type mockListPoolsResult struct {
+	status int32
+	err    error
+}
+
 type mockMgmtSvcClient struct {
 	ACLRet       *mockACLResult
-	ListPoolsErr error
+	ListPoolsRet *mockListPoolsResult
 }
 
 func (m *mockMgmtSvcClient) PoolCreate(ctx context.Context, req *mgmtpb.PoolCreateReq, o ...grpc.CallOption) (*mgmtpb.PoolCreateResp, error) {
@@ -282,15 +287,16 @@ func (m *mockMgmtSvcClient) KillRank(ctx context.Context, req *mgmtpb.KillRankRe
 }
 
 func (m *mockMgmtSvcClient) ListPools(ctx context.Context, req *mgmtpb.ListPoolsReq, o ...grpc.CallOption) (*mgmtpb.ListPoolsResp, error) {
-	if m.ListPoolsErr != nil {
-		return nil, m.ListPoolsErr
+	if m.ListPoolsRet.err != nil {
+		return nil, m.ListPoolsRet.err
 	}
-	return &mgmtpb.ListPoolsResp{Pools: MockPoolList}, nil
+	return &mgmtpb.ListPoolsResp{Pools: MockPoolList, Status: m.ListPoolsRet.status}, nil
 }
 
-func newMockMgmtSvcClient(getACLResult *mockACLResult) mgmtpb.MgmtSvcClient {
+func newMockMgmtSvcClient(getACLResult *mockACLResult, listPoolsResult *mockListPoolsResult) mgmtpb.MgmtSvcClient {
 	return &mockMgmtSvcClient{
-		ACLRet: getACLResult,
+		ACLRet:       getACLResult,
+		ListPoolsRet: listPoolsResult,
 	}
 }
 
@@ -341,20 +347,20 @@ func newMockControl(
 }
 
 type mockControllerFactory struct {
-	log           logging.Logger
-	state         connectivity.State
-	ctrlrs        NvmeControllers
-	ctrlrResults  NvmeControllerResults
-	modules       ScmModules
-	moduleResults ScmModuleResults
-	pmems         ScmNamespaces
-	mountResults  ScmMountResults
-	// to provide error injection into Control objects
-	scanRet      error
-	formatRet    error
-	killRet      error
-	connectRet   error
-	getACLResult *mockACLResult
+	log             logging.Logger
+	state           connectivity.State
+	ctrlrs          NvmeControllers
+	ctrlrResults    NvmeControllerResults
+	modules         ScmModules
+	moduleResults   ScmModuleResults
+	pmems           ScmNamespaces
+	mountResults    ScmMountResults
+	scanRet         error
+	formatRet       error
+	killRet         error
+	connectRet      error
+	getACLResult    *mockACLResult
+	listPoolsResult *mockListPoolsResult
 }
 
 func (m *mockControllerFactory) create(address string, cfg *security.TransportConfig) (Control, error) {
@@ -362,7 +368,7 @@ func (m *mockControllerFactory) create(address string, cfg *security.TransportCo
 	cClient := newMockMgmtCtlClient(m.ctrlrs, m.ctrlrResults, m.modules,
 		m.moduleResults, m.pmems, m.mountResults, m.scanRet, m.formatRet)
 
-	sClient := newMockMgmtSvcClient(m.getACLResult)
+	sClient := newMockMgmtSvcClient(m.getACLResult, m.listPoolsResult)
 
 	controller := newMockControl(m.log, address, m.state, m.connectRet, cClient, sClient)
 
@@ -375,14 +381,15 @@ func newMockConnect(log logging.Logger,
 	state connectivity.State, ctrlrs NvmeControllers,
 	ctrlrResults NvmeControllerResults, modules ScmModules,
 	moduleResults ScmModuleResults, pmems ScmNamespaces, mountResults ScmMountResults,
-	scanRet error, formatRet error, killRet error, connectRet error, ACLRet *mockACLResult) Connect {
+	scanRet error, formatRet error, killRet error, connectRet error, ACLRet *mockACLResult,
+	listPoolsRet *mockListPoolsResult) Connect {
 
 	return &connList{
 		log: log,
 		factory: &mockControllerFactory{
 			log, state, ctrlrs, ctrlrResults, modules, moduleResults,
 			pmems, mountResults, scanRet, formatRet, killRet,
-			connectRet, ACLRet,
+			connectRet, ACLRet, listPoolsRet,
 		},
 	}
 }
@@ -391,7 +398,7 @@ func defaultMockConnect(log logging.Logger) Connect {
 	return newMockConnect(
 		log, connectivity.Ready, MockCtrlrs, MockCtrlrResults, MockScmModules,
 		MockModuleResults, MockScmNamespaces, MockMountResults,
-		nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, MockACL, nil)
 }
 
 // MockScanResp mocks scan results from scm and nvme for multiple servers.

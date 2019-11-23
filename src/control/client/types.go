@@ -469,3 +469,24 @@ func (acl *AccessControlList) Empty() bool {
 	}
 	return false
 }
+
+// PoolDiscovery represents the basic discovery information for a pool.
+type PoolDiscovery struct {
+	UUID        string // Unique identifier
+	SvcReplicas []int  // Ranks of pool service replicas
+}
+
+// TODO KJ: Unit tests
+func poolDiscoveriesFromProtobuf(pbPools []*mgmtpb.ListPoolsResp_Pool) []*PoolDiscovery {
+	pools := make([]*PoolDiscovery, 0, len(pbPools))
+	for _, pbPool := range pbPools {
+		svcReps := make([]int, 0)
+		// TODO KJ: dissect svcreps
+		pools = append(pools, &PoolDiscovery{
+			UUID:        pbPool.Uuid,
+			SvcReplicas: svcReps,
+		})
+	}
+
+	return pools
+}
