@@ -1655,7 +1655,8 @@ ds_cont_tgt_epoch_aggregate_handler(crt_rpc_t *rpc)
 	rc = dss_thread_collective(cont_epoch_aggregate_one, NULL, 0);
 	if (rc != 0)
 		D_ERROR(DF_CONT": Aggregation failed: %s\n",
-			DP_CONT(in->tai_pool_uuid, in->tai_cont_uuid), d_errstr(rc));
+			DP_CONT(in->tai_pool_uuid, in->tai_cont_uuid),
+				d_errstr(rc));
 }
 
 int
@@ -1705,7 +1706,8 @@ ds_cont_iter(daos_handle_t ph, uuid_t co_uuid, ds_iter_cb_t callback,
 		if (rc == -DER_NONEXIST)
 			rc = 0;
 		else
-			D_ERROR("set iterator cursor failed: %s\n", d_errstr(rc));
+			D_ERROR("set iterator cursor failed: %s\n",
+				d_errstr(rc));
 		D_GOTO(iter_fini, rc);
 	}
 

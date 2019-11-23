@@ -869,7 +869,8 @@ fill_segments(daos_handle_t ih, struct agg_merge_window *mw,
 			D_ERROR("Fill seg %u-%u %p "DF_RECT" error: %s\n",
 				lgc_seg->ls_idx_start, lgc_seg->ls_idx_end,
 				lgc_seg->ls_phy_ent,
-				DP_RECT(&lgc_seg->ls_ent_in.ei_rect), d_errstr(rc));
+				DP_RECT(&lgc_seg->ls_ent_in.ei_rect),
+					d_errstr(rc));
 			break;
 		}
 	}

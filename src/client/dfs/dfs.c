@@ -250,7 +250,8 @@ oid_gen(dfs_t *dfs, uint16_t oclass, bool file, daos_obj_id_t *oid)
 		/** Allocate an OID for the namespace */
 		rc = daos_cont_alloc_oids(dfs->coh, 1, &dfs->oid.lo, NULL);
 		if (rc) {
-			D_ERROR("daos_cont_alloc_oids() Failed (%s)\n", d_errstr(rc));
+			D_ERROR("daos_cont_alloc_oids() Failed (%s)\n",
+				d_errstr(rc));
 			D_MUTEX_UNLOCK(&dfs->lock);
 			return daos_der2errno(rc);
 		}
@@ -989,7 +990,8 @@ open_sb(daos_handle_t coh, bool create, dfs_attr_t *attr, daos_handle_t *oh)
 		rc = daos_obj_update(*oh, DAOS_TX_NONE, &dkey, SB_AKEYS, iods,
 				     sgls, NULL);
 		if (rc) {
-			D_ERROR("Failed to update SB info (%s)\n", d_errstr(rc));
+			D_ERROR("Failed to update SB info (%s)\n",
+				d_errstr(rc));
 			D_GOTO(err, rc = daos_der2errno(rc));
 		}
 
@@ -2039,21 +2041,24 @@ dfs_open(dfs_t *dfs, dfs_obj_t *parent, const char *name, mode_t mode,
 	case S_IFREG:
 		rc = open_file(dfs, th, parent, flags, cid, chunk_size, obj);
 		if (rc) {
-			D_DEBUG(DB_TRACE, "Failed to open file (%s)\n", d_errstr(rc));
+			D_DEBUG(DB_TRACE, "Failed to open file (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out, rc);
 		}
 		break;
 	case S_IFDIR:
 		rc = open_dir(dfs, th, parent->oh, flags, cid, obj);
 		if (rc) {
-			D_DEBUG(DB_TRACE, "Failed to open dir (%s)\n", d_errstr(rc));
+			D_DEBUG(DB_TRACE, "Failed to open dir (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out, rc);
 		}
 		break;
 	case S_IFLNK:
 		rc = open_symlink(dfs, th, parent, flags, value, obj);
 		if (rc) {
-			D_DEBUG(DB_TRACE, "Failed to open symlink (%s)\n", d_errstr(rc));
+			D_DEBUG(DB_TRACE, "Failed to open symlink (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out, rc);
 		}
 		break;
@@ -2910,7 +2915,8 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 	rc = fetch_entry(new_parent->oh, th, new_name, true, &exists,
 			 &new_entry);
 	if (rc) {
-		D_ERROR("Failed to fetch entry %s (%s)\n", new_name, d_errstr(rc));
+		D_ERROR("Failed to fetch entry %s (%s)\n", new_name,
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -2929,7 +2935,8 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 			rc = daos_obj_open(dfs->coh, new_entry.oid, DAOS_OO_RW,
 					   &oh, NULL);
 			if (rc) {
-				D_ERROR("daos_obj_open() Failed (%s)\n", d_errstr(rc));
+				D_ERROR("daos_obj_open() Failed (%s)\n",
+					d_errstr(rc));
 				D_GOTO(out, rc = daos_der2errno(rc));
 			}
 
@@ -2943,7 +2950,8 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 
 			rc = daos_obj_close(oh, NULL);
 			if (rc) {
-				D_ERROR("daos_obj_close() Failed (%s)\n", d_errstr(rc));
+				D_ERROR("daos_obj_close() Failed (%s)\n",
+					d_errstr(rc));
 				D_GOTO(out, rc = daos_der2errno(rc));
 			}
 
@@ -2984,7 +2992,8 @@ dfs_move(dfs_t *dfs, dfs_obj_t *parent, char *name, dfs_obj_t *new_parent,
 	/** insert old entry in new parent object */
 	rc = insert_entry(new_parent->oh, th, new_name, entry);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%s)\n", new_name, d_errstr(rc));
+		D_ERROR("Inserting entry %s failed (%s)\n", new_name,
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -3083,7 +3092,8 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	/** insert entry1 in parent2 object */
 	rc = insert_entry(parent2->oh, th, name1, entry1);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%s)\n", name1, d_errstr(rc));
+		D_ERROR("Inserting entry %s failed (%s)\n", name1,
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -3091,7 +3101,8 @@ dfs_exchange(dfs_t *dfs, dfs_obj_t *parent1, char *name1, dfs_obj_t *parent2,
 	/** insert entry2 in parent1 object */
 	rc = insert_entry(parent1->oh, th, name2, entry2);
 	if (rc) {
-		D_ERROR("Inserting entry %s failed (%s)\n", name2, d_errstr(rc));
+		D_ERROR("Inserting entry %s failed (%s)\n", name2,
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 

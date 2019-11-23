@@ -449,7 +449,8 @@ attach_group(const char *name, bool pmixless, int npsrs,
 	if (!pmixless) {
 		rc = crt_group_attach((char *)name, &group);
 		if (rc != 0) {
-			D_ERROR("failed to attach to group %s: %s\n", name, d_errstr(rc));
+			D_ERROR("failed to attach to group %s: %s\n", name,
+				d_errstr(rc));
 			goto err;
 		}
 		goto out;

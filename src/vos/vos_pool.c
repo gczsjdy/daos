@@ -282,7 +282,8 @@ vos_pool_create(const char *path, uuid_t uuid, daos_size_t scm_sz,
 
 	rc = pmemobj_ctl_set(ph, "stats.enabled", &enabled);
 	if (rc) {
-		D_ERROR("Enable SCM usage statistics failed. rc:%s\n", d_errstr(rc));
+		D_ERROR("Enable SCM usage statistics failed. rc:%s\n",
+			d_errstr(rc));
 		rc = umem_tx_errno(rc);
 		goto close;
 	}
@@ -594,7 +595,8 @@ vos_pool_open(const char *path, uuid_t uuid, daos_handle_t *poh)
 		rc = vea_load(&pool->vp_umm, vos_txd_get(), &pool_df->pd_vea_df,
 			      &unmap_ctxt, &pool->vp_vea_info);
 		if (rc) {
-			D_ERROR("Failed to load block space info: %s\n", d_errstr(rc));
+			D_ERROR("Failed to load block space info: %s\n",
+				d_errstr(rc));
 			goto failed;
 		}
 	}

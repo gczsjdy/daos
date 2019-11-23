@@ -1610,7 +1610,8 @@ evt_insert_or_split(struct evt_context *tcx, const struct evt_entry_in *ent_new)
 
 		rc = evt_node_split(tcx, leaf, nd_cur, nd_new);
 		if (rc != 0) {
-			V_TRACE(DB_TRACE, "Failed to split node: %s\n", d_errstr(rc));
+			V_TRACE(DB_TRACE, "Failed to split node: %s\n",
+				d_errstr(rc));
 			D_GOTO(failed, rc);
 		}
 

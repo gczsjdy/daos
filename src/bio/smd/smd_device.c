@@ -275,7 +275,8 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 			       NULL, NULL);
 	if (rc) {
 		if (rc != -DER_NONEXIST)
-			D_ERROR("Probe first device failed. %s\n", d_errstr(rc));
+			D_ERROR("Probe first device failed. %s\n",
+				d_errstr(rc));
 		else
 			rc = 0;
 		goto done;
@@ -294,7 +295,8 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 		info = create_dev_info(key_dev.uuid, &entry);
 		if (info == NULL) {
 			rc = -DER_NOMEM;
-			D_ERROR("Create device info failed. %s\n", d_errstr(rc));
+			D_ERROR("Create device info failed. %s\n",
+				d_errstr(rc));
 			break;
 		}
 		d_list_add_tail(&info->sdi_link, dev_list);
@@ -304,7 +306,8 @@ smd_dev_list(d_list_t *dev_list, int *devs)
 		rc = dbtree_iter_next(iter_hdl);
 		if (rc) {
 			if (rc != -DER_NONEXIST)
-				D_ERROR("Iterate next failed. %s\n", d_errstr(rc));
+				D_ERROR("Iterate next failed. %s\n",
+					d_errstr(rc));
 			else
 				rc = 0;
 			break;

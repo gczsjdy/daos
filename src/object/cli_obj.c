@@ -1148,7 +1148,8 @@ obj_bulk_prep(d_sg_list_t *sgls, unsigned int nr, bool bulk_bind,
 				continue;
 			rc = crt_bulk_bind(bulks[i], daos_task2ctx(task));
 			if (rc != 0) {
-				D_ERROR("crt_bulk_bind failed, rc: %s\n", d_errstr(rc));
+				D_ERROR("crt_bulk_bind failed, rc: %s\n",
+					d_errstr(rc));
 				D_GOTO(out, rc);
 			}
 		}
@@ -1268,7 +1269,8 @@ obj_recx_valid(unsigned int nr, daos_recx_t *recxs, bool update)
 					   BTR_FEAT_DIRECT_KEY, 8,
 					   &uma, &broot, &bth);
 		if (rc != 0) {
-			D_ERROR("failed to create recx tree: %s\n", d_errstr(rc));
+			D_ERROR("failed to create recx tree: %s\n",
+				d_errstr(rc));
 			return false;
 		}
 
@@ -1897,7 +1899,8 @@ out_task:
 	if (d_list_empty(task_list)) {
 		tse_task_complete(obj_task, rc);
 	} else {
-		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n", d_errstr(rc));
+		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n",
+			d_errstr(rc));
 
 		tse_task_list_traverse(task_list, shard_task_abort, &rc);
 	}
@@ -2922,7 +2925,8 @@ out_task:
 	if (head == NULL || d_list_empty(head)) {/* nothing has been started */
 		tse_task_complete(api_task, rc);
 	} else {
-		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n", d_errstr(rc));
+		D_ASSERTF(!obj_retry_error(rc), "unexpected ret %s\n",
+			d_errstr(rc));
 
 		tse_task_list_traverse(head, shard_task_abort, &rc);
 	}

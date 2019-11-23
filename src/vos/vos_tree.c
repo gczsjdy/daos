@@ -978,7 +978,8 @@ key_tree_punch(struct vos_object *obj, daos_handle_t toh, daos_epoch_t epoch,
 		rc = dbtree_upsert(toh, BTR_PROBE_BYPASS, DAOS_INTENT_UPDATE,
 				   key_iov, val_iov);
 		if (rc) {
-			D_ERROR("Failed to add new punch, rc=%s\n", d_errstr(rc));
+			D_ERROR("Failed to add new punch, rc=%s\n",
+				d_errstr(rc));
 			return rc;
 		}
 	}

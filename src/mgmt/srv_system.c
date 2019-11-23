@@ -382,7 +382,8 @@ map_update_bcast(crt_context_t ctx, struct mgmt_svc *svc, uint32_t map_version,
 				  0 /* flags */,
 				  crt_tree_topo(CRT_TREE_KNOMIAL, 32), &rpc);
 	if (rc != 0) {
-		D_ERROR("failed to create system map update RPC: %s\n", d_errstr(rc));
+		D_ERROR("failed to create system map update RPC: %s\n",
+			d_errstr(rc));
 		goto out;
 	}
 	in = crt_req_get(rpc);
@@ -516,7 +517,8 @@ ds_mgmt_svc_start(bool create, size_t size, bool bootstrap, uuid_t srv_uuid,
 			   create, size, bootstrap ? &replicas : NULL,
 			   bootstrap ? &arg : NULL);
 	if (rc != 0 && rc != -DER_ALREADY)
-		D_ERROR("failed to start management service: %s\n", d_errstr(rc));
+		D_ERROR("failed to start management service: %s\n",
+			d_errstr(rc));
 
 	return rc;
 }
@@ -528,7 +530,8 @@ ds_mgmt_svc_stop(void)
 
 	rc = ds_rsvc_stop_all(DS_RSVC_CLASS_MGMT);
 	if (rc != 0)
-		D_ERROR("failed to stop management service: %s\n", d_errstr(rc));
+		D_ERROR("failed to stop management service: %s\n",
+			d_errstr(rc));
 	return rc;
 }
 
@@ -788,7 +791,8 @@ ds_mgmt_get_attach_info_handler(Mgmt__GetAttachInfoResp *resp)
 		rc = crt_rank_uri_get(grp, rank, 0 /* tag */,
 				      &(resp->psrs[i]->uri));
 		if (rc != 0) {
-			D_ERROR("unable to get rank %u URI: %s\n", rank, d_errstr(rc));
+			D_ERROR("unable to get rank %u URI: %s\n", rank,
+				d_errstr(rc));
 			break;
 		}
 	}

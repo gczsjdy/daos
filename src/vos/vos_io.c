@@ -1086,7 +1086,8 @@ vos_reserve_single(struct vos_io_context *ioc, uint16_t media,
 	} else {
 		rc = vos_reserve(ioc, DAOS_MEDIA_NVME, size, &off);
 		if (rc) {
-			D_ERROR("Reserve NVMe for SV failed. %s\n", d_errstr(rc));
+			D_ERROR("Reserve NVMe for SV failed. %s\n",
+				d_errstr(rc));
 			return rc;
 		}
 	}

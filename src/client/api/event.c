@@ -149,7 +149,8 @@ daos_eq_lib_fini()
 	if (daos_eq_ctx != NULL) {
 		rc = crt_context_destroy(daos_eq_ctx, 1 /* force */);
 		if (rc != 0) {
-			D_ERROR("failed to destroy client context: %s\n", d_errstr(rc));
+			D_ERROR("failed to destroy client context: %s\n",
+				d_errstr(rc));
 			D_GOTO(unlock, rc);
 		}
 		daos_eq_ctx = NULL;
@@ -1068,7 +1069,8 @@ daos_event_fini(struct daos_event *ev)
 
 		rc = daos_event_fini(daos_evx2ev(tmp));
 		if (rc < 0) {
-			D_ERROR("Failed to finalize child event (%s)\n", d_errstr(rc));
+			D_ERROR("Failed to finalize child event (%s)\n",
+				d_errstr(rc));
 			goto out;
 		}
 		tmp->evx_status = DAOS_EVS_READY;

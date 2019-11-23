@@ -258,7 +258,8 @@ vos_dtx_cos_register(void)
 
 	rc = dbtree_class_register(VOS_BTR_DTX_COS, 0, &dtx_btr_cos_ops);
 	if (rc != 0)
-		D_ERROR("Failed to register DTX CoS dbtree: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to register DTX CoS dbtree: rc = %s\n",
+			d_errstr(rc));
 
 	return rc;
 }

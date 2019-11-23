@@ -47,7 +47,8 @@ smd_store_gen_fname(const char *path, char **store_fname)
 	rc = asprintf(store_fname, "%s/%s/%s", path, SMD_STORE_DIR,
 		      SMD_STORE_FILE);
 	if (rc < 0) {
-		D_ERROR("Generate SMD store filename failed. %s\n", d_errstr(rc));
+		D_ERROR("Generate SMD store filename failed. %s\n",
+			d_errstr(rc));
 		return -DER_NOMEM;
 	}
 

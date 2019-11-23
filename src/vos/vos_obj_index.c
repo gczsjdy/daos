@@ -571,7 +571,8 @@ oi_iter_fetch(struct vos_iterator *iter, vos_iter_entry_t *it_entry,
 			D_DEBUG(DB_TRACE, "Cannot fetch oid info because of "
 				"conflict modification: %s\n", d_errstr(rc));
 		else
-			D_ERROR("Error while fetching oid info: %s\n", d_errstr(rc));
+			D_ERROR("Error while fetching oid info: %s\n",
+				d_errstr(rc));
 		return rc;
 	}
 

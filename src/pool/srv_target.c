@@ -1006,7 +1006,8 @@ ds_pool_cont_iter(daos_handle_t ph, pool_iter_cb_t callback, void *arg)
 		if (rc == -DER_NONEXIST)
 			rc = 0;
 		else
-			D_ERROR("set iterator cursor failed: %s\n", d_errstr(rc));
+			D_ERROR("set iterator cursor failed: %s\n",
+				d_errstr(rc));
 
 		D_GOTO(iter_fini, rc);
 	}

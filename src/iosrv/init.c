@@ -116,7 +116,8 @@ register_dbtree_classes(void)
 	rc = dbtree_class_register(DBTREE_CLASS_KV, 0 /* feats */,
 				   &dbtree_kv_ops);
 	if (rc != 0) {
-		D_ERROR("failed to register DBTREE_CLASS_KV: %s\n", d_errstr(rc));
+		D_ERROR("failed to register DBTREE_CLASS_KV: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -124,21 +125,24 @@ register_dbtree_classes(void)
 				   BTR_FEAT_UINT_KEY /* feats */,
 				   &dbtree_iv_ops);
 	if (rc != 0) {
-		D_ERROR("failed to register DBTREE_CLASS_IV: %s\n", d_errstr(rc));
+		D_ERROR("failed to register DBTREE_CLASS_IV: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
 	rc = dbtree_class_register(DBTREE_CLASS_NV, 0 /* feats */,
 				   &dbtree_nv_ops);
 	if (rc != 0) {
-		D_ERROR("failed to register DBTREE_CLASS_NV: %s\n", d_errstr(rc));
+		D_ERROR("failed to register DBTREE_CLASS_NV: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
 	rc = dbtree_class_register(DBTREE_CLASS_UV, 0 /* feats */,
 				   &dbtree_uv_ops);
 	if (rc != 0) {
-		D_ERROR("failed to register DBTREE_CLASS_UV: %s\n", d_errstr(rc));
+		D_ERROR("failed to register DBTREE_CLASS_UV: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -146,7 +150,8 @@ register_dbtree_classes(void)
 				   BTR_FEAT_UINT_KEY /* feats */,
 				   &dbtree_ec_ops);
 	if (rc != 0) {
-		D_ERROR("failed to register DBTREE_CLASS_EC: %s\n", d_errstr(rc));
+		D_ERROR("failed to register DBTREE_CLASS_EC: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -514,14 +519,16 @@ server_init(int argc, char *argv[])
 	if (dss_mod_facs & DSS_FAC_LOAD_CLI) {
 		rc = daos_init();
 		if (rc) {
-			D_ERROR("daos_init (client) failed, rc: %s\n", d_errstr(rc));
+			D_ERROR("daos_init (client) failed, rc: %s\n",
+				d_errstr(rc));
 			D_GOTO(exit_srv_init, rc);
 		}
 		D_INFO("Client stack enabled\n");
 	} else {
 		rc = daos_hhash_init();
 		if (rc) {
-			D_ERROR("daos_hhash_init failed, rc: %s\n", d_errstr(rc));
+			D_ERROR("daos_hhash_init failed, rc: %s\n",
+				d_errstr(rc));
 			D_GOTO(exit_srv_init, rc);
 		}
 		rc = pl_init();
@@ -536,7 +543,8 @@ server_init(int argc, char *argv[])
 
 	rc = server_init_state_init();
 	if (rc != 0) {
-		D_ERROR("failed to init server init state: %s\n", d_errstr(rc));
+		D_ERROR("failed to init server init state: %s\n",
+			d_errstr(rc));
 		goto exit_daos_fini;
 	}
 
@@ -938,7 +946,8 @@ main(int argc, char **argv)
 	while (1) {
 		rc = sigwait(&set, &sig);
 		if (rc) {
-			D_ERROR("failed to wait for signals: %s\n", d_errstr(rc));
+			D_ERROR("failed to wait for signals: %s\n",
+				d_errstr(rc));
 			break;
 		}
 

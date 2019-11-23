@@ -700,7 +700,8 @@ add_acl_to_response(struct daos_acl *acl, Mgmt__ACLResp *resp)
 
 	rc = daos_acl_to_strs(acl, &ace_list, &ace_nr);
 	if (rc != 0) {
-		D_ERROR("Couldn't convert ACL to string list, rc=%s", d_errstr(rc));
+		D_ERROR("Couldn't convert ACL to string list, rc=%s",
+			d_errstr(rc));
 		return rc;
 	}
 

@@ -159,7 +159,8 @@ oid_iv_ent_update(struct ds_iv_entry *ns_entry, struct ds_iv_key *iv_key,
 					   key->coh_uuid, num_oids,
 					   &avail->oid);
 		if (rc) {
-			D_ERROR("failed to fetch and update max_oid %s\n", d_errstr(rc));
+			D_ERROR("failed to fetch and update max_oid %s\n",
+				d_errstr(rc));
 			D_GOTO(err_lock, rc);
 		}
 		oids->oid = avail->oid;

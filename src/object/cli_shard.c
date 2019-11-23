@@ -463,7 +463,8 @@ dc_obj_shard_rw(struct dc_obj_shard *shard, enum obj_rpc_opc opc,
 	} else {
 		rc = daos_rpc_send(req, task);
 		if (rc != 0) {
-			D_ERROR("update/fetch rpc failed rc %s\n", d_errstr(rc));
+			D_ERROR("update/fetch rpc failed rc %s\n",
+				d_errstr(rc));
 			D_GOTO(out_args, rc);
 		}
 	}

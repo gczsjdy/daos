@@ -673,7 +673,8 @@ init_blobstore_ctxt(struct bio_xs_context *ctxt, int tgt_id)
 			return rc;
 		}
 	} else if (rc) {
-		D_ERROR("Failed to get dev for tgt %d. %s\n", tgt_id, d_errstr(rc));
+		D_ERROR("Failed to get dev for tgt %d. %s\n", tgt_id,
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -919,14 +920,16 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 
 		rc = spdk_env_init(&opts);
 		if (rc != 0) {
-			D_ERROR("failed to initialize SPDK env, rc:%s\n", d_errstr(rc));
+			D_ERROR("failed to initialize SPDK env, rc:%s\n",
+				d_errstr(rc));
 			rc = -DER_INVAL; /* spdk_env_init() returns -1 */
 			goto out;
 		}
 
 		rc = spdk_thread_lib_init(NULL, 0);
 		if (rc != 0) {
-			D_ERROR("failed to init SPDK thread lib, rc:%s\n", d_errstr(rc));
+			D_ERROR("failed to init SPDK thread lib, rc:%s\n",
+				d_errstr(rc));
 			rc = -DER_INVAL;
 			spdk_env_fini();
 			goto out;
@@ -962,7 +965,8 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 		/* The SPDK 'Malloc' device relies on copy engine. */
 		rc = spdk_copy_engine_initialize();
 		if (rc != 0) {
-			D_ERROR("failed to init SPDK copy engine, rc:%s\n", d_errstr(rc));
+			D_ERROR("failed to init SPDK copy engine, rc:%s\n",
+				d_errstr(rc));
 			goto out;
 		}
 
@@ -983,7 +987,8 @@ bio_xsctxt_alloc(struct bio_xs_context **pctxt, int tgt_id)
 		nvme_glb.bd_init_thread = ctxt->bxc_thread;
 		rc = init_bio_bdevs(ctxt);
 		if (rc != 0) {
-			D_ERROR("failed to init bio_bdevs, rc:%s\n", d_errstr(rc));
+			D_ERROR("failed to init bio_bdevs, rc:%s\n",
+				d_errstr(rc));
 			goto out;
 		}
 	}

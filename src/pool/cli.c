@@ -392,7 +392,8 @@ pool_connect_cp(tse_task_t *task, void *data)
 	}
 
 	if (rc) {
-		D_ERROR("RPC error while connecting to pool: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while connecting to pool: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -591,7 +592,8 @@ dc_pool_connect(tse_task_t *task)
 	/** request credentials */
 	rc = dc_sec_request_creds(&pci->pci_cred);
 	if (rc != 0) {
-		D_ERROR("failed to obtain security credential: %s\n", d_errstr(rc));
+		D_ERROR("failed to obtain security credential: %s\n",
+			d_errstr(rc));
 		D_GOTO(out_req, rc);
 	}
 
@@ -660,7 +662,8 @@ pool_disconnect_cp(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc) {
-		D_ERROR("RPC error while disconnecting from pool: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while disconnecting from pool: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1077,7 +1080,8 @@ pool_tgt_update_cp(tse_task_t *task, void *data)
 	}
 
 	if (rc != 0) {
-		D_ERROR("RPC error while excluding targets: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while excluding targets: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1485,7 +1489,8 @@ pool_evict_cp(tse_task_t *task, void *data)
 	}
 
 	if (rc != 0) {
-		D_ERROR("RPC error while evicting pool handles: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while evicting pool handles: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 

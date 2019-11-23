@@ -54,7 +54,8 @@ pool_create_cp(tse_task_t *task, void *data)
 	pc_out = crt_reply_get(arg->rpc);
 	rc = pc_out->pc_rc;
 	if (rc) {
-		D_ERROR("MGMT_POOL_CREATE replied failed, rc: %s\n", d_errstr(rc));
+		D_ERROR("MGMT_POOL_CREATE replied failed, rc: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -277,7 +278,8 @@ pool_destroy_cp(tse_task_t *task, void *data)
 	pd_out = crt_reply_get(arg->rpc);
 	rc = pd_out->pd_rc;
 	if (rc) {
-		D_ERROR("MGMT_POOL_DESTROY replied failed, rc: %s\n", d_errstr(rc));
+		D_ERROR("MGMT_POOL_DESTROY replied failed, rc: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -382,7 +384,8 @@ mgmt_list_pools_cp(tse_task_t *task, void *data)
 	D_ASSERT(pc_out != NULL);
 	rc = pc_out->lp_rc;
 	if (rc) {
-		D_ERROR("MGMT_POOL_CREATE replied failed, rc: %s\n", d_errstr(rc));
+		D_ERROR("MGMT_POOL_CREATE replied failed, rc: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 

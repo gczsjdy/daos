@@ -357,7 +357,8 @@ ds_sec_check_pool_access(struct daos_acl *acl, struct pool_owner *ownership,
 
 	rc = ds_sec_validate_credentials(cred, &token);
 	if (rc != 0) {
-		D_ERROR("Failed to validate credentials, rc=%s\n", d_errstr(rc));
+		D_ERROR("Failed to validate credentials, rc=%s\n",
+			d_errstr(rc));
 		return rc;
 	}
 

@@ -455,7 +455,8 @@ ts_iterate_internal(uint32_t type, vos_iter_param_t *param,
 		if (rc == -DER_NONEXIST)
 			rc = 0;
 		else
-			D_ERROR("Failed to prepare d-key iterator: %s\n", d_errstr(rc));
+			D_ERROR("Failed to prepare d-key iterator: %s\n",
+				d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 

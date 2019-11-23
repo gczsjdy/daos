@@ -390,7 +390,8 @@ dbtree_nv_update(daos_handle_t tree, const void *key, size_t key_size,
 
 	rc = dbtree_update(tree, &key_iov, &val);
 	if (rc != 0)
-		D_ERROR("failed to update \"%s\": %s\n", (char *)key, d_errstr(rc));
+		D_ERROR("failed to update \"%s\": %s\n", (char *)key,
+			d_errstr(rc));
 
 	return rc;
 }
@@ -492,7 +493,8 @@ dbtree_nv_create_tree(daos_handle_t tree, const void *key, size_t key_size,
 
 	rc = create_tree(tree, &key_iov, class, feats, order, tree_new);
 	if (rc != 0)
-		D_ERROR("failed to create \"%s\": %s\n", (char *)key, d_errstr(rc));
+		D_ERROR("failed to create \"%s\": %s\n", (char *)key,
+			d_errstr(rc));
 
 	return rc;
 }
@@ -511,7 +513,8 @@ dbtree_nv_open_tree(daos_handle_t tree, const void *key, size_t key_size,
 		if (rc == -DER_NONEXIST)
 			D_DEBUG(DB_TRACE, "cannot find \"%s\"\n", (char *)key);
 		else
-			D_ERROR("failed to open \"%s\": %s\n", (char *)key, d_errstr(rc));
+			D_ERROR("failed to open \"%s\": %s\n", (char *)key,
+				d_errstr(rc));
 	}
 
 	return rc;
@@ -722,7 +725,8 @@ dbtree_uv_update(daos_handle_t tree, const uuid_t uuid, const void *value,
 
 	rc = dbtree_update(tree, &key, &val);
 	if (rc != 0)
-		D_ERROR("failed to update "DF_UUID": %s\n", DP_UUID(uuid), d_errstr(rc));
+		D_ERROR("failed to update "DF_UUID": %s\n", DP_UUID(uuid),
+			d_errstr(rc));
 
 	return rc;
 }
@@ -815,7 +819,8 @@ dbtree_uv_create_tree(daos_handle_t tree, const uuid_t uuid, unsigned int class,
 
 	rc = create_tree(tree, &key, class, feats, order, tree_new);
 	if (rc != 0)
-		D_ERROR("failed to create "DF_UUID": %s\n", DP_UUID(uuid), d_errstr(rc));
+		D_ERROR("failed to create "DF_UUID": %s\n", DP_UUID(uuid),
+			d_errstr(rc));
 
 	return rc;
 }
@@ -1007,7 +1012,8 @@ dbtree_ec_lookup(daos_handle_t tree, uint64_t epoch, uint64_t *count)
 	if (rc == -DER_NONEXIST)
 		D_DEBUG(DB_TRACE, "cannot find "DF_U64"\n", epoch);
 	else if (rc != 0)
-		D_ERROR("failed to look up "DF_U64": %s\n", epoch, d_errstr(rc));
+		D_ERROR("failed to look up "DF_U64": %s\n", epoch,
+			d_errstr(rc));
 
 	return rc;
 }

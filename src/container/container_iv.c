@@ -185,7 +185,8 @@ cont_iv_ent_destroy(d_sg_list_t *sgl)
 			rc = dbtree_iterate(*root_hdl, DAOS_INTENT_PUNCH, false,
 					    delete_iter_cb, NULL);
 			if (rc < 0) {
-				D_ERROR("dbtree iterate fails %s\n", d_errstr(rc));
+				D_ERROR("dbtree iterate fails %s\n",
+					d_errstr(rc));
 				return rc;
 			}
 		}

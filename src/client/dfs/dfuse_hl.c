@@ -714,7 +714,8 @@ dfuse_unlink(const char *path)
 
 	rc = dfs_remove(dfs, parent, name, false, NULL);
 	if (rc) {
-		fprintf(stderr, "Failed to remove file %s (%s)\n", name, d_errstr(rc));
+		fprintf(stderr, "Failed to remove file %s (%s)\n", name,
+			d_errstr(rc));
 		D_GOTO(out, rc = -rc);
 	}
 
@@ -758,7 +759,8 @@ dfuse_rmdir(const char *path)
 
 	rc = dfs_remove(dfs, parent, name, false, NULL);
 	if (rc) {
-		fprintf(stderr, "Failed to remove dir %s (%s)\n", name, d_errstr(rc));
+		fprintf(stderr, "Failed to remove dir %s (%s)\n", name,
+			d_errstr(rc));
 		D_GOTO(out, rc = -rc);
 	}
 
@@ -1162,7 +1164,8 @@ int main(int argc, char *argv[])
 			       &poh, &pool_info, NULL);
 	d_rank_list_free(svcl);
 	if (rc < 0) {
-		fprintf(stderr, "Failed to connect to pool (%s)\n", d_errstr(rc));
+		fprintf(stderr, "Failed to connect to pool (%s)\n",
+			d_errstr(rc));
 		D_GOTO(out_daos, rc = 1);
 	}
 
@@ -1172,7 +1175,8 @@ int main(int argc, char *argv[])
 
 		rc = dfs_mount_root_cont(poh, &dfs);
 		if (rc) {
-			fprintf(stderr, "failed to mount root cont (%s)\n", d_errstr(rc));
+			fprintf(stderr, "failed to mount root cont (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out_disc, rc = 1);
 		}
 	} else {
@@ -1194,14 +1198,16 @@ int main(int argc, char *argv[])
 		rc = daos_cont_open(poh, co_uuid, DAOS_COO_RW, &coh, &co_info,
 				    NULL);
 		if (rc) {
-			fprintf(stderr, "Failed container open (%s)\n", d_errstr(rc));
+			fprintf(stderr, "Failed container open (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out_disc, rc = 1);
 		}
 
 		rc = dfs_mount(poh, coh, O_RDWR, &dfs);
 		if (rc) {
 			daos_cont_close(coh, NULL);
-			fprintf(stderr, "Failed dfs mount (%s)\n", d_errstr(rc));
+			fprintf(stderr, "Failed dfs mount (%s)\n",
+				d_errstr(rc));
 			D_GOTO(out_disc, rc = 1);
 		}
 	}

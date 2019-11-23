@@ -380,7 +380,8 @@ vos_cont_open(daos_handle_t poh, uuid_t co_uuid, daos_handle_t *coh)
 			&cont->vc_cont_df->cd_dtx_table_df.tt_committed_btr,
 			&pool->vp_uma, &cont->vc_dtx_committed_hdl);
 	if (rc) {
-		D_ERROR("Failed to open committed DTX table: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to open committed DTX table: rc = %s\n",
+			d_errstr(rc));
 		D_GOTO(exit, rc);
 	}
 
@@ -388,7 +389,8 @@ vos_cont_open(daos_handle_t poh, uuid_t co_uuid, daos_handle_t *coh)
 			&cont->vc_cont_df->cd_dtx_table_df.tt_active_btr,
 			&pool->vp_uma, &cont->vc_dtx_active_hdl);
 	if (rc) {
-		D_ERROR("Failed to open active DTX table: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to open active DTX table: rc = %s\n",
+			d_errstr(rc));
 		D_GOTO(exit, rc);
 	}
 
@@ -399,7 +401,8 @@ vos_cont_open(daos_handle_t poh, uuid_t co_uuid, daos_handle_t *coh)
 				   &cont->vc_dtx_cos_btr,
 				   &cont->vc_dtx_cos_hdl);
 	if (rc != 0) {
-		D_ERROR("Failed to create DTX CoS btree: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to create DTX CoS btree: rc = %s\n",
+			d_errstr(rc));
 		D_GOTO(exit, rc);
 	}
 

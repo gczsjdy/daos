@@ -111,13 +111,15 @@ cont_create_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while creating container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while creating container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
 	rc = out->cco_op.co_rc;
 	if (rc != 0) {
-		D_DEBUG(DF_DSMC, "failed to create container: %s\n", d_errstr(rc));
+		D_DEBUG(DF_DSMC, "failed to create container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -206,7 +208,8 @@ cont_destroy_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while destroying container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while destroying container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -393,7 +396,8 @@ cont_open_complete(tse_task_t *task, void *data)
 	}
 
 	if (rc != 0) {
-		D_ERROR("RPC error while opening container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while opening container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -633,7 +637,8 @@ cont_close_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while closing container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while closing container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -796,7 +801,8 @@ cont_query_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while querying container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while querying container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1417,7 +1423,8 @@ cont_req_complete(tse_task_t *task, void *data)
 		D_GOTO(out, rc = 0);
 
 	if (rc != 0) {
-		D_ERROR("RPC error while querying container: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while querying container: %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1551,7 +1558,8 @@ dc_cont_list_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to list container attributes: %s\n", d_errstr(rc));
+	D_DEBUG(DF_DSMC, "Failed to list container attributes: %s\n",
+		d_errstr(rc));
 	return rc;
 }
 
@@ -1695,7 +1703,8 @@ dc_cont_get_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to get container attributes: %s\n", d_errstr(rc));
+	D_DEBUG(DF_DSMC, "Failed to get container attributes: %s\n",
+		d_errstr(rc));
 	return rc;
 }
 
@@ -1753,7 +1762,8 @@ dc_cont_set_attr(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to set container attributes: %s\n", d_errstr(rc));
+	D_DEBUG(DF_DSMC, "Failed to set container attributes: %s\n",
+		d_errstr(rc));
 	return rc;
 }
 
@@ -1975,7 +1985,8 @@ dc_cont_list_snap(tse_task_t *task)
 	return rc;
 out:
 	tse_task_complete(task, rc);
-	D_DEBUG(DF_DSMC, "Failed to list container snapshots: %s\n", d_errstr(rc));
+	D_DEBUG(DF_DSMC, "Failed to list container snapshots: %s\n",
+		d_errstr(rc));
 	return rc;
 }
 

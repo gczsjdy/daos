@@ -139,7 +139,8 @@ nested_prepare(vos_iter_type_t type, struct vos_iter_dict *dict,
 				dict->id_name);
 		else if (rc == -DER_INPROGRESS)
 			D_DEBUG(DB_TRACE, "Cannot fetch nested tree from "
-				"because of conflict modification: %s\n", d_errstr(rc));
+				"because of conflict modification: %s\n",
+					d_errstr(rc));
 		else
 			D_ERROR("Problem fetching nested tree from iterator:"
 				" %s\n", d_errstr(rc));
@@ -565,7 +566,8 @@ probe:
 		} else {
 			if (rc == -DER_INPROGRESS)
 				D_DEBUG(DB_TRACE, "Cannot probe because of "
-					"some conflict modification: %s\n", d_errstr(rc));
+					"some conflict modification: %s\n",
+					d_errstr(rc));
 			else
 				D_ERROR("failed to probe iterator (type=%d "
 					"anchor=%p): %s\n",

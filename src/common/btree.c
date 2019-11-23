@@ -1801,7 +1801,8 @@ btr_update(struct btr_context *tcx, d_iov_t *key, d_iov_t *val)
 	}
 
 	if (rc != 0) { /* failed */
-		D_DEBUG(DB_TRACE, "Failed to update record: %s\n", d_errstr(rc));
+		D_DEBUG(DB_TRACE, "Failed to update record: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 	return 0;
@@ -1824,7 +1825,8 @@ btr_insert(struct btr_context *tcx, d_iov_t *key, d_iov_t *val)
 
 	rc = btr_rec_alloc(tcx, key, val, rec);
 	if (rc != 0) {
-		D_DEBUG(DB_TRACE, "Failed to create new record: %s\n", d_errstr(rc));
+		D_DEBUG(DB_TRACE, "Failed to create new record: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -1841,7 +1843,8 @@ btr_insert(struct btr_context *tcx, d_iov_t *key, d_iov_t *val)
 		rc = btr_node_insert_rec(tcx, trace, rec);
 		if (rc != 0) {
 			D_DEBUG(DB_TRACE,
-				"Failed to insert record to leaf: %s\n", d_errstr(rc));
+				"Failed to insert record to leaf: %s\n",
+					d_errstr(rc));
 			return rc;
 		}
 
@@ -1851,7 +1854,8 @@ btr_insert(struct btr_context *tcx, d_iov_t *key, d_iov_t *val)
 
 		rc = btr_root_start(tcx, rec);
 		if (rc != 0) {
-			D_DEBUG(DB_TRACE, "Failed to start the tree: %s\n", d_errstr(rc));
+			D_DEBUG(DB_TRACE, "Failed to start the tree: %s\n",
+				d_errstr(rc));
 			return rc;
 		}
 	}
@@ -3655,7 +3659,8 @@ dbtree_iterate(daos_handle_t toh, uint32_t intent, bool backward,
 
 		rc = dbtree_iter_fetch(ih, &key, &val, NULL /* anchor */);
 		if (rc != 0) {
-			D_ERROR("failed to fetch iterator: %s\n", d_errstr(rc));
+			D_ERROR("failed to fetch iterator: %s\n",
+				d_errstr(rc));
 			break;
 		}
 

@@ -1626,7 +1626,8 @@ test_evt_various_data_size_internal(void **state)
 				epr.epr_hi = epoch;
 				rc = evt_find(toh, &epr, &extent, &ent_array);
 				if (rc != 0)
-					D_FATAL("Find rect failed %s\n", d_errstr(rc));
+					D_FATAL("Find rect failed %s\n",
+						d_errstr(rc));
 				evt_ent_array_for_each(ent, &ent_array) {
 					static char *actual;
 

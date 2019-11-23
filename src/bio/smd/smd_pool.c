@@ -325,7 +325,8 @@ smd_pool_list(d_list_t *pool_list, int *pools)
 		rc = dbtree_iter_next(iter_hdl);
 		if (rc) {
 			if (rc != -DER_NONEXIST)
-				D_ERROR("Iterate next failed. %s\n", d_errstr(rc));
+				D_ERROR("Iterate next failed. %s\n",
+					d_errstr(rc));
 			else
 				rc = 0;
 			break;

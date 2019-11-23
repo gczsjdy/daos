@@ -496,7 +496,8 @@ dss_srv_handler(void *arg)
 		/* create private transport context */
 		rc = crt_context_create(&dmi->dmi_ctx);
 		if (rc != 0) {
-			D_ERROR("failed to create crt ctxt: %s\n", d_errstr(rc));
+			D_ERROR("failed to create crt ctxt: %s\n",
+				d_errstr(rc));
 			goto tls_fini;
 		}
 
@@ -504,14 +505,16 @@ dss_srv_handler(void *arg)
 						   dss_process_rpc,
 						   dx->dx_pools);
 		if (rc != 0) {
-			D_ERROR("failed to register process cb %s\n", d_errstr(rc));
+			D_ERROR("failed to register process cb %s\n",
+				d_errstr(rc));
 			goto crt_destroy;
 		}
 
 		/** Get context index from cart */
 		rc = crt_context_idx(dmi->dmi_ctx, &dmi->dmi_ctx_id);
 		if (rc != 0) {
-			D_ERROR("failed to get xtream index: rc %s\n", d_errstr(rc));
+			D_ERROR("failed to get xtream index: rc %s\n",
+				d_errstr(rc));
 			goto crt_destroy;
 		}
 		dx->dx_ctx_id = dmi->dmi_ctx_id;
@@ -778,7 +781,8 @@ dss_start_one_xstream(hwloc_cpuset_t cpus, int xs_id)
 
 	rc = ABT_thread_attr_set_stacksize(attr, 65536);
 	if (rc != ABT_SUCCESS) {
-		D_ERROR("ABT_thread_attr_set_stacksize fails %s\n", d_errstr(rc));
+		D_ERROR("ABT_thread_attr_set_stacksize fails %s\n",
+			d_errstr(rc));
 		D_GOTO(out_xstream, rc = dss_abterr2der(rc));
 	}
 

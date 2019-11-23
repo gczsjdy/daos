@@ -1261,7 +1261,8 @@ ds_pool_svc_start_all(void)
 	rc = dss_ult_create(pool_svc_start_all, NULL,
 			    DSS_ULT_POOL_SRV, 0, 0, &thread);
 	if (rc != 0) {
-		D_ERROR("failed to create pool service start ULT: %s\n", d_errstr(rc));
+		D_ERROR("failed to create pool service start ULT: %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 	ABT_thread_join(thread);

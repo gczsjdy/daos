@@ -263,7 +263,8 @@ rebuild_objects_send(struct rebuild_root *root, unsigned int tgt_id,
 		rc = pool_map_find_down_tgts(rpt->rt_pool->sp_map, &targets,
 					     &failed_tgts_cnt);
 		if (rc != 0) {
-			D_ERROR("failed create failed tgt list rc %s\n", d_errstr(rc));
+			D_ERROR("failed create failed tgt list rc %s\n",
+				d_errstr(rc));
 			break;
 		}
 

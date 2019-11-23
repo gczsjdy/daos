@@ -654,7 +654,8 @@ check_ace_is_duplicate(struct daos_ace *ace, struct d_hash_table *found_aces)
 			daos_ace_get_size(ace),
 			&entry->entry, true);
 	if (rc != 0) {
-		D_ERROR("Failed to insert new hash entry, rc=%s\n", d_errstr(rc));
+		D_ERROR("Failed to insert new hash entry, rc=%s\n",
+			d_errstr(rc));
 		D_FREE(entry);
 	}
 

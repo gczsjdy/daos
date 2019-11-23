@@ -142,7 +142,8 @@ rebuild_fetch_update_inline(struct rebuild_one *rdone, daos_handle_t oh,
 					    &rdone->ro_iods[start],
 					    &sgls[start]);
 			if (rc) {
-				D_ERROR("rebuild failed: rc %s\n", d_errstr(rc));
+				D_ERROR("rebuild failed: rc %s\n",
+					d_errstr(rc));
 				break;
 			}
 			iod_cnt = 0;
@@ -1132,7 +1133,8 @@ rebuild_btr_hdl_get(struct rebuild_tgt_pool_tracker *rpt, daos_handle_t *hdl,
 					   &rpt->rt_tobe_rb_root,
 					   &rpt->rt_tobe_rb_root_hdl);
 		if (rc != 0) {
-			D_ERROR("failed to create rebuild tree: %s\n", d_errstr(rc));
+			D_ERROR("failed to create rebuild tree: %s\n",
+				d_errstr(rc));
 			return rc;
 		}
 	}
@@ -1145,7 +1147,8 @@ rebuild_btr_hdl_get(struct rebuild_tgt_pool_tracker *rpt, daos_handle_t *hdl,
 					   &rpt->rt_rebuilt_root,
 					   &rpt->rt_rebuilt_root_hdl);
 		if (rc != 0) {
-			D_ERROR("failed to create rebuild tree: %s\n", d_errstr(rc));
+			D_ERROR("failed to create rebuild tree: %s\n",
+				d_errstr(rc));
 			return rc;
 		}
 	}

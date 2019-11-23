@@ -888,7 +888,8 @@ rebuild_scan_broadcast(struct ds_pool *pool,
 	rc = crt_bulk_create(dss_get_module_info()->dmi_ctx, &sgl, CRT_BULK_RW,
 			     &bulk_hdl);
 	if (rc != 0) {
-		D_ERROR("Create bulk for map buffer failed: rc %s\n", d_errstr(rc));
+		D_ERROR("Create bulk for map buffer failed: rc %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
@@ -1142,7 +1143,8 @@ rebuild_leader_start(struct ds_pool *pool, uint32_t rebuild_ver,
 
 	rc = ds_pool_svc_term_get(pool->sp_uuid, &leader_term);
 	if (rc) {
-		D_ERROR("Get pool service term failed: rc = %s\n", d_errstr(rc));
+		D_ERROR("Get pool service term failed: rc = %s\n",
+			d_errstr(rc));
 		D_GOTO(out, rc);
 	}
 
@@ -1514,7 +1516,8 @@ ds_rebuild_regenerate_task(struct ds_pool *pool, d_rank_list_t *svc_list)
 	rc = pool_map_find_down_tgts(pool->sp_map, &down_tgts,
 				     &down_tgts_cnt);
 	if (rc != 0) {
-		D_ERROR("failed to create failed tgt list rc %s\n", d_errstr(rc));
+		D_ERROR("failed to create failed tgt list rc %s\n",
+			d_errstr(rc));
 		return rc;
 	}
 
