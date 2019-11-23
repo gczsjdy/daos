@@ -1390,7 +1390,8 @@ dss_collective_reduce_internal(struct dss_coll_ops *ops,
 			if (i < args->ca_exclude_tgts_cnt) {
 				D_DEBUG(DB_TRACE, "Skip tgt %d\n", tid);
 				rc = ABT_future_set(future, (void *)stream);
-				D_ASSERTF(rc == ABT_SUCCESS, "%s\n", d_errstr(rc));
+				D_ASSERTF(rc == ABT_SUCCESS, "%s\n",
+					d_errstr(rc));
 				continue;
 			}
 		}
@@ -1752,7 +1753,8 @@ dss_dump_ABT_state()
 
 	rc = ABT_info_print_all_xstreams(stderr);
 	if (rc != ABT_SUCCESS)
-		D_ERROR("ABT_info_print_all_xstreams() error, rc = %s\n", d_errstr(rc));
+		D_ERROR("ABT_info_print_all_xstreams() error, rc = %s\n",
+			d_errstr(rc));
 
 	ABT_mutex_lock(xstream_data.xd_mutex);
 	for (idx = 0; idx < xstream_data.xd_xs_nr; idx++) {
@@ -1837,8 +1839,8 @@ dss_dump_ABT_state()
 			if (rc != ABT_SUCCESS)
 				D_ERROR("ABT_info_print_pool() error, rc = %s, "
 					"for DAOS xstream %p, ABT xstream %p, "
-					"sched %p, pool[%d]\n", d_errstr(rc), dx,
-					dx->dx_xstream, dx->dx_sched, i);
+					"sched %p, pool[%d]\n", d_errstr(rc),
+					dx, dx->dx_xstream, dx->dx_sched, i);
 		}
 		/* XXX last, each pool's ULTs infos (and stacks?!) will need to
 		 * be also dumped, when a new pool method will be available to

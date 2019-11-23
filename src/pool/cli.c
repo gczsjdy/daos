@@ -2184,7 +2184,8 @@ pool_membership_update_cb(tse_task_t *task, void *data)
 	}
 
 	if (rc != 0) {
-		D_ERROR("RPC error while excluding targets: %s\n", d_errstr(rc));
+		D_ERROR("RPC error while excluding targets: %s\n",
+			d_errstr(rc));
 		D_GOTO(out_state, rc);
 	}
 

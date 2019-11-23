@@ -57,7 +57,8 @@ dtx_iter_fini(struct vos_iterator *iter)
 	if (!daos_handle_is_inval(oiter->oit_hdl)) {
 		rc = dbtree_iter_finish(oiter->oit_hdl);
 		if (rc != 0)
-			D_ERROR("oid_iter_fini failed: rc = %s\n", d_errstr(rc));
+			D_ERROR("oid_iter_fini failed: rc = %s\n",
+				d_errstr(rc));
 	}
 
 	if (oiter->oit_cont != NULL)
@@ -94,7 +95,8 @@ dtx_iter_prep(vos_iter_type_t type, vos_iter_param_t *param,
 
 	rc = dbtree_iter_prepare(cont->vc_dtx_active_hdl, 0, &oiter->oit_hdl);
 	if (rc != 0) {
-		D_ERROR("Failed to prepare DTX iteration: rc = %s\n", d_errstr(rc));
+		D_ERROR("Failed to prepare DTX iteration: rc = %s\n",
+			d_errstr(rc));
 		dtx_iter_fini(&oiter->oit_iter);
 	} else {
 		*iter_pp = &oiter->oit_iter;
