@@ -167,8 +167,8 @@ func (tc *testConn) SystemStop() (common.SystemMemberResults, error) {
 	return make(common.SystemMemberResults, 0), nil
 }
 
-func (tc *testConn) ListPools(req *client.ListPoolsReq) (*client.ListPoolsResp, error) {
-	tc.appendInvocation(fmt.Sprintf("ListPools-%s", req))
+func (tc *testConn) ListPools() (*client.ListPoolsResp, error) {
+	tc.appendInvocation("ListPools")
 	return &client.ListPoolsResp{}, nil
 }
 

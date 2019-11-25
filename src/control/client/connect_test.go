@@ -536,11 +536,7 @@ func TestListPools(t *testing.T) {
 					status: tt.listPoolsRespStatus,
 				})
 
-			req := &ListPoolsReq{
-				System: "daos",
-			}
-
-			resp, err := cc.ListPools(req)
+			resp, err := cc.ListPools()
 
 			if tt.expectedErr != "" {
 				ExpectError(t, err, tt.expectedErr, name)

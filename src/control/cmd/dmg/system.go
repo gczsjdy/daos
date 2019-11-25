@@ -25,14 +25,16 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
-// systemCmd is the struct representing the top-level system subcommand.
+// SystemCmd is the struct representing the top-level system subcommand.
 type SystemCmd struct {
 	MemberQuery systemMemberQueryCmd `command:"member-query" alias:"q" description:"Retrieve DAOS system membership"`
 	Stop        systemStopCmd        `command:"stop" alias:"s" description:"Perform controlled shutdown of DAOS system"`
+	ListPools   systemListPoolsCmd   `command:"list-pools" alias:"p" description:"List all pools in the DAOS system"`
 }
 
 // systemStopCmd is the struct representing the command to shutdown system.
@@ -80,5 +82,44 @@ func (cmd *systemMemberQueryCmd) Execute(args []string) error {
 
 	cmd.log.Infof("System-member-query command %s\n", msg)
 
+	return nil
+}
+
+// systemListPoolsCmd represents the command to fetch a list of all DAOS pools in the system.
+type systemListPoolsCmd struct {
+	logCmd
+	connectedCmd
+}
+
+// Execute is run when systemListPoolsCmd activates
+func (cmd *systemListPoolsCmd) Execute(args []string) error {
+	resp, err := cmd.conns.ListPools()
+	if err != nil {
+		cmd.log.Infof("List-Pools command failed: %s\n", err.Error())
+		return err
+	}
+
+	cmd.log.Info("List-Pools command succeeded\n")
+	if len(resp.Pools) == 0 {
+		cmd.log.Info("No pools in system\n")
+		return nil
+	}
+
+	for _, pool := range resp.Pools {
+		var b strings.Builder
+
+		b.WriteString(pool.UUID)
+		if len(pool.SvcReplicas) > 0 {
+			b.WriteString(" ")
+			for i, rep := range pool.SvcReplicas {
+				if i != 0 {
+					b.WriteString(":")
+				}
+				fmt.Fprintf(&b, "%d", rep)
+			}
+		}
+		b.WriteString("\n")
+		cmd.log.Info(b.String())
+	}
 	return nil
 }

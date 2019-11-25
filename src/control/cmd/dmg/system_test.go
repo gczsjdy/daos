@@ -43,6 +43,12 @@ func TestSystemCommands(t *testing.T) {
 			nil,
 		},
 		{
+			"system list-pools with no arguments",
+			"system list-pools",
+			"ConnectClients ListPools",
+			nil,
+		},
+		{
 			"Nonexistent subcommand",
 			"system quack",
 			"",
