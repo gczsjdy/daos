@@ -468,7 +468,7 @@ func TestPoolUpdateACL(t *testing.T) {
 			cc := connectSetupServers(tt.addr, log, Ready,
 				MockCtrlrs, MockCtrlrResults, MockScmModules,
 				MockModuleResults, MockScmNamespaces, MockMountResults,
-				nil, nil, nil, nil, aclResult)
+				nil, nil, nil, nil, aclResult, nil)
 
 			req := &PoolUpdateACLReq{
 				UUID: "TestUUID",
@@ -521,7 +521,7 @@ func TestListPools(t *testing.T) {
 		"success": {
 			addr:                MockServers,
 			listPoolsRespStatus: 0,
-			expectedResp:        &ListPoolsResp{Pools: poolDiscoveriesFromProtobuf(MockPoolList)},
+			expectedResp:        &ListPoolsResp{Pools: poolDiscoveriesFromPB(MockPoolList)},
 			expectedErr:         "",
 		},
 	} {

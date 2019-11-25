@@ -139,6 +139,6 @@ func (c *connList) ListPools(req *ListPoolsReq) (*ListPoolsResp, error) {
 	}
 
 	return &ListPoolsResp{
-		
+		Pools: poolDiscoveriesFromPB(pbResp.Pools),
 	}, nil
 }

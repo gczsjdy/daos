@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	mgmtpb "github.com/daos-stack/daos/src/control/common/proto/mgmt"
@@ -476,12 +477,19 @@ type PoolDiscovery struct {
 	SvcReplicas []int  // Ranks of pool service replicas
 }
 
-// TODO KJ: Unit tests
-func poolDiscoveriesFromProtobuf(pbPools []*mgmtpb.ListPoolsResp_Pool) []*PoolDiscovery {
+// poolDiscoveriesFromPB converts the protobuf ListPoolsResp_Pool structures to
+// PoolDiscovery structures.
+func poolDiscoveriesFromPB(pbPools []*mgmtpb.ListPoolsResp_Pool) []*PoolDiscovery {
 	pools := make([]*PoolDiscovery, 0, len(pbPools))
 	for _, pbPool := range pbPools {
+		svcRepStr := strings.Split(pbPool.Svcreps, ",")
 		svcReps := make([]int, 0)
-		// TODO KJ: dissect svcreps
+		for _, repStr := range svcRepStr {
+			if rep, err := strconv.Atoi(strings.TrimSpace(repStr)); err == nil {
+				svcReps = append(svcReps, rep)
+			}
+		}
+
 		pools = append(pools, &PoolDiscovery{
 			UUID:        pbPool.Uuid,
 			SvcReplicas: svcReps,
