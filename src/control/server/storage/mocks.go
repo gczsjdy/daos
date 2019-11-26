@@ -57,12 +57,12 @@ func MockNvmeController(varIdx ...int32) *NvmeController {
 	idx := getIndex(varIdx...)
 
 	return &NvmeController{
-		Model:      concat("model", idx),
-		Serial:     concat("serial", idx),
-		PciAddr:    concat("pciAddr", idx),
-		FwRev:      concat("fwRev", idx),
-		SocketID:   idx,
-		Health:     MockNvmeDeviceHealth(idx),
-		Namespaces: []*NvmeNamespace{MockNvmeNamespace(idx)},
+		Model:       concat("model", idx),
+		Serial:      concat("serial", idx),
+		PciAddr:     concat("pciAddr", idx),
+		FwRev:       concat("fwRev", idx),
+		SocketID:    idx,
+		HealthStats: MockNvmeDeviceHealth(idx),
+		Namespaces:  []*NvmeNamespace{MockNvmeNamespace(idx)},
 	}
 }

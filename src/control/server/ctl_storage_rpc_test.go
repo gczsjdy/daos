@@ -24,19 +24,25 @@
 package server
 
 import (
+	"context"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/grpc"
 
 	"github.com/daos-stack/daos/src/control/common"
+	"github.com/daos-stack/daos/src/control/common/proto"
 	. "github.com/daos-stack/daos/src/control/common/proto/ctl"
-
-	//. "github.com/daos-stack/daos/src/control/common/storage"
+	"github.com/daos-stack/daos/src/control/logging"
 	"github.com/daos-stack/daos/src/control/server/ioserver"
 	"github.com/daos-stack/daos/src/control/server/storage"
+	"github.com/daos-stack/daos/src/control/server/storage/bdev"
+	"github.com/daos-stack/daos/src/control/server/storage/scm"
 )
 
 // MockScmModule returns a mock SCM module of type storage.ScmModule.
 func MockScmModule() storage.ScmModule {
-	m := common.MockModulePB()
+	m := proto.MockScmModule()
 
 	return storage.ScmModule{
 		PhysicalID:      uint32(m.Physicalid),
@@ -51,7 +57,7 @@ func MockScmModule() storage.ScmModule {
 // MockScmNamespace returns a mock SCM namespace (PMEM device file),
 // which would normally be parsed from the output of ndctl cmdline tool.
 func MockScmNamespace() storage.ScmNamespace {
-	m := common.MockPmemDevicePB()
+	m := proto.MockPmemDevice()
 
 	return storage.ScmNamespace{
 		UUID:        m.Uuid,
@@ -97,38 +103,42 @@ func newMockStorageConfig(
 	return c
 }
 
-/*
 func TestStorageScan(t *testing.T) {
 	var (
-		ctrlr      = MockController()
-		pbCtrlr    = common.MockControllerPB()
-		errExample = errors.New("example failure")
+		//ctrlr      = storage.MockNvmeController()
+		pbCtrlr = proto.MockNvmeController()
+		//errExample = errors.New("example failure")
 	)
 
 	for name, tc := range map[string]struct {
-		spdkInitEnvRet      error
+		bmbc *bdev.MockBackendConfig
+		smbc *scm.MockBackendConfig
+		/*spdkInitEnvRet      error
 		spdkDiscoverRet     error
 		scmDiscoverRes      []storage.ScmModule
 		scmDiscoverErr      error
 		scmGetNamespacesRes []storage.ScmNamespace
-		scmGetNamespacesErr error
-		expSetupErr         error
-		expResp             StorageScanResp
-		expNvmeFailedInit   bool
+		scmGetNamespacesErr error*/
+		expSetupErr       error
+		expResp           StorageScanResp
+		expNvmeFailedInit bool
 	}{
 		"successful scan with scm namespaces": {
+			bmbc: &bdev.MockBackendConfig{
+				ScanRes: storage.NvmeControllers{storage.MockNvmeController()},
+			},
 			expResp: StorageScanResp{
 				Nvme: &ScanNvmeResp{
-					Ctrlrs: NvmeControllers{pbCtrlr},
+					Ctrlrs: proto.NvmeControllers{pbCtrlr},
 					State:  new(ResponseState),
 				},
 				Scm: &ScanScmResp{
-					Pmems: ScmNamespaces{common.MockPmemDevicePB()},
+					Pmems: proto.ScmNamespaces{proto.MockPmemDevice()},
 					State: new(ResponseState),
 				},
 			},
 		},
-		"successful scan no scm namespaces": {
+		/*"successful scan no scm namespaces": {
 			scmGetNamespacesRes: []storage.ScmNamespace{},
 			expResp: StorageScanResp{
 				Nvme: &ScanNvmeResp{
@@ -212,48 +222,34 @@ func TestStorageScan(t *testing.T) {
 				},
 			},
 			expNvmeFailedInit: true,
-		},
+		},*/
 	} {
 		t.Run(name, func(t *testing.T) {
 			log, buf := logging.NewTestLogger(t.Name())
 			defer common.ShowBufferOnFailure(t, buf)
 
-			mbc := scm.MockBackendConfig{
-				DiscoverRes:     tc.scmDiscoverRes,
-				DiscoverErr:     tc.scmDiscoverErr,
-				GetNamespaceRes: tc.scmGetNamespacesRes,
-				GetNamespaceErr: tc.scmGetNamespacesErr,
+			if tc.smbc == nil {
+				tc.smbc = &scm.MockBackendConfig{}
 			}
-			if mbc.DiscoverRes == nil {
-				mbc.DiscoverRes = []storage.ScmModule{MockScmModule()}
+			if tc.smbc.DiscoverRes == nil {
+				tc.smbc.DiscoverRes = []storage.ScmModule{MockScmModule()}
 			}
-			if mbc.GetNamespaceRes == nil {
-				mbc.GetNamespaceRes = []storage.ScmNamespace{MockScmNamespace()}
+			if tc.smbc.GetNamespaceRes == nil {
+				tc.smbc.GetNamespaceRes = []storage.ScmNamespace{MockScmNamespace()}
 			}
 
 			// test for both empty and default config cases
 			for configIdx, config := range []*Configuration{defaultMockConfig(t), emptyMockConfig(t)} {
-				cs := mockControlService(t, log, config, &mbc, nil)
-
-				// overwrite default nvme storage behaviour
-				cs.nvme = newMockNvmeStorage(
-					log, config.ext,
-					newMockSpdkEnv(tc.spdkInitEnvRet),
-					newMockSpdkNvme(log, []spdk.Controller{ctrlr},
-						[]spdk.Namespace{MockNamespace(&ctrlr)},
-						[]spdk.DeviceHealth{MockDeviceHealth(&ctrlr)},
-						tc.spdkDiscoverRet, nil),
-					false)
-				_ = new(StorageScanResp)
+				cs := mockControlService(t, log, config, tc.bmbc, tc.smbc, nil)
 
 				// runs discovery for nvme & scm
 				err := cs.Setup()
 				if err != nil {
-					common.ExpectError(t, err, tc.expSetupErr.Error(), name)
+					common.CmpErr(t, tc.expSetupErr, err)
 				} else {
 					// if emptyMockConfig (configIdx == 1), no err raised in setup.
 					if configIdx == 0 {
-						common.AssertEqual(t, tc.expSetupErr, nil, name)
+						common.CmpErr(t, tc.expSetupErr, nil)
 					}
 				}
 
@@ -266,13 +262,12 @@ func TestStorageScan(t *testing.T) {
 				if diff := cmp.Diff(tc.expResp, *resp); diff != "" {
 					t.Fatalf("unexpected response (-want, +got):\n%s\n", diff)
 				}
-
-				common.AssertEqual(t, cs.nvme.initialized, !tc.expNvmeFailedInit, name)
 			}
 		})
 	}
 }
 
+/*
 func TestStoragePrepare(t *testing.T) {
 	var (
 		ctrlr      = MockController()

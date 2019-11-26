@@ -103,8 +103,8 @@ func defaultBackend(log logging.Logger) *spdkBackend {
 	return newBackend(log, defaultScriptRunner(log))
 }
 
-func (b *spdkBackend) init() error {
-	if err := b.binding.init(); err != nil {
+func (b *spdkBackend) Init(shmID ...int) error {
+	if err := b.binding.init(shmID...); err != nil {
 		return err
 	}
 
@@ -135,11 +135,11 @@ func coalesceControllers(bcs []spdk.Controller, bns []spdk.Namespace, bhs []spdk
 			if bh.CtrlrPciAddr != sc.PciAddr {
 				continue
 			}
-			if sc.Health != nil {
+			if sc.HealthStats != nil {
 				return nil, errors.Errorf("duplicate health entry for %s", sc.PciAddr)
 			}
-			sc.Health = &storage.NvmeDeviceHealth{}
-			if err := convertDeviceHealth(bh, sc.Health); err != nil {
+			sc.HealthStats = &storage.NvmeDeviceHealth{}
+			if err := convertDeviceHealth(bh, sc.HealthStats); err != nil {
 				return nil, errors.Wrapf(err, "failed to convert spdk DeviceHealth %+v", bh)
 			}
 		}
@@ -151,7 +151,7 @@ func coalesceControllers(bcs []spdk.Controller, bns []spdk.Namespace, bhs []spdk
 }
 
 func (b *spdkBackend) Scan() (storage.NvmeControllers, error) {
-	if err := b.init(); err != nil {
+	if err := b.Init(); err != nil {
 		return nil, err
 	}
 
@@ -188,7 +188,7 @@ func getFormattedController(pciAddr string, bcs []spdk.Controller, bns []spdk.Na
 }
 
 func (b *spdkBackend) Format(pciAddr string) (*storage.NvmeController, error) {
-	if err := b.init(); err != nil {
+	if err := b.Init(); err != nil {
 		return nil, err
 	}
 

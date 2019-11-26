@@ -33,6 +33,7 @@ import (
 type (
 	MockBackendConfig struct {
 		formatIdx     int
+		InitErr       error
 		ResetErr      error
 		PrepareErr    error
 		FormatRes     *storage.NvmeController
@@ -59,6 +60,10 @@ func NewMockBackend(cfg *MockBackendConfig) *MockBackend {
 
 func DefaultMockBackend() *MockBackend {
 	return NewMockBackend(nil)
+}
+
+func (mb *MockBackend) Init(_ ...int) error {
+	return mb.cfg.InitErr
 }
 
 func (mb *MockBackend) Reset() error {

@@ -106,13 +106,13 @@ type (
 	// NvmeController represents a NVMe device controller which includes health
 	// and namespace information.
 	NvmeController struct {
-		Model      string
-		Serial     string
-		PciAddr    string
-		FwRev      string
-		SocketID   int32
-		Health     *NvmeDeviceHealth
-		Namespaces []*NvmeNamespace
+		Model       string
+		Serial      string
+		PciAddr     string
+		FwRev       string
+		SocketID    int32
+		HealthStats *NvmeDeviceHealth
+		Namespaces  []*NvmeNamespace
 	}
 
 	// NvmeControllers is a type alias for []*NvmeController which implements fmt.Stringer.

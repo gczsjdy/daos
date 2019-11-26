@@ -30,6 +30,11 @@ import (
 )
 
 type (
+	// InitRequest defines the parameters for initializing the provider.
+	InitRequest struct {
+		SPDKShmID int
+	}
+
 	// ScanRequest defines the parameters for a Scan operation.
 	ScanRequest struct {
 		Forwarded bool
@@ -76,6 +81,7 @@ type (
 
 	// Backend defines a set of methods to be implemented by a Block Device backend.
 	Backend interface {
+		Init(shmID ...int) error
 		Reset() error
 		Prepare(hugePageCount int, targetUser string, pciWhitelist string) error
 		Scan() (storage.NvmeControllers, error)
@@ -101,6 +107,11 @@ func NewProvider(log logging.Logger, backend Backend) *Provider {
 		log:     log,
 		backend: backend,
 	}
+}
+
+// Init performs any initialization steps required by the provider.
+func (p *Provider) Init(req InitRequest) error {
+	return p.backend.Init(req.SPDKShmID)
 }
 
 // Scan attempts to perform a scan to discover NVMe components in the system.

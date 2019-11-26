@@ -30,8 +30,8 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 
+	"github.com/daos-stack/daos/src/control/common/proto"
 	ctlpb "github.com/daos-stack/daos/src/control/common/proto/ctl"
-	pb_types "github.com/daos-stack/daos/src/control/common/storage"
 	"github.com/daos-stack/daos/src/control/fault"
 	"github.com/daos-stack/daos/src/control/logging"
 	"github.com/daos-stack/daos/src/control/server/storage"
@@ -55,7 +55,18 @@ func newState(log logging.Logger, status ctlpb.ResponseStatus, errMsg string, in
 	return state
 }
 
-func scmModulesToPB(mms []storage.ScmModule) (pbMms pb_types.ScmModules) {
+// convertTypes uses JSON as an intermediate representation to
+// convert between native and PB types
+func convertTypes(in interface{}, out interface{}) error {
+	j, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(j, out)
+}
+
+func scmModulesToPB(mms []storage.ScmModule) (pbMms proto.ScmModules) {
 	for _, c := range mms {
 		pbMms = append(
 			pbMms,
@@ -73,7 +84,7 @@ func scmModulesToPB(mms []storage.ScmModule) (pbMms pb_types.ScmModules) {
 	return
 }
 
-func scmNamespacesToPB(nss []storage.ScmNamespace) (pbNss pb_types.ScmNamespaces) {
+func scmNamespacesToPB(nss []storage.ScmNamespace) (pbNss proto.ScmNamespaces) {
 	for _, ns := range nss {
 		pbNss = append(pbNss,
 			&ctlpb.PmemDevice{
@@ -88,20 +99,11 @@ func scmNamespacesToPB(nss []storage.ScmNamespace) (pbNss pb_types.ScmNamespaces
 	return
 }
 
-func convert(in interface{}, out interface{}) error {
-	j, err := json.Marshal(in)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(j, out)
-}
-
-func nvmeControllersToPB(ncl storage.NvmeControllers) (pbNcl pb_types.NvmeControllers) {
+func nvmeControllersToPB(log logging.Logger, ncl storage.NvmeControllers) (pbNcl proto.NvmeControllers) {
 	for _, nc := range ncl {
 		pbCtl := &ctlpb.NvmeController{}
-		if err := convert(nc, pbCtl); err != nil {
-			return
+		if err := convertTypes(nc, pbCtl); err != nil {
+			log.Errorf("failed to cleanly convert %#v: %s", nc, err)
 		}
 		pbNcl = append(pbNcl, pbCtl)
 	}
@@ -190,7 +192,7 @@ func (c *StorageControlService) StorageScan(ctx context.Context, req *ctlpb.Stor
 	} else {
 		resp.Nvme = &ctlpb.ScanNvmeResp{
 			State:  newState(c.log, ctlpb.ResponseStatus_CTL_SUCCESS, "", "", msg+"NVMe"),
-			Ctrlrs: nvmeControllersToPB(bsr.Controllers),
+			Ctrlrs: nvmeControllersToPB(c.log, bsr.Controllers),
 		}
 	}
 
@@ -219,6 +221,16 @@ func newMntRet(log logging.Logger, op string, mntPoint string, status ctlpb.Resp
 	return &ctlpb.ScmMountResult{
 		Mntpoint: mntPoint,
 		State:    newState(log, status, errMsg, infoMsg, "scm mount "+op),
+	}
+}
+
+// newCret creates and populates NVMe controller result and logs error
+func newCret(log logging.Logger, op string, pciaddr string, status ctlpb.ResponseStatus, errMsg string,
+	infoMsg string) *ctlpb.NvmeControllerResult {
+
+	return &ctlpb.NvmeControllerResult{
+		Pciaddr: pciaddr,
+		State:   newState(log, status, errMsg, infoMsg, "nvme controller "+op),
 	}
 }
 
@@ -252,7 +264,7 @@ func (c *ControlService) doFormat(i *IOServerInstance, reformat bool, resp *ctlp
 	needsSuperblock := true
 	needsScmFormat := reformat
 	// placeholder result indicating NVMe not yet formatted
-	resp.Crets = pb_types.NvmeControllerResults{
+	resp.Crets = proto.NvmeControllerResults{
 		newCret(c.log, "format", "", ctlpb.ResponseStatus_CTL_ERR_NVME, msgBdevScmNotReady, ""),
 	}
 
@@ -280,7 +292,7 @@ func (c *ControlService) doFormat(i *IOServerInstance, reformat bool, resp *ctlp
 
 	// When SCM format is required, format and populate response with result.
 	if needsScmFormat {
-		results := pb_types.ScmMountResults{}
+		results := proto.ScmMountResults{}
 		result, err := c.scmFormat(scmConfig, true)
 		if err != nil {
 			return errors.Wrap(err, "scm format") // return unexpected errors
@@ -301,7 +313,7 @@ func (c *ControlService) doFormat(i *IOServerInstance, reformat bool, resp *ctlp
 		}
 	}
 
-	results := pb_types.NvmeControllerResults{} // init actual NVMe format results
+	results := proto.NvmeControllerResults{} // init actual NVMe format results
 
 	// If no superblock exists, populate NVMe response with format results.
 	if needsSuperblock {

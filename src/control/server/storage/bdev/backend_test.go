@@ -85,9 +85,9 @@ func TestBdevBackendCoalesce(t *testing.T) {
 
 	scEmptyNamespaces := storage.MockNvmeController()
 	scEmptyNamespaces.Namespaces = nil
-	scEmptyNamespaces.Health = nil
+	scEmptyNamespaces.HealthStats = nil
 	scEmptyDeviceHealth := storage.MockNvmeController()
-	scEmptyDeviceHealth.Health = nil
+	scEmptyDeviceHealth.HealthStats = nil
 
 	for name, tc := range map[string]struct {
 		input  input
@@ -169,9 +169,9 @@ func TestBdevBackendGetFormattedController(t *testing.T) {
 	// controller results shouldn't include it.
 	scEmptyNamespaces := storage.MockNvmeController()
 	scEmptyNamespaces.Namespaces = nil
-	scEmptyNamespaces.Health = nil
+	scEmptyNamespaces.HealthStats = nil
 	scNormalNoHealth := storage.MockNvmeController()
-	scNormalNoHealth.Health = nil
+	scNormalNoHealth.HealthStats = nil
 
 	for name, tc := range map[string]struct {
 		input  input

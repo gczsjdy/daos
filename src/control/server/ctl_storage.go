@@ -33,6 +33,14 @@ import (
 	"github.com/daos-stack/daos/src/control/server/storage/scm"
 )
 
+const (
+	msgBdevNotFound = "controller at pci addr not found, check device exists " +
+		"and can be discovered, you may need to run `sudo daos_server " +
+		"storage prepare --nvme-only` to setup SPDK to access SSDs"
+	msgBdevNoDevs      = "no controllers specified"
+	msgBdevScmNotReady = "nvme format not performed because scm not ready"
+)
+
 // StorageControlService encapsulates the storage part of the control service
 type StorageControlService struct {
 	log             logging.Logger
@@ -44,17 +52,6 @@ type StorageControlService struct {
 // DefaultStorageControlService returns a initialized *StorageControlService
 // with default behaviour
 func DefaultStorageControlService(log logging.Logger, cfg *Configuration) (*StorageControlService, error) {
-	/*scriptPath, err := cfg.ext.getAbsInstallPath(spdkSetupPath)
-	if err != nil {
-		return nil, err
-	}
-
-	spdkScript := &spdkSetup{
-		log:         log,
-		scriptPath:  scriptPath,
-		nrHugePages: cfg.NrHugepages,
-	}*/
-
 	return NewStorageControlService(log,
 		bdev.DefaultProvider(log),
 		scm.DefaultProvider(log), cfg.Servers), nil
@@ -116,16 +113,6 @@ func (c *StorageControlService) Setup() error {
 
 	return nil
 }
-
-// Teardown delegates to Storage implementation's Teardown methods.
-/*func (c *StorageControlService) Teardown() {
-	if err := c.nvme.Teardown(); err != nil {
-		c.log.Debugf("%s\n", errors.Wrap(err, "Warning, NVMe Teardown"))
-	}
-
-	// TODO: implement provider Reset()
-	//c.scm.scanCompleted = false
-}*/
 
 // NvmePrepare preps locally attached SSDs and returns error.
 //
