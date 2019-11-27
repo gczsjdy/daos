@@ -926,7 +926,7 @@ ds_mgmt_drpc_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	size_t				 len;
 	struct mgmt_list_pools_one	*pools = NULL;
 	size_t				 pools_len = 0;
-	uint64_t			 npools;
+	uint64_t			 npools = 0;
 	int				 i;
 	int				 rc = 0;
 
@@ -944,9 +944,9 @@ ds_mgmt_drpc_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 	D_INFO("Received request to list pools in DAOS system %s\n",
 		req->sys);
 
-	/* resp.pools, n_pols, and numpools are all NULL/0 to start */
+	/* resp.pools, n_pools are all NULL/0 to start */
+	/* need to get the number of pools */
 
-	npools = req->numpools;
 	rc = ds_mgmt_list_pools(req->sys, &npools, &pools, &pools_len);
 	if (rc != 0) {
 		D_ERROR("Failed to list pools in %s :%d\n", req->sys, rc);
@@ -958,7 +958,6 @@ ds_mgmt_drpc_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 		if (resp.pools == NULL)
 			D_GOTO(out, rc = -DER_NOMEM);
 	}
-	resp.numpools = npools;	/* in system, may exceed n_pools*/
 	resp.n_pools = pools_len;	/* in reply <= req->numpools */
 
 	for (i = 0; i < pools_len; i++) {
@@ -980,7 +979,6 @@ ds_mgmt_drpc_list_pools(Drpc__Call *drpc_req, Drpc__Response *drpc_resp)
 
 out:
 	resp.status = rc;
-	resp.numpools = npools;	/* in system, may exceed n_pools */
 
 	len = mgmt__list_pools_resp__get_packed_size(&resp);
 	D_ALLOC(body, len);
