@@ -42,31 +42,34 @@ public class StatAttributes {
 
   private final long objId;
 
-  private int mode;
+  private final int mode;
 
-  private long uid;
+  private final int uid;
 
-  private long gid;
+  private final int gid;
 
-  private long length;
+  private final long blockCnt;
 
-  private long accessTime;
+  private final long length;
 
-  private long modifyTime;
+  private final TimeSpec accessTime;
 
-  private final long createTime;
+  private final TimeSpec modifyTime;
+
+  private final TimeSpec createTime;
 
   private final boolean file;
 
   protected StatAttributes(ByteBuffer buffer){
     objId = buffer.getLong();
     mode = buffer.getInt();
-    uid = buffer.getLong();
-    gid = buffer.getLong();
+    uid = buffer.getInt();
+    gid = buffer.getInt();
+    blockCnt = buffer.getLong();
     length = buffer.getLong();
-    accessTime = buffer.getLong();
-    modifyTime = buffer.getLong();
-    createTime = buffer.getLong();
+    accessTime = new TimeSpec(buffer.getLong(), buffer.getLong());
+    modifyTime = new TimeSpec(buffer.getLong(), buffer.getLong());
+    createTime = new TimeSpec(buffer.getLong(), buffer.getLong());
     file = buffer.get() > 0;
   }
 
@@ -78,27 +81,31 @@ public class StatAttributes {
     return objId;
   }
 
-  public long getAccessTime() {
+  public TimeSpec getAccessTime() {
     return accessTime;
   }
 
-  public long getCreateTime() {
+  public TimeSpec getCreateTime() {
     return createTime;
   }
 
-  public long getGid() {
+  public int getGid() {
     return gid;
+  }
+
+  public long getBlockCnt() {
+    return blockCnt;
   }
 
   public long getLength() {
     return length;
   }
 
-  public long getModifyTime() {
+  public TimeSpec getModifyTime() {
     return modifyTime;
   }
 
-  public long getUid() {
+  public int getUid() {
     return uid;
   }
 
@@ -107,6 +114,24 @@ public class StatAttributes {
   }
 
   public static int objectSize(){
-    return 61;
+    return 3*8 + 3*4 + 3*16 + 1; //85
+  }
+
+  public static class TimeSpec{
+    private final long seconds;
+    private final long nano;
+
+    public TimeSpec(long seconds, long nano){
+      this.seconds = seconds;
+      this.nano = nano;
+    }
+
+    public long getNano() {
+      return nano;
+    }
+
+    public long getSeconds() {
+      return seconds;
+    }
   }
 }

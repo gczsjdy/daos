@@ -39,13 +39,14 @@ public final class DaosUtils {
   /**
    * normalize path to make sure it's valid path
    * @param path
-   * @return
+   * @return String
    */
   public static String normalize(String path){
     if(path == null || (path=path.trim()).length() == 0){
       return "";
     }
     path = path.replaceAll("\\\\{1,}", "/");
+    path = path.replaceAll("/{2,}", "/");
     Matcher m = PAT_PATH.matcher(path);
     if(!m.matches()){
       throw new IllegalArgumentException("Invalid path. only characters / a-z A-Z 0-9 _ - . are valid");
@@ -59,7 +60,7 @@ public final class DaosUtils {
   /**
    * split parent and name
    * @param path
-   * @return
+   * @return String[]
    */
   public static String[] parsePath(String path) {
     int slash = path.lastIndexOf('/');

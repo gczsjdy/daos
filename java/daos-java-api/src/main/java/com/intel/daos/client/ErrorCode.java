@@ -21,26 +21,22 @@
  * portions thereof marked with this legend must also reproduce the markings.
  */
 
-#include <stdio.h>
-#include <daos.h>
-#include <daos_fs.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <gurt/common.h>
+package com.intel.daos.client;
 
-#ifndef _INCLUDED_DAOS_JNI_COMMON
-#define _INCLUDED_DAOS_JNI_COMMON
+public class ErrorCode {
+  private final int code;
+  private final String msg;
 
-static jint JNI_VERSION = JNI_VERSION_1_8;
+  public ErrorCode(int code, String msg){
+    this.code = code;
+    this.msg = msg;
+  }
 
-static const int READ_DIR_BATCH_SIZE = 10;
-static const int READ_DIR_INITIAL_BUFFER_SIZE = 1024;
-static const int CUSTOM_ERROR_CODE_BASE = -1000000;
+  public int getCode() {
+    return code;
+  }
 
-static const int CUSTOM_ERR1 = -1000001; // scm size and nvme size no greater than 0
-static const int CUSTOM_ERR2 = -1000002; // failed to parse service replics string
-static const int CUSTOM_ERR3 = -1000003; // malloc or realloc buffer failed
-static const int CUSTOM_ERR4 = -1000004; // value length greater than expected
-
-#endif
+  public String getMsg() {
+    return msg;
+  }
+}
