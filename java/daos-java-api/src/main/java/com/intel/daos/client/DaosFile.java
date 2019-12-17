@@ -231,8 +231,8 @@ public class DaosFile {
    */
   public boolean delete(boolean force) throws IOException {
     boolean deleted = client.delete(dfsPtr, parentPath, name, force);
-    if (cleaner != null) {
-      cleaned = true;
+    if (deleted) {
+      deleted();
     }
     return deleted;
   }
@@ -446,7 +446,16 @@ public class DaosFile {
       return this;
     }
     client.move(path, destPath);
+    deleted();
     return new DaosFile(destPath, accessFlags, client);
+  }
+
+  private void deleted() {
+    if (cleaner != null){
+      cleaned = true;
+      cleaner = null;
+    }
+    objId = 0;
   }
 
   /**
@@ -550,5 +559,10 @@ public class DaosFile {
   protected long getObjId() throws IOException {
     open(true);
     return objId;
+  }
+
+  @Override
+  public String toString(){
+    return path;
   }
 }

@@ -321,10 +321,14 @@ public final class DaosFsClient {
     move(dfsPtr, srcPath, destPath);
   }
 
-  public void delete(String path)throws IOException{
+  public void delete(String path, boolean force)throws IOException{
     path = DaosUtils.normalize(path);
     String[] pc = DaosUtils.parsePath(path);
-    delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], false);
+    delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], force);
+  }
+
+  public void delete(String path)throws IOException{
+    delete(path, false);
   }
 
   public void mkdir(String path, int mode, boolean recursive)throws IOException{
