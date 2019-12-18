@@ -49,7 +49,7 @@ public class DaosFileSystem extends FileSystem {
   private URI uri;
   private DaosFsClient daos = null;
   private int readBufferSize;
-  private int preLoadBufferSize;
+  private boolean bufferedReadEnabled;
   private int writeBufferSize;
   private int blockSize;
   private int chunksize;
@@ -75,23 +75,17 @@ public class DaosFileSystem extends FileSystem {
       this.writeBufferSize = conf.getInt(Constants.DAOS_WRITE_BUFFER_SIZE, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE);
       this.blockSize = conf.getInt(Constants.DAOS_BLOCK_SIZE, Constants.DEFAULT_DAOS_BLOCK_SIZE);
       this.chunksize = conf.getInt(Constants.DAOS_CHUNK_SIZE, Constants.DEFAULT_DAOS_CHUNK_SIZE);
-      this.preLoadBufferSize = conf.getInt(Constants.DAOS_PRELOAD_SIZE, Constants.DEFAULT_DAOS_PRELOAD_SIZE);
+      bufferedReadEnabled = conf.getBoolean(Constants.BUFFERED_READ_ENABLED, Constants.DEFAULT_BUFFERED_READ_ENABLED);
 
       checkSizeMin(readBufferSize, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE, "internal read buffer size should be no less than ");
       checkSizeMin(writeBufferSize, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE, "internal write buffer size should be no less than ");
       checkSizeMin(blockSize, Constants.MINIMUM_DAOS_BLOCK_SIZE, "block size should be no less than ");
       checkSizeMin(chunksize, Constants.DEFAULT_DAOS_CHUNK_SIZE, "daos chunk size should be no less than ");
-      checkSizeMin(preLoadBufferSize, Constants.DEFAULT_DAOS_PRELOAD_SIZE, "preload buffer size should be no less than ");
 
       checkSizeMax(readBufferSize, Constants.MAXIMUM_DAOS_READ_BUFFER_SIZE, "internal read buffer size should not be greater than ");
       checkSizeMax(writeBufferSize, Constants.MAXIMUM_DAOS_WRITE_BUFFER_SIZE, "internal write buffer size should not be greater than ");
       checkSizeMax(blockSize, Constants.MAXIMUM_DAOS_BLOCK_SIZE, "block size should be not be greater than ");
       checkSizeMax(chunksize, Constants.MAXIMUM_DAOS_CHUNK_SIZE, "daos chunk size should not be greater than ");
-      checkSizeMin(preLoadBufferSize, Constants.MAXIMUM_DAOS_PRELOAD_SIZE, "preload buffer size should not be greater than ");
-
-      if (preLoadBufferSize > readBufferSize) {
-        throw new IllegalArgumentException("preload buffer size " + preLoadBufferSize + " should not be greater than reader buffer size, "+readBufferSize);
-      }
 
       String poolUuid = conf.get(Constants.DAOS_POOL_UUID);
       if (StringUtils.isEmpty(poolUuid)) {
@@ -159,7 +153,7 @@ public class DaosFileSystem extends FileSystem {
       throw new FileNotFoundException(f + "not exist");
     }
 
-    return new FSDataInputStream(new DaosInputStream(file, statistics, readBufferSize, preLoadBufferSize));
+    return new FSDataInputStream(new DaosInputStream(file, statistics, readBufferSize, bufferedReadEnabled));
   }
 
   @Override

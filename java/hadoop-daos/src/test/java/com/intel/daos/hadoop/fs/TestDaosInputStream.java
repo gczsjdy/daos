@@ -1,5 +1,6 @@
 package com.intel.daos.hadoop.fs;
 
+import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -10,13 +11,22 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Answers.RETURNS_SMART_NULLS;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -25,6 +35,9 @@ public class TestDaosInputStream {
   private static final Logger LOG = LoggerFactory.getLogger(TestDaosInputStream.class);
   private static FileSystem fs;
   private static String testRootPath = TestDaosTestUtils.generateUniqueTestPath();
+
+  @Mock(answer = RETURNS_SMART_NULLS) DaosFile file;
+  @Mock(answer = RETURNS_SMART_NULLS) FileSystem.Statistics stats;
 
   @Rule
   public Timeout testTimeout = new Timeout(30 * 60 * 1000);
@@ -140,21 +153,49 @@ public class TestDaosInputStream {
               + fsDataInputStream.getPos(), fsDataInputStream.getPos() == 0);
       DaosInputStream in =
               (DaosInputStream)fsDataInputStream.getWrappedStream();
-      byte[] buf = new byte[Constants.DEFAULE_DAOS_READ_BUFFER_SIZE];
-      in.read(buf,0, Constants.DEFAULE_DAOS_READ_BUFFER_SIZE);
+      byte[] buf = new byte[Constants.DEFAULT_DAOS_READ_BUFFER_SIZE];
+      in.read(buf,0, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
       assertTrue("expected position at:"
-                      + Constants.DEFAULE_DAOS_READ_BUFFER_SIZE + ", but got:"
+                      + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE + ", but got:"
                       + in.getFilePos(),
-              in.getFilePos() == Constants.DEFAULE_DAOS_READ_BUFFER_SIZE);
+              in.getFilePos() == Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
 
       fsDataInputStream.seek(4 * 1024 * 1024);
-    in.read(buf,0, Constants.DEFAULE_DAOS_READ_BUFFER_SIZE);
+    in.read(buf,0, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
     assertTrue("expected position at:" + 4 * 1024 * 1024
-                      + Constants.DEFAULE_DAOS_READ_BUFFER_SIZE + ", but got:"
+                      + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE + ", but got:"
                       + in.getFilePos(),
               in.getFilePos() == 4 * 1024 * 1024
-                      + Constants.DEFAULE_DAOS_READ_BUFFER_SIZE);
+                      + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
 
       IOUtils.closeStream(fsDataInputStream);
+  }
+
+  @Test
+  public void testNonBufferedRead() throws IOException {
+    int bufferSize = 7;
+    boolean bufferedReadEnabled = false;
+    byte[] data = new byte[]{19, 49, 89, 64, 20, 19, 1, 2, 3};
+    doAnswer(
+            invocationOnMock -> {
+              ByteBuffer buffer = (ByteBuffer) invocationOnMock.getArguments()[0];
+              long bufferOffset = (long) invocationOnMock.getArguments()[1];
+              long len = (long) invocationOnMock.getArguments()[3];
+              for (long i = bufferOffset; i < bufferOffset + len; i ++) {
+                buffer.put((int)i, data[(int)(i - bufferOffset)]);
+              }
+              return len;
+            })
+            .when(file)
+            .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
+    DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferedReadEnabled);
+    int readSize = 4;
+    byte[] answer = new byte[readSize];
+    input.read(answer, 0, readSize);
+    byte[] expect = new byte[readSize];
+    for (int i = 0; i < readSize; i ++) {
+      expect[i] = data[i];
+    }
+    assertArrayEquals(expect, answer);
   }
 }

@@ -23,6 +23,7 @@
 
 package com.intel.daos.hadoop.fs;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -42,9 +43,9 @@ public class DaosInputStream extends FSInputStream {
   private final FileSystem.Statistics stats;
   private final long fileLen;
   private final int bufferCapacity;
-  private final int preLoadSize;
+  private final boolean bufferedReadEnabled;
 
-  private ByteBuffer buffer;
+  ByteBuffer buffer;
   private int bufEnd;   // buffer offset from which data ends
 
   private byte[] singleByte = new byte[]{0};
@@ -58,13 +59,13 @@ public class DaosInputStream extends FSInputStream {
 
   public DaosInputStream(DaosFile daosFile,
                          FileSystem.Statistics stats,
-                         int bufferSize, int preLoadSize) throws IOException{
+                         int bufferSize, boolean bufferedReadEnabled) throws IOException{
     this.daosFile = daosFile;
     this.stats = stats;
     this.buffer = ByteBuffer.allocateDirect(bufferSize);
     this.fileLen = daosFile.length();
     this.bufferCapacity = bufferSize;
-    this.preLoadSize = preLoadSize;
+    this.bufferedReadEnabled = bufferedReadEnabled;
   }
 
   @Override
@@ -230,8 +231,9 @@ public class DaosInputStream extends FSInputStream {
     }
     clearBuffer();
 
-    length = Math.min(length, bufferCapacity);
-    length = Math.max(length, preLoadSize);
+    if (bufferedReadEnabled) {
+      length = Math.max(length, bufferCapacity);
+    }
 
     long currentTime = 0;
     if (LOG.isDebugEnabled()) {
