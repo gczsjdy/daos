@@ -42,13 +42,15 @@ public class TestDaosInputStream {
   @Rule
   public Timeout testTimeout = new Timeout(30 * 60 * 1000);
 
-  private void setup() throws IOException {
+  @Before
+  public void setup() throws IOException {
     System.out.println("@BeforeClass");
     fs = DaosFSFactory.getFS();
     fs.mkdirs(new Path(testRootPath));
   }
 
-  private void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     System.out.println("@AfterClass");
     if (fs != null) {
       fs.delete(new Path(testRootPath), true);
@@ -71,7 +73,6 @@ public class TestDaosInputStream {
 
   @Test
   public void testSeekFile() throws Exception {
-    setup();
     Path smallSeekFile = setPath("/test.txt");
     long size = 5 * 1024 * 1024;
 
@@ -100,12 +101,10 @@ public class TestDaosInputStream {
       LOG.info("completed seeking at pos: " + instream.getPos());
     }
     IOUtils.closeStream(instream);
-    tearDown();
   }
 
   @Test
   public void testReadFile() throws Exception {
-    setup();
     final int bufLen = 256;
     final int sizeFlag = 5;
     String filename = "readTestFile_" + sizeFlag + ".txt";
@@ -139,12 +138,10 @@ public class TestDaosInputStream {
     }
     assertTrue(instream.available() == 0);
     IOUtils.closeStream(instream);
-    tearDown();
   }
 
   @Test
   public void testSequentialAndRandomRead() throws Exception {
-    setup();
       Path smallSeekFile = setPath("/test/smallSeekFile.txt");
       long size = 5 * 1024 * 1024;
 
@@ -172,7 +169,6 @@ public class TestDaosInputStream {
                       + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
 
       IOUtils.closeStream(fsDataInputStream);
-      tearDown();
   }
 
   @Test
