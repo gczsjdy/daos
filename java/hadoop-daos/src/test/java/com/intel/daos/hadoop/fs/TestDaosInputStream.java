@@ -12,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,20 +38,17 @@ public class TestDaosInputStream {
   private static String testRootPath = TestDaosTestUtils.generateUniqueTestPath();
 
   @Mock(answer = RETURNS_SMART_NULLS) DaosFile file;
-  @Mock(answer = RETURNS_SMART_NULLS) FileSystem.Statistics stats;
 
   @Rule
   public Timeout testTimeout = new Timeout(30 * 60 * 1000);
 
-  @Before
-  public void setup() throws IOException {
+  private void setup() throws IOException {
     System.out.println("@BeforeClass");
     fs = DaosFSFactory.getFS();
     fs.mkdirs(new Path(testRootPath));
   }
 
-  @After
-  public void tearDown() throws Exception {
+  private void tearDown() throws Exception {
     System.out.println("@AfterClass");
     if (fs != null) {
       fs.delete(new Path(testRootPath), true);
@@ -73,6 +71,7 @@ public class TestDaosInputStream {
 
   @Test
   public void testSeekFile() throws Exception {
+    setup();
     Path smallSeekFile = setPath("/test.txt");
     long size = 5 * 1024 * 1024;
 
@@ -101,10 +100,12 @@ public class TestDaosInputStream {
       LOG.info("completed seeking at pos: " + instream.getPos());
     }
     IOUtils.closeStream(instream);
+    tearDown();
   }
 
   @Test
   public void testReadFile() throws Exception {
+    setup();
     final int bufLen = 256;
     final int sizeFlag = 5;
     String filename = "readTestFile_" + sizeFlag + ".txt";
@@ -138,10 +139,12 @@ public class TestDaosInputStream {
     }
     assertTrue(instream.available() == 0);
     IOUtils.closeStream(instream);
+    tearDown();
   }
 
   @Test
-  public void testSequentialAndRandomRead() throws  IOException{
+  public void testSequentialAndRandomRead() throws Exception {
+    setup();
       Path smallSeekFile = setPath("/test/smallSeekFile.txt");
       long size = 5 * 1024 * 1024;
 
@@ -169,33 +172,50 @@ public class TestDaosInputStream {
                       + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
 
       IOUtils.closeStream(fsDataInputStream);
+      tearDown();
   }
 
   @Test
-  public void testNonBufferedRead() throws IOException {
+  public void testBufferedAndNonBufferedRead() throws IOException {
+    MockitoAnnotations.initMocks(this);
+    FileSystem.Statistics stats = new FileSystem.Statistics("daos:///");
+
     int bufferSize = 7;
-    boolean bufferedReadEnabled = false;
     byte[] data = new byte[]{19, 49, 89, 64, 20, 19, 1, 2, 3};
+
     doAnswer(
             invocationOnMock -> {
               ByteBuffer buffer = (ByteBuffer) invocationOnMock.getArguments()[0];
               long bufferOffset = (long) invocationOnMock.getArguments()[1];
               long len = (long) invocationOnMock.getArguments()[3];
-              for (long i = bufferOffset; i < bufferOffset + len; i ++) {
-                buffer.put((int)i, data[(int)(i - bufferOffset)]);
+              for (long i = bufferOffset; i < bufferOffset + len; i++) {
+                buffer.put((int) i, data[(int) (i - bufferOffset)]);
               }
               return len;
             })
             .when(file)
             .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
-    DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferedReadEnabled);
-    int readSize = 4;
-    byte[] answer = new byte[readSize];
-    input.read(answer, 0, readSize);
-    byte[] expect = new byte[readSize];
-    for (int i = 0; i < readSize; i ++) {
-      expect[i] = data[i];
+
+    boolean[] trueTrueFalseFalse = new boolean[]{true, false};
+
+    for (int j = 0; j < 2; j ++) {
+      boolean bufferedReadEnabled = trueTrueFalseFalse[j];
+      DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferedReadEnabled);
+      int readSize = 4;
+      byte[] answer = new byte[readSize];
+      input.read(answer, 0, readSize);
+      byte[] expect = new byte[readSize];
+      for (int i = 0; i < readSize; i++) {
+        expect[i] = data[i];
+      }
+      assertArrayEquals(expect, answer);
+
+      boolean shouldThemEqual = bufferedReadEnabled;
+      for (int i = readSize; i < data.length && i < input.buffer.limit(); i++) {
+        // If enabled buffered read, the internal buffer of DataInputStream should be fully filled
+        // Otherwise, DaosInputStream's internal buffer is not filled for non-target part
+        assert (shouldThemEqual == (input.buffer.get(i) == data[i]));
+      }
     }
-    assertArrayEquals(expect, answer);
   }
 }

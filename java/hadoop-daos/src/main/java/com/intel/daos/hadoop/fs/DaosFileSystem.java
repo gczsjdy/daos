@@ -63,9 +63,6 @@ public class DaosFileSystem extends FileSystem {
     if (!getScheme().equals(name.getScheme())){
       throw new IllegalArgumentException("schema should be "+getScheme());
     }
-    if (StringUtils.isEmpty(name.getAuthority())) {
-      throw new IllegalArgumentException("authority (ip:port) cannot be empty. we need it to identify a unique DAOS File System");
-    }
 
     super.initialize(name, conf);
 
@@ -102,7 +99,7 @@ public class DaosFileSystem extends FileSystem {
 
       // daosFSclient build
       //TODO: uncomment
-//      this.daos = new DaosFsClient.DaosFsClientBuilder().poolId(pooluuid).containerId(contuuid).ranks(svc).build();
+      this.daos = new DaosFsClient.DaosFsClientBuilder().poolId(poolUuid).containerId(contUuid).ranks(svc).build();
       this.uri = URI.create(name.getScheme() + "://" + name.getAuthority());
       this.workingDir = new Path("/user", System.getProperty("user.name")).
               makeQualified(this.uri, this.getWorkingDirectory());
