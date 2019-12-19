@@ -1,5 +1,6 @@
 package com.intel.daos.hadoop.fs;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -40,6 +41,26 @@ public class TestDaosFileSystem {
     initializationTest("daos://c", "daos://c");
     initializationTest("daos://c/", "daos://c");
     initializationTest("daos://c/path", "daos://c");
+  }
+
+  @Test
+  public void testBufferedReadConfigurationKey() throws IOException {
+    Configuration conf = new Configuration();
+    conf.set(Constants.DAOS_POOL_UUID, DaosFSFactory.getPoolUuid());
+    conf.set(Constants.DAOS_CONTAINER_UUID, DaosFSFactory.getContUuid());
+    conf.set(Constants.DAOS_POOL_SVC, "0");
+
+    boolean defaultEnabled = Constants.DEFAULT_BUFFERED_READ_ENABLED;
+    conf.setBoolean(Constants.BUFFERED_READ_ENABLED, defaultEnabled ^ true);
+    DaosFileSystem fs = new DaosFileSystem();
+    fs.initialize(URI.create("daos:///"), conf);
+    assert (fs.getBufferedReadEnabled() == defaultEnabled ^ true);
+    fs.close();
+    // if not set, should be default
+    conf.unset(Constants.BUFFERED_READ_ENABLED);
+    fs.initialize(URI.create("daos:///"), conf);
+    assert (fs.getBufferedReadEnabled() == defaultEnabled);
+    fs.close();
   }
 
   private void initializationTest(String initializationUri, String expectedUri) throws Exception{

@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+
 /**
  * Implementation of {@link FileSystem} for DAOS file system.
  */
@@ -175,9 +176,9 @@ public class DaosFileSystem extends FileSystem {
     }
 
     daosFile.createNewFile(
-              Constants.DAOS_MODLE,
-              DaosObjectType.OC_SX,
-              this.chunksize);
+            Constants.DAOS_MODLE,
+            DaosObjectType.OC_SX,
+            this.chunksize);
 
     return new FSDataOutputStream(new DaosOutputStream(daosFile, key, writeBufferSize), statistics);
   }
@@ -365,6 +366,10 @@ public class DaosFileSystem extends FileSystem {
       LOG.debug("DaosFileSystem close");
     }
     super.close();
+  }
+
+  public boolean getBufferedReadEnabled() {
+    return bufferedReadEnabled;
   }
 
 //  DaosFile getFile(Path path){

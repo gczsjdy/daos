@@ -192,10 +192,10 @@ public class TestDaosInputStream {
       .when(file)
       .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
 
-    boolean[] trueTrueFalseFalse = new boolean[]{true, false};
+    boolean[] trueFalse = new boolean[]{true, false};
 
     for (int j = 0; j < 2; j ++) {
-      boolean bufferedReadEnabled = trueTrueFalseFalse[j];
+      boolean bufferedReadEnabled = trueFalse[j];
       DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferedReadEnabled);
       int readSize = 4;
       byte[] answer = new byte[readSize];
@@ -245,10 +245,10 @@ public class TestDaosInputStream {
       .when(file)
       .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
 
-    boolean[] trueTrueFalseFalse = new boolean[]{true, false};
+    boolean[] trueFalse = new boolean[]{true, false};
 
     for (int j = 0; j < 2; j ++) {
-      boolean bufferedReadEnabled = trueTrueFalseFalse[j];
+      boolean bufferedReadEnabled = trueFalse[j];
       DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferedReadEnabled);
       int readSize = 9;
       byte[] answer = new byte[readSize];

@@ -12,7 +12,6 @@ public class DaosFSFactory {
   private final static String contuuid = "9e60aff2-ca28-45fe-bdb0-d1a6c182c342";
   private final static String svc = "0";
 
-
   private static void createFS(){
     Configuration conf = new Configuration();
     conf.set(Constants.DAOS_POOL_UUID, pooluuid);
@@ -26,5 +25,13 @@ public class DaosFSFactory {
       createFS();
     }
     return fs;
+  }
+
+  public static String getPoolUuid() {
+    return pooluuid;
+  }
+
+  public static String getContUuid() {
+    return contuuid;
   }
 }
