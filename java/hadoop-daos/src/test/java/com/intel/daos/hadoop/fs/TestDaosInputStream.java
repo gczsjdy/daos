@@ -180,17 +180,17 @@ public class TestDaosInputStream {
     byte[] data = new byte[]{19, 49, 89, 64, 20, 19, 1, 2, 3};
 
     doAnswer(
-            invocationOnMock -> {
-              ByteBuffer buffer = (ByteBuffer) invocationOnMock.getArguments()[0];
-              long bufferOffset = (long) invocationOnMock.getArguments()[1];
-              long len = (long) invocationOnMock.getArguments()[3];
-              for (long i = bufferOffset; i < bufferOffset + len; i++) {
-                buffer.put((int) i, data[(int) (i - bufferOffset)]);
-              }
-              return len;
-            })
-            .when(file)
-            .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
+      invocationOnMock -> {
+        ByteBuffer buffer = (ByteBuffer) invocationOnMock.getArguments()[0];
+        long bufferOffset = (long) invocationOnMock.getArguments()[1];
+        long len = (long) invocationOnMock.getArguments()[3];
+        for (long i = bufferOffset; i < bufferOffset + len; i++) {
+          buffer.put((int) i, data[(int) (i - bufferOffset)]);
+        }
+        return len;
+      })
+      .when(file)
+      .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
 
     boolean[] trueTrueFalseFalse = new boolean[]{true, false};
 
