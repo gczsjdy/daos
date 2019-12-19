@@ -41,7 +41,7 @@ public class TestDaosTestUtils {
     URI testURI = null;
     if (liveTest) {
       testURI = URI.create(fsname);
-      liveTest = testURI.getScheme().equals(Constants.FS_DAOS);
+      liveTest = testURI.getScheme().equals(Constants.DAOS_SCHEMA);
     }
 
     if (!liveTest) {

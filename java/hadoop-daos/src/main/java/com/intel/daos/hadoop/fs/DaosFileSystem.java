@@ -24,9 +24,7 @@
 package com.intel.daos.hadoop.fs;
 
 import com.google.common.collect.Lists;
-import com.intel.daos.client.DaosFile;
-import com.intel.daos.client.DaosFsClient;
-import com.intel.daos.client.DaosObjectType;
+import com.intel.daos.client.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -52,7 +50,7 @@ public class DaosFileSystem extends FileSystem {
   private int preLoadBufferSize;
   private int writeBufferSize;
   private int blockSize;
-  private int chunksize;
+  private int chunkSize;
 
   @Override
   public void initialize(URI name, Configuration conf)
@@ -74,20 +72,20 @@ public class DaosFileSystem extends FileSystem {
       this.readBufferSize = conf.getInt(Constants.DAOS_READ_BUFFER_SIZE, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
       this.writeBufferSize = conf.getInt(Constants.DAOS_WRITE_BUFFER_SIZE, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE);
       this.blockSize = conf.getInt(Constants.DAOS_BLOCK_SIZE, Constants.DEFAULT_DAOS_BLOCK_SIZE);
-      this.chunksize = conf.getInt(Constants.DAOS_CHUNK_SIZE, Constants.DEFAULT_DAOS_CHUNK_SIZE);
+      this.chunkSize = conf.getInt(Constants.DAOS_CHUNK_SIZE, Constants.DEFAULT_DAOS_CHUNK_SIZE);
       this.preLoadBufferSize = conf.getInt(Constants.DAOS_PRELOAD_SIZE, Constants.DEFAULT_DAOS_PRELOAD_SIZE);
 
       checkSizeMin(readBufferSize, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE, "internal read buffer size should be no less than ");
       checkSizeMin(writeBufferSize, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE, "internal write buffer size should be no less than ");
       checkSizeMin(blockSize, Constants.MINIMUM_DAOS_BLOCK_SIZE, "block size should be no less than ");
-      checkSizeMin(chunksize, Constants.DEFAULT_DAOS_CHUNK_SIZE, "daos chunk size should be no less than ");
+      checkSizeMin(chunkSize, Constants.DEFAULT_DAOS_CHUNK_SIZE, "daos chunk size should be no less than ");
       checkSizeMin(preLoadBufferSize, Constants.DEFAULT_DAOS_PRELOAD_SIZE, "preload buffer size should be no less than ");
 
       checkSizeMax(readBufferSize, Constants.MAXIMUM_DAOS_READ_BUFFER_SIZE, "internal read buffer size should not be greater than ");
       checkSizeMax(writeBufferSize, Constants.MAXIMUM_DAOS_WRITE_BUFFER_SIZE, "internal write buffer size should not be greater than ");
       checkSizeMax(blockSize, Constants.MAXIMUM_DAOS_BLOCK_SIZE, "block size should be not be greater than ");
-      checkSizeMax(chunksize, Constants.MAXIMUM_DAOS_CHUNK_SIZE, "daos chunk size should not be greater than ");
-      checkSizeMin(preLoadBufferSize, Constants.MAXIMUM_DAOS_PRELOAD_SIZE, "preload buffer size should not be greater than ");
+      checkSizeMax(chunkSize, Constants.MAXIMUM_DAOS_CHUNK_SIZE, "daos chunk size should not be greater than ");
+      checkSizeMax(preLoadBufferSize, Constants.MAXIMUM_DAOS_PRELOAD_SIZE, "preload buffer size should not be greater than ");
 
       if (preLoadBufferSize > readBufferSize) {
         throw new IllegalArgumentException("preload buffer size " + preLoadBufferSize + " should not be greater than reader buffer size, "+readBufferSize);
@@ -95,24 +93,24 @@ public class DaosFileSystem extends FileSystem {
 
       String poolUuid = conf.get(Constants.DAOS_POOL_UUID);
       if (StringUtils.isEmpty(poolUuid)) {
-        throw new IOException(Constants.DAOS_POOL_UUID + " is null , need to set up " + Constants.DAOS_POOL_UUID +" in hdfs.xml .");
+        throw new IllegalArgumentException(Constants.DAOS_POOL_UUID + " is null , need to set up " + Constants.DAOS_POOL_UUID +" in hdfs.xml .");
       }
       String contUuid = conf.get(Constants.DAOS_CONTAINER_UUID);
       if (StringUtils.isEmpty(contUuid)) {
-        throw new IOException(Constants.DAOS_CONTAINER_UUID + " is null, need to set up " + Constants.DAOS_CONTAINER_UUID +" in hdfs.xml .");
+        throw new IllegalArgumentException(Constants.DAOS_CONTAINER_UUID + " is null, need to set up " + Constants.DAOS_CONTAINER_UUID +" in hdfs.xml .");
       }
       String svc = conf.get(Constants.DAOS_POOL_SVC);
       if (StringUtils.isEmpty(svc)) {
-        throw new IOException(Constants.DAOS_POOL_SVC + " is null, need to set up " + Constants.DAOS_POOL_SVC + " in hdfs.xml .");
+        throw new IllegalArgumentException(Constants.DAOS_POOL_SVC + " is null, need to set up " + Constants.DAOS_POOL_SVC + " in hdfs.xml .");
       }
 
       // daosFSclient build
-      //TODO: uncomment
-//      this.daos = new DaosFsClient.DaosFsClientBuilder().poolId(pooluuid).containerId(contuuid).ranks(svc).build();
+      this.daos = new DaosFsClient.DaosFsClientBuilder().poolId(poolUuid).containerId(contUuid).ranks(svc).build();
       this.uri = URI.create(name.getScheme() + "://" + name.getAuthority());
       this.workingDir = new Path("/user", System.getProperty("user.name")).
               makeQualified(this.uri, this.getWorkingDirectory());
-      //TODO: mkdir workingDir in DAOS
+      //mkdir workingDir in DAOS
+      daos.mkdir(workingDir.toUri().getPath(), true);
       setConf(conf);
     } catch (IOException e) {
       throw new IOException("failed to initialize "+this.getClass().getName(), e);
@@ -121,13 +119,13 @@ public class DaosFileSystem extends FileSystem {
 
   private void checkSizeMin(int size, int min, String msg){
     if (size < min) {
-      throw new IllegalArgumentException(msg + min);
+      throw new IllegalArgumentException(msg + min + ", size is "+size);
     }
   }
 
-  private void checkSizeMax(int size, int max, String msg){
+  private void checkSizeMax(int size, long max, String msg){
     if (size > max) {
-      throw new IllegalArgumentException(msg + max);
+      throw new IllegalArgumentException(msg + max + ", size is "+size);
     }
   }
 
@@ -186,7 +184,7 @@ public class DaosFileSystem extends FileSystem {
     daosFile.createNewFile(
               Constants.DAOS_MODLE,
               DaosObjectType.OC_SX,
-              this.chunksize);
+              this.chunkSize);
 
     return new FSDataOutputStream(new DaosOutputStream(daosFile, key, writeBufferSize), statistics);
   }
@@ -208,7 +206,7 @@ public class DaosFileSystem extends FileSystem {
     // determine  if src is root dir and whether it exits
     if(src.toUri().getPath().equals("/")){
       if(LOG.isDebugEnabled()){
-        LOG.debug("DaosFileSystem:  cat not rename root path %s",src);
+        LOG.debug("DaosFileSystem:  cat not rename root path {}", src);
       }
       return false;
     }
@@ -244,39 +242,33 @@ public class DaosFileSystem extends FileSystem {
   @Override
   public FileStatus[] listStatus(Path f) throws IOException{
     if (LOG.isDebugEnabled()) {
-      LOG.debug("DaosFileSystem listStatus :  List status for path = %s " ,f.toUri().getPath());
+      LOG.debug("DaosFileSystem listStatus :  List status for path = {}", f.toUri().getPath());
     }
+
+    DaosFile file = daos.getFile(f.toUri().getPath());
 
     final List<FileStatus> result = Lists.newArrayList();
     try {
-      String key = f.toUri().getPath();
-
-      final FileStatus fileStatus = getFileStatus(f);
-      if(fileStatus==null) {
-        return result.toArray(new FileStatus[result.size()]);
-      }
-      if (fileStatus.isDirectory()) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("DaosFileSystem listStatus : doing listFile for directory %s " , f.toUri().getPath());
-        }
-        String[] fileString = daos.getFile(key).listChildren();
-        if(fileString==null||fileString.length <= 0 ){
-          return result.toArray(new FileStatus[result.size()]);
-        }
-        for (String filePath : fileString) {
-          if(filePath.equals("/")){
-            FileStatus file =getFileStatus(new Path(key + filePath).makeQualified(this.uri, this.workingDir));
-            result.add(file);
-          }else{
-            FileStatus file = getFileStatus(new Path(key + "/" + filePath).makeQualified(this.uri, this.workingDir));
-            result.add(file);
+      if (file.isDirectory()) {
+        String[] children = file.listChildren();
+        if (children != null && children.length > 0 ){
+          for (String child : children) {
+            FileStatus childStatus = getFileStatus(new Path(f, child).makeQualified(this.uri, this.workingDir)
+                    , daos.getFile(file, child));
+            result.add(childStatus);
           }
         }
       } else {
-        result.add(fileStatus);
+        result.add(getFileStatus(f, file));
       }
-    } catch (FileNotFoundException e) {
-      throw new FileNotFoundException(e.getMessage());
+    } catch (IOException e){
+      if (e instanceof DaosIOException) {
+        DaosIOException de = (DaosIOException)e;
+        if (de.getErrorCode() == com.intel.daos.client.Constants.ERROR_CODE_NOT_EXIST) {
+          throw new FileNotFoundException(e.getMessage());
+        }
+      }
+      throw e;
     }
     return result.toArray(new FileStatus[result.size()]);
   }
@@ -297,62 +289,31 @@ public class DaosFileSystem extends FileSystem {
       LOG.debug("DaosFileSystem mkdirs: Making directory = %s ",f.toUri().getPath());
     }
     String key = f.toUri().getPath();
-    try{
-      FileStatus status = getFileStatus(f);
-      // if the thread reaches here, there is something at the path
-      if (status.isDirectory()) {
-        return true;
-      }else{
-        throw new FileAlreadyExistsException("Not a directory: " + f);
-      }
-    }catch(FileNotFoundException e){
-      validatePath(f);
-      daos.getFile(key).mkdirs();
+    try {
+      daos.mkdir(key, com.intel.daos.client.Constants.FILE_DEFAULT_FILE_MODE, true);
       return true;
+    }catch (IOException e){//TODO: determine return value on error code
+      return false;
     }
-  }
-
-  /**
-   * Check whether the path is a valid path.
-   *
-   * @param path the path to be checked.
-   * @throws IOException
-   */
-  private void validatePath(Path path) throws IOException {
-    Path fPart = path.getParent();
-    do {
-      try {
-        FileStatus fileStatus = getFileStatus(fPart);
-        if (fileStatus.isDirectory()) {
-          // If path exists and a directory, exit
-          break;
-        } else {
-          throw new FileAlreadyExistsException(String.format(
-                  "Can't make directory for path '%s', it is a file.", fPart));
-        }
-      } catch (FileNotFoundException fnfe) {
-      }
-      fPart = fPart.getParent();
-    } while (fPart != null);
   }
 
   @Override
   public FileStatus getFileStatus(Path f) throws IOException {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("DaosFileSystem getFileStatus:  Get File Status , path= %s ",f.toUri().getPath());
+      LOG.debug("DaosFileSystem getFileStatus:  Get File Status , path = {}", f.toUri().getPath());
     }
     String key = f.toUri().getPath();
-    DaosFile daosFile = daos.getFile(key);
-    if (!daosFile.exists()) {
-      throw new FileNotFoundException("File does not exist: " + key);
-    }
-    //TODO: get statAttributes
-    if (daosFile.isDirectory()) {
-      return new FileStatus(0, true, 1, this.blockSize, 0, f);
+    return getFileStatus(f, daos.getFile(key));
+  }
+
+  FileStatus getFileStatus(Path path, DaosFile file) throws IOException{
+    if (!file.exists()) {
+      throw new FileNotFoundException(file + "doesn't exist");
     }
 
-    long length = daosFile.length();
-    return new FileStatus(length, false, 1, this.blockSize, 0, f);
+    StatAttributes attributes = file.getStatAttributes();
+    return new FileStatus(attributes.getLength(), !attributes.isFile(), 1,
+            file.getChunkSize(), toMilliSeconds(attributes.getModifyTime()), path);
   }
 
   @Override
@@ -362,7 +323,7 @@ public class DaosFileSystem extends FileSystem {
     }
     try {
       String key = f.toUri().getPath();
-      return daos.getFile(key).exists();
+      return daos.exists(key);
     } catch (IOException e) {
       return false;
     }
@@ -373,10 +334,14 @@ public class DaosFileSystem extends FileSystem {
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosFileSystem close");
     }
+    if (daos != null) {
+      daos.disconnect();
+    }
     super.close();
   }
 
-//  DaosFile getFile(Path path){
-//    weakCache.get(path);
-//  }
+  static long toMilliSeconds(StatAttributes.TimeSpec modifyTime) {
+    long ms = modifyTime.getSeconds() * 1000;
+    return ms + modifyTime.getNano()/(1000*1000);
+  }
 }
