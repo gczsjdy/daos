@@ -26,6 +26,7 @@ package com.intel.daos.hadoop.fs;
 import com.intel.daos.client.DaosFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.nio.ch.DirectBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,19 +39,27 @@ public class DaosOutputStream extends OutputStream {
   private static final Logger LOG = LoggerFactory.getLogger(DaosOutputStream.class);
 
   private ByteBuffer buffer;
-  private final byte[] singleByte = new byte[1];
-  private long position = 0;
+  private long fileOffset;
   private boolean closed;
   private String path;
   private final DaosFile daosFile;
 
   public DaosOutputStream(DaosFile daosFile,
                           String path,
-                          final int writeSize) {
+                          final int writeBufferSize) {
+    this(daosFile, path, ByteBuffer.allocateDirect(writeBufferSize));
+  }
+
+  public DaosOutputStream(DaosFile daosFile,
+                          String path,
+                          ByteBuffer buffer) {
     this.path = path;
     this.daosFile = daosFile;
     this.closed = false;
-    this.buffer = ByteBuffer.allocateDirect(writeSize);
+    this.buffer = buffer;
+    if (!(buffer instanceof DirectBuffer)) {
+      throw new IllegalArgumentException("need instance of direct buffer, but "+buffer.getClass().getName());
+    }
   }
 
   /**
@@ -115,14 +124,14 @@ public class DaosOutputStream extends OutputStream {
       currentTime = System.currentTimeMillis();
     }
     long writeSize = this.daosFile.write(
-      this.buffer, 0, this.position,
+      this.buffer, 0, this.fileOffset,
       this.buffer.position());
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosOutputStream : writing by daos_api spend time is : "
           + (System.currentTimeMillis() - currentTime)
           + " ; writing data size : " + writeSize + ".");
     }
-    this.position += writeSize;
+    this.fileOffset += writeSize;
     this.buffer.clear();
   }
 
@@ -131,7 +140,9 @@ public class DaosOutputStream extends OutputStream {
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosOutputStream close");
     }
-    checkNotClose();
+    if (closed) {
+      return;
+    }
     if (this.buffer.position() > 0) {
       daosWrite();
     }

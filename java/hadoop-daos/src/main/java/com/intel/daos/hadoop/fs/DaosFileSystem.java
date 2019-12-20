@@ -45,7 +45,7 @@ public class DaosFileSystem extends FileSystem {
   private static final Logger LOG = LoggerFactory.getLogger(DaosFileSystem.class);
   private Path workingDir;
   private URI uri;
-  private DaosFsClient daos = null;
+  private DaosFsClient daos;
   private int readBufferSize;
   private int preLoadBufferSize;
   private int writeBufferSize;
@@ -208,22 +208,20 @@ public class DaosFileSystem extends FileSystem {
       if(LOG.isDebugEnabled()){
         LOG.debug("DaosFileSystem:  cat not rename root path {}", src);
       }
-      return false;
+      throw new IOException("cannot move root / directory");
     }
 
     if (srcPath.equals(destPath)){
-      return false;
+      throw new IOException("dest and src paths are same. "+srcPath);
     }
 
-    //TODO: check error code for specific exception
-    //FileAlreadyExistsException
-    //FileNotFoundException
-    try {
-      daos.move(srcPath, destPath);
-      return true;
-    }catch (IOException e){
-      return false;
+    //TODO: to remove after confirming with DAOS
+    if (daos.exists(destPath)) {
+      throw new IOException("dest file exists, "+destPath);
     }
+
+    daos.move(srcPath, destPath);
+    return true;
   }
 
   @Override
@@ -231,12 +229,7 @@ public class DaosFileSystem extends FileSystem {
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosFileSystem:   delete  path = {} - recursive = {}", f.toUri().getPath(), recursive);
     }
-    try {
-      daos.delete(f.toUri().getPath(), recursive);
-      return true;
-    }catch (IOException e) {////TODO: check error code for specific exception
-      return false;
-    }
+    return daos.delete(f.toUri().getPath(), recursive);
   }
 
   @Override
@@ -289,12 +282,9 @@ public class DaosFileSystem extends FileSystem {
       LOG.debug("DaosFileSystem mkdirs: Making directory = %s ",f.toUri().getPath());
     }
     String key = f.toUri().getPath();
-    try {
-      daos.mkdir(key, com.intel.daos.client.Constants.FILE_DEFAULT_FILE_MODE, true);
+
+    daos.mkdir(key, com.intel.daos.client.Constants.FILE_DEFAULT_FILE_MODE, true);
       return true;
-    }catch (IOException e){//TODO: determine return value on error code
-      return false;
-    }
   }
 
   @Override
@@ -313,7 +303,7 @@ public class DaosFileSystem extends FileSystem {
 
     StatAttributes attributes = file.getStatAttributes();
     return new FileStatus(attributes.getLength(), !attributes.isFile(), 1,
-            file.getChunkSize(), toMilliSeconds(attributes.getModifyTime()), path);
+            attributes.isFile() ? file.getChunkSize():0, toMilliSeconds(attributes.getModifyTime()), path);
   }
 
   @Override

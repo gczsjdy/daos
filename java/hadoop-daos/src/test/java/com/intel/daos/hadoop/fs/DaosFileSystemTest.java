@@ -59,4 +59,43 @@ public class DaosFileSystemTest {
     fs.initialize(URI.create("daos://1234:56/root"), cfg);
     fs.close();
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNewDaosFileSystemFailedNoContId() throws Exception {
+    PowerMockito.mockStatic(DaosFsClient.class);
+    DaosFsClient.DaosFsClientBuilder builder = mock(DaosFsClient.DaosFsClientBuilder.class);
+    DaosFsClient client = mock(DaosFsClient.class);
+
+    PowerMockito.whenNew(DaosFsClient.DaosFsClientBuilder.class).withNoArguments().thenReturn(builder);
+    when(builder.poolId(anyString())).thenReturn(builder);
+    when(builder.containerId(anyString())).thenReturn(builder);
+    when(builder.ranks(anyString())).thenReturn(builder);
+    when(builder.build()).thenReturn(client);
+
+    DaosFileSystem fs = new DaosFileSystem();
+    Configuration cfg = new Configuration();
+    cfg.set(Constants.DAOS_POOL_UUID, "123");
+    fs.initialize(URI.create("daos://1234:56/root"), cfg);
+    fs.close();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNewDaosFileSystemFailedNoSvc() throws Exception {
+    PowerMockito.mockStatic(DaosFsClient.class);
+    DaosFsClient.DaosFsClientBuilder builder = mock(DaosFsClient.DaosFsClientBuilder.class);
+    DaosFsClient client = mock(DaosFsClient.class);
+
+    PowerMockito.whenNew(DaosFsClient.DaosFsClientBuilder.class).withNoArguments().thenReturn(builder);
+    when(builder.poolId(anyString())).thenReturn(builder);
+    when(builder.containerId(anyString())).thenReturn(builder);
+    when(builder.ranks(anyString())).thenReturn(builder);
+    when(builder.build()).thenReturn(client);
+
+    DaosFileSystem fs = new DaosFileSystem();
+    Configuration cfg = new Configuration();
+    cfg.set(Constants.DAOS_POOL_UUID, "123");
+    cfg.set(Constants.DAOS_CONTAINER_UUID, "123");
+    fs.initialize(URI.create("daos://1234:56/root"), cfg);
+    fs.close();
+  }
 }

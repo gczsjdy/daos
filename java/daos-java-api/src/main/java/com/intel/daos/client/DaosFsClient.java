@@ -392,11 +392,13 @@ public final class DaosFsClient {
    * @param path
    * @param force
    * @throws IOException
+   *
+   * @return true for deleted successfully, false for other cases, like not existed or failed to delete
    */
-  public void delete(String path, boolean force)throws IOException{
+  public boolean delete(String path, boolean force)throws IOException{
     path = DaosUtils.normalize(path);
     String[] pc = DaosUtils.parsePath(path);
-    delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], force);
+    return delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], force);
   }
 
   /**
@@ -404,9 +406,11 @@ public final class DaosFsClient {
    *
    * @param path
    * @throws IOException
+   *
+   * @return true for deleted successfully, false for other cases, like not existed or failed to delete
    */
-  public void delete(String path)throws IOException{
-    delete(path, false);
+  public boolean delete(String path)throws IOException{
+    return delete(path, false);
   }
 
   /**
@@ -431,7 +435,16 @@ public final class DaosFsClient {
    * @throws IOException
    */
   public void mkdir(String path, int mode, boolean recursive)throws IOException{
-    mkdir(dfsPtr, path, mode, recursive);
+    try {
+      mkdir(dfsPtr, path, mode, recursive);
+    } catch (IOException e) {
+      if (recursive && (e instanceof DaosIOException)) {
+        if (((DaosIOException)e).getErrorCode() == Constants.ERROR_CODE_DIRECTORY_EXIST) {
+          return;
+        }
+      }
+      throw e;
+    }
   }
 
   /**

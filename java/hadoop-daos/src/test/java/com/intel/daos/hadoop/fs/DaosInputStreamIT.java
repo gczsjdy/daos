@@ -21,10 +21,10 @@ import static org.junit.Assert.assertTrue;
 /**
  *
  */
-public class TestDaosInputStream {
-  private static final Logger LOG = LoggerFactory.getLogger(TestDaosInputStream.class);
+public class DaosInputStreamIT {
+  private static final Logger LOG = LoggerFactory.getLogger(DaosInputStreamIT.class);
   private static FileSystem fs;
-  private static String testRootPath = TestDaosTestUtils.generateUniqueTestPath();
+  private static String testRootPath = DaosUtils.generateUniqueTestPath();
 
   @Rule
   public Timeout testTimeout = new Timeout(30 * 60 * 1000);
@@ -42,7 +42,7 @@ public class TestDaosInputStream {
     if (fs != null) {
       fs.delete(new Path(testRootPath), true);
     }
-    fs.close();
+//    fs.close();
   }
 
   private Path setPath(String path) throws IOException {

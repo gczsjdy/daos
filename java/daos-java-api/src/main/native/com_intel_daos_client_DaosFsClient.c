@@ -363,13 +363,13 @@ JNIEXPORT void JNICALL Java_com_intel_daos_client_DaosFsClient_move
 		if (rc) {
 			char *tmp = "Cannot open destination directory (%s)";
 			char *msg = (char *)malloc(strlen(tmp) + strlen(dest_dir));
-			sprintf(msg, tmp, src_dir);
+			sprintf(msg, tmp, dest_dir);
 			throw_exception(env, msg, rc);
 			goto out;
 		}
 	}
 	rc = dfs_move(dfs, src_dir_handle, src_base, dest_dir_handle, dest_base, NULL);
-	if(rc){
+	if (rc) {
 		char *tmp = "Failed to move source path (%s) to destination path (%s)";
 		char *msg = (char *)malloc(strlen(tmp) + strlen(src_path) + strlen(dest_path));
 		sprintf(msg, tmp, src_path, dest_path);
@@ -707,20 +707,15 @@ JNIEXPORT jstring JNICALL Java_com_intel_daos_client_DaosFsClient_dfsReadDir
 	return result;
 }
 
-static void cpyfield(JNIEnv *env, char *buffer, void *value, int valueLen, int expLen){
-	if (valueLen > expLen){
-		char *tmp = "value length (%d) greater than expected (%d)";
+static void cpyfield(JNIEnv *env, char *buffer, int *value, int valueLen, int expLen){
+	if (valueLen != expLen){
+		char *tmp = "value length (%d) not equal to expected (%d)";
 		char *msg = (char *)malloc(strlen(tmp) + 4 + 4);
 		sprintf(msg, tmp, valueLen, expLen);
 		throw_exception(env, msg, CUSTOM_ERR4);
 		return;
 	}
 	memcpy(buffer, value, valueLen);
-	int i;
-	char zero = (char)0;
-	for(i=valueLen; i<expLen; i++){
-		memcpy(buffer+i, &zero, 1);
-	}
 }
 
 /**
@@ -730,7 +725,7 @@ JNIEXPORT void JNICALL Java_com_intel_daos_client_DaosFsClient_dfsOpenedObjStat
   (JNIEnv *env, jobject client, jlong dfsPtr, jlong objId, jlong bufferAddress){
 	dfs_t *dfs = *(dfs_t**)&dfsPtr;
 	dfs_obj_t *file = *(dfs_obj_t**)&objId;
-	struct stat stat;
+	struct stat stat = {};
 	int rc = dfs_ostat(dfs, file, &stat);
 	if (rc) {
 		char *tmp = "Failed to get StatAttribute of open object";
@@ -740,12 +735,17 @@ JNIEXPORT void JNICALL Java_com_intel_daos_client_DaosFsClient_dfsOpenedObjStat
 			return;
 		}
 		char *buffer = (char *)bufferAddress;
-		memcpy(buffer, &objId, 8);
-		cpyfield(env, buffer+8, &stat.st_mode, sizeof(stat.st_mode), 4);
-		cpyfield(env, buffer+12, &stat.st_uid, sizeof(stat.st_uid), 4);
-		cpyfield(env, buffer+16, &stat.st_gid, sizeof(stat.st_gid), 4);
-		cpyfield(env, buffer+20, &stat.st_blocks, sizeof(stat.st_blocks), 8);
-		cpyfield(env, buffer+28, &stat.st_size, sizeof(stat.st_size), 8);
+		cpyfield(env, buffer, &objId, sizeof(objId), 8);
+		jint ivalue = stat.st_mode;
+		cpyfield(env, buffer+8, &ivalue, sizeof(ivalue), 4);
+		ivalue = stat.st_uid;
+		cpyfield(env, buffer+12, &ivalue, sizeof(ivalue), 4);
+		ivalue = stat.st_gid;
+		cpyfield(env, buffer+16, &ivalue, sizeof(ivalue), 4);
+		jlong lvalue = stat.st_blocks;
+		cpyfield(env, buffer+20, &lvalue, sizeof(lvalue), 8);
+		lvalue = stat.st_size;
+		cpyfield(env, buffer+28, &lvalue, sizeof(lvalue), 8);
 		cpyfield(env, buffer+36, &stat.st_atim, sizeof(stat.st_atim), 16);
 		cpyfield(env, buffer+52, &stat.st_mtim, sizeof(stat.st_mtim), 16);
 		cpyfield(env, buffer+68, &stat.st_ctim, sizeof(stat.st_ctim), 16);
@@ -823,8 +823,8 @@ JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_dfsGetChunkSize
 	daos_size_t size;
 	int rc = dfs_get_chunk_size(file, &size);
 	if (rc) {
-		char *msg = "Failed to get chunk size of object";
-		throw_exception(env, msg, rc);
+		char *msg = "Failed to get chunk size of object. It's a directory, not a file? ";
+		throw_exception_const_msg(env, msg, rc);
 	}
 	return size;
 }

@@ -326,8 +326,7 @@ public class DaosInputStreamTest {
     is.close();
   }
 
-  @Test(expected = IOException.class)
-  public void testClose() throws Exception{
+  private DaosInputStream close()throws Exception{
     DaosFile file = mock(DaosFile.class);
     FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
 
@@ -338,6 +337,17 @@ public class DaosInputStreamTest {
     is.close();
     is.close();
     verify(file, times(1)).release();
+    return is;
+  }
+
+  @Test
+  public void testClose() throws Exception{
+    close();
+  }
+
+  @Test(expected = IOException.class)
+  public void testOperationAfterClose() throws Exception{
+    DaosInputStream is = close();
     is.read(null, 0, 0);
   }
 
