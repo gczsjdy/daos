@@ -382,7 +382,7 @@ public final class DaosFsClient {
    * @throws IOException
    */
   public void move(String srcPath, String destPath)throws IOException {
-    move(dfsPtr, srcPath, destPath);
+    move(dfsPtr, DaosUtils.normalize(srcPath), DaosUtils.normalize(destPath));
   }
 
   /**
@@ -410,7 +410,7 @@ public final class DaosFsClient {
    * @return true for deleted successfully, false for other cases, like not existed or failed to delete
    */
   public boolean delete(String path)throws IOException{
-    return delete(path, false);
+    return delete(DaosUtils.normalize(path), false);
   }
 
   /**
@@ -422,7 +422,7 @@ public final class DaosFsClient {
    * @throws IOException
    */
   public void mkdir(String path, boolean recursive)throws IOException{
-    mkdir(path, builder.defaultFileMode, recursive);
+    mkdir(DaosUtils.normalize(path), builder.defaultFileMode, recursive);
   }
 
   /**
@@ -436,7 +436,7 @@ public final class DaosFsClient {
    */
   public void mkdir(String path, int mode, boolean recursive)throws IOException{
     try {
-      mkdir(dfsPtr, path, mode, recursive);
+      mkdir(dfsPtr, DaosUtils.normalize(path), mode, recursive);
     } catch (IOException e) {
       if (recursive && (e instanceof DaosIOException)) {
         if (((DaosIOException)e).getErrorCode() == Constants.ERROR_CODE_DIRECTORY_EXIST) {
@@ -457,7 +457,7 @@ public final class DaosFsClient {
   public boolean exists(String path) throws IOException{
     long objId = 0;
     try {
-      objId = dfsLookup(dfsPtr, path, builder.defaultFileAccessFlags, -1);
+      objId = dfsLookup(dfsPtr, DaosUtils.normalize(path), builder.defaultFileAccessFlags, -1);
       return true;
     }catch (Exception e) {
       if (!(e instanceof DaosIOException)) {//unexpected exception

@@ -24,6 +24,7 @@
 package com.intel.daos.hadoop.fs;
 
 import com.intel.daos.client.DaosFile;
+import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.nio.ch.DirectBuffer;
@@ -43,20 +44,22 @@ public class DaosOutputStream extends OutputStream {
   private boolean closed;
   private String path;
   private final DaosFile daosFile;
+  private final FileSystem.Statistics stats;
 
   public DaosOutputStream(DaosFile daosFile,
                           String path,
-                          final int writeBufferSize) {
-    this(daosFile, path, ByteBuffer.allocateDirect(writeBufferSize));
+                          final int writeBufferSize, FileSystem.Statistics stats) {
+    this(daosFile, path, ByteBuffer.allocateDirect(writeBufferSize), stats);
   }
 
   public DaosOutputStream(DaosFile daosFile,
                           String path,
-                          ByteBuffer buffer) {
+                          ByteBuffer buffer, FileSystem.Statistics stats) {
     this.path = path;
     this.daosFile = daosFile;
     this.closed = false;
     this.buffer = buffer;
+    this.stats = stats;
     if (!(buffer instanceof DirectBuffer)) {
       throw new IllegalArgumentException("need instance of direct buffer, but "+buffer.getClass().getName());
     }
@@ -126,6 +129,7 @@ public class DaosOutputStream extends OutputStream {
     long writeSize = this.daosFile.write(
       this.buffer, 0, this.fileOffset,
       this.buffer.position());
+    stats.incrementWriteOps(1);
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosOutputStream : writing by daos_api spend time is : "
           + (System.currentTimeMillis() - currentTime)

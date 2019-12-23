@@ -57,6 +57,7 @@ public class DaosInputStreamTest {
     FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
     long actualReadLen = requestLen<preloadSize ? preloadSize:requestLen;
     when(file.read(any(ByteBuffer.class), anyLong(), anyLong(), eq(actualReadLen))).thenReturn(actualReadLen);
+    when(file.length()).thenReturn(200L);
 
     ByteBuffer buffer = ByteBuffer.allocateDirect(bufferCap);
     ByteBuffer sbuffer = spy(buffer);
@@ -101,6 +102,7 @@ public class DaosInputStreamTest {
     int bufferCap = 100;
     int preloadSize = 50;
     DaosFile file = mock(DaosFile.class);
+    when(file.length()).thenReturn(1000L);
     FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
 
     ByteBuffer buffer = ByteBuffer.allocateDirect(bufferCap);

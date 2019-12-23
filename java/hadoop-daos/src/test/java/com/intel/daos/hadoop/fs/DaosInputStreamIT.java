@@ -31,14 +31,12 @@ public class DaosInputStreamIT {
 
   @Before
   public void setup() throws IOException {
-    System.out.println("@BeforeClass");
     fs = DaosFSFactory.getFS();
     fs.mkdirs(new Path(testRootPath));
   }
 
   @After
   public void tearDown() throws Exception {
-    System.out.println("@AfterClass");
     if (fs != null) {
       fs.delete(new Path(testRootPath), true);
     }
@@ -140,20 +138,19 @@ public class DaosInputStreamIT {
               + fsDataInputStream.getPos(), fsDataInputStream.getPos() == 0);
       DaosInputStream in =
               (DaosInputStream)fsDataInputStream.getWrappedStream();
-      byte[] buf = new byte[Constants.DEFAULT_DAOS_READ_BUFFER_SIZE];
-      in.read(buf,0, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
+      byte[] buf = new byte[Constants.DEFAULT_DAOS_PRELOAD_SIZE];
+      in.read(buf,0, Constants.DEFAULT_DAOS_PRELOAD_SIZE);
       assertTrue("expected position at:"
                       + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE + ", but got:"
                       + in.getPos(),
-              in.getPos() == Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
+              in.getPos() == Constants.DEFAULT_DAOS_PRELOAD_SIZE);
 
       fsDataInputStream.seek(4 * 1024 * 1024);
-    in.read(buf,0, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
-    assertTrue("expected position at:" + 4 * 1024 * 1024
-                      + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE + ", but got:"
+    buf = new byte[1 * 1024 * 1024];
+    in.read(buf,0, 1 * 1024 * 1024);
+    assertTrue("expected position at:" + size + ", but got:"
                       + in.getPos(),
-              in.getPos() == 4 * 1024 * 1024
-                      + Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
+              in.getPos() == size);
 
       IOUtils.closeStream(fsDataInputStream);
   }

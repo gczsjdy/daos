@@ -175,6 +175,7 @@ public class DaosInputStream extends FSInputStream {
       throw new IndexOutOfBoundsException("requested more bytes than destination buffer size "
               + " : request length = " + len + ", with offset = " + off + ", buffer capacity =" + (buf.length - off));
     }
+
     if (len == 0) {
       return 0;
     }
@@ -188,7 +189,6 @@ public class DaosInputStream extends FSInputStream {
       if (remaining >= len) {// all requested data in buffer
         buffer.get(buf, off, len);
         nextReadPos += len;
-        this.stats.incrementBytesRead(len);
         return len;
       }
       // part of data in buffer
@@ -198,13 +198,11 @@ public class DaosInputStream extends FSInputStream {
       // read more from file
       long moreLen = readFromDaos(buf, off, (int) (len - remaining));
       long actualLen = remaining + moreLen;
-      this.stats.incrementBytesRead(actualLen);
       return (int) actualLen;
     }
     // data not in buffer
     long actualLen = readFromDaos(buf, off, len);
-    this.stats.incrementBytesRead(actualLen);
-    if (actualLen == 0 && nextReadPos == fileLen) {
+    if (actualLen == 0) {
       return -1; // reach end of file
     }
     return (int) actualLen;
@@ -213,7 +211,7 @@ public class DaosInputStream extends FSInputStream {
   private long readFromDaos(byte[] buf, int off, int len) throws IOException {
     long totalLen = 0;
     boolean next = true;
-    while (len > 0 && next) {
+    while (len > 0 && next && (nextReadPos < fileLen)) {
       long actualLen = readFromDaos(len);
       if (actualLen == 0) {
         break;
@@ -254,6 +252,8 @@ public class DaosInputStream extends FSInputStream {
     long actualLen = this.daosFile.read(this.buffer, 0, this.nextReadPos, length);
     lastFilePos = nextReadPos;
     buffer.limit((int) actualLen);
+    stats.incrementReadOps(1);
+    this.stats.incrementBytesRead(actualLen);
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosInputStream :reading from daos_api spend time is :  "
               + (System.currentTimeMillis() - currentTime)

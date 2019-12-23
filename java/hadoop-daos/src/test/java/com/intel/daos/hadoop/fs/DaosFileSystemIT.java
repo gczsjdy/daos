@@ -17,8 +17,6 @@ import java.net.URI;
 public class DaosFileSystemIT {
   private static final Logger LOG = LoggerFactory.getLogger(DaosFileSystemIT.class);
 
-  private static String testRootPath =
-          DaosUtils.generateUniqueTestPath();
   private static FileSystem fs;
 
   @BeforeClass
@@ -31,15 +29,14 @@ public class DaosFileSystemIT {
   @Test
   public void testInitialization() throws Exception{
     initializationTest("daos://192.168.2.1:2345/", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a:b@c", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a:b@c/", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a:b@c/path", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a@c", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a@c/", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/a@c/path", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/c", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/c/", "daos://192.168.2.1:2345");
-    initializationTest("daos://192.168.2.1:2345/c/path", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/abc", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/ae/", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/ac/path", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/ac", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/ad_c/", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/ac2/path", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/c.3", "daos://192.168.2.1:2345");
+    initializationTest("daos://192.168.2.1:2345/234/", "daos://192.168.2.1:2345");
   }
 
   private void initializationTest(String initializationUri, String expectedUri) throws Exception{
