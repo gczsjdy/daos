@@ -363,6 +363,7 @@ public class DaosInputStreamTest {
     FileSystem.Statistics stats = new FileSystem.Statistics("daos:///");
 
     int bufferSize = 7;
+    ByteBuffer internalBuffer = ByteBuffer.allocateDirect(bufferSize);
     byte[] data = new byte[]{19, 49, 89, 64, 20, 19, 1, 2, 3};
 
     doAnswer(
@@ -370,9 +371,11 @@ public class DaosInputStreamTest {
         ByteBuffer buffer = (ByteBuffer) invocationOnMock.getArguments()[0];
         long bufferOffset = (long) invocationOnMock.getArguments()[1];
         long len = (long) invocationOnMock.getArguments()[3];
-        for (long i = bufferOffset; i < bufferOffset + len; i++) {
+        long i;
+        for (i = bufferOffset; i < bufferOffset + len; i++) {
           buffer.put((int) i, data[(int) (i - bufferOffset)]);
         }
+        buffer.limit((int)i);
         return len;
       })
       .when(file)
@@ -382,7 +385,7 @@ public class DaosInputStreamTest {
 
     for (int j = 0; j < 2; j ++) {
       boolean bufferedReadEnabled = trueFalse[j];
-      DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferSize, bufferedReadEnabled);
+      DaosInputStream input = new DaosInputStream(file, stats, internalBuffer, bufferSize, bufferedReadEnabled);
       int readSize = 4;
       byte[] answer = new byte[readSize];
       input.read(answer, 0, readSize);
@@ -393,10 +396,10 @@ public class DaosInputStreamTest {
       assertArrayEquals(expect, answer);
 
       boolean shouldThemEqual = bufferedReadEnabled;
-      for (int i = readSize; i < data.length && i < input.buffer.limit(); i++) {
+      for (int i = readSize; i < data.length && i < internalBuffer.limit(); i++) {
         // If enabled buffered read, the internal buffer of DataInputStream should be fully filled
         // Otherwise, DaosInputStream's internal buffer is not filled for non-target part
-        assert (shouldThemEqual == (input.buffer.get(i) == data[i]));
+        assert (shouldThemEqual == (internalBuffer.get(i) == data[i]));
       }
     }
   }
@@ -407,6 +410,7 @@ public class DaosInputStreamTest {
     FileSystem.Statistics stats = new FileSystem.Statistics("daos:///");
 
     int bufferSize = 7;
+    ByteBuffer internalBuffer = ByteBuffer.allocateDirect(bufferSize);
     byte[] data = new byte[]{19, 49, 89, 64, 20, 19, 1, 2, 3};
 
     doAnswer(
@@ -435,7 +439,7 @@ public class DaosInputStreamTest {
 
     for (int j = 0; j < 2; j ++) {
       boolean bufferedReadEnabled = trueFalse[j];
-      DaosInputStream input = new DaosInputStream(file, stats, bufferSize, bufferSize, bufferedReadEnabled);
+      DaosInputStream input = new DaosInputStream(file, stats, internalBuffer, bufferSize, bufferedReadEnabled);
       int readSize = 9;
       byte[] answer = new byte[readSize];
       input.read(answer, 0, readSize);
@@ -446,10 +450,10 @@ public class DaosInputStreamTest {
       assertArrayEquals(expect, answer);
 
       boolean shouldThemEqual = bufferedReadEnabled;
-      for (int i = readSize; i < data.length && i < input.buffer.limit(); i++) {
+      for (int i = readSize; i < data.length && i < internalBuffer.limit(); i++) {
         // If enabled buffered read, the internal buffer of DataInputStream should be fully filled
         // Otherwise, DaosInputStream's internal buffer is not filled for non-target part
-        assert (shouldThemEqual == (input.buffer.get(i) == data[i]));
+        assert (shouldThemEqual == (internalBuffer.get(i) == data[i]));
       }
     }
   }

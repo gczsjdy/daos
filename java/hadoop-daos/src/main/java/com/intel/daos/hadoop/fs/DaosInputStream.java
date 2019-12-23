@@ -23,7 +23,6 @@
 
 package com.intel.daos.hadoop.fs;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FSInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -56,7 +55,7 @@ public class DaosInputStream extends FSInputStream {
   private final int preLoadSize;
   private final boolean bufferedReadEnabled;
 
-  ByteBuffer buffer;
+  private ByteBuffer buffer;
 
   private byte[] singleByte = new byte[]{0};
 
