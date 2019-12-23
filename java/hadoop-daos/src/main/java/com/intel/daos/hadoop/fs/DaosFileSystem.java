@@ -181,8 +181,8 @@ public class DaosFileSystem extends FileSystem {
 
     DaosFile daosFile = this.daos.getFile(key);
 
-    if (daosFile.exists()) {
-      throw new FileAlreadyExistsException(f + " already exists");
+    if (daosFile.exists() && (!daosFile.delete())) {
+      throw new IOException("failed to delete existing file "+daosFile);
     }
 
     daosFile.createNewFile(
@@ -190,7 +190,7 @@ public class DaosFileSystem extends FileSystem {
               DaosObjectType.OC_SX,
               this.chunkSize);
 
-    return new FSDataOutputStream(new DaosOutputStream(daosFile, key, writeBufferSize), statistics);
+    return new FSDataOutputStream(new DaosOutputStream(daosFile, key, writeBufferSize, statistics), statistics);
   }
 
   @Override
@@ -283,12 +283,12 @@ public class DaosFileSystem extends FileSystem {
   @Override
   public boolean mkdirs(Path f, FsPermission permission) throws IOException {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("DaosFileSystem mkdirs: Making directory = %s ",f.toUri().getPath());
+      LOG.debug("DaosFileSystem mkdirs: Making directory = {} ",f.toUri().getPath());
     }
     String key = f.toUri().getPath();
 
     daos.mkdir(key, com.intel.daos.client.Constants.FILE_DEFAULT_FILE_MODE, true);
-      return true;
+    return true;
   }
 
   @Override
@@ -313,7 +313,7 @@ public class DaosFileSystem extends FileSystem {
   @Override
   public boolean exists(Path f){
     if (LOG.isDebugEnabled()) {
-      LOG.debug(" DaosFileSystem exists: Is path = %s exists",f.toUri().getPath());
+      LOG.debug(" DaosFileSystem exists: Is path = {} exists",f.toUri().getPath());
     }
     try {
       String key = f.toUri().getPath();

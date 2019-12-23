@@ -1,6 +1,7 @@
 package com.intel.daos.hadoop.fs;
 
 import com.intel.daos.client.DaosFile;
+import org.apache.hadoop.fs.FileSystem;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,14 +16,16 @@ public class DaosOutputStreamTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonDirectBuffer() throws Exception{
-    DaosOutputStream dos = new DaosOutputStream(null, null, ByteBuffer.allocate(100));
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
+    DaosOutputStream dos = new DaosOutputStream(null, null, ByteBuffer.allocate(100), stats);
     dos.close();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testWriteLenIllegal()throws Exception{
     DaosFile file = mock(DaosFile.class);
-    DaosOutputStream os = new DaosOutputStream(file, "/zjf", 100);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
+    DaosOutputStream os = new DaosOutputStream(file, "/zjf", 100, stats);
     byte[] buf = new byte[10];
     os.write(buf, 0, -10);
   }
@@ -30,7 +33,8 @@ public class DaosOutputStreamTest {
   @Test(expected = IndexOutOfBoundsException.class)
   public void testWriteOverflowException()throws Exception{
     DaosFile file = mock(DaosFile.class);
-    DaosOutputStream os = new DaosOutputStream(file, "/zjf", 100);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
+    DaosOutputStream os = new DaosOutputStream(file, "/zjf", 100, stats);
     byte[] buf = new byte[10];
     os.write(buf, 0, 200);
   }
@@ -38,9 +42,10 @@ public class DaosOutputStreamTest {
   private void writeNoMoreThanBuffer(int writeLen, int writeTimes)throws Exception{
     int bufCap = 100;
     DaosFile file = mock(DaosFile.class);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufCap);
     ByteBuffer sbuffer = spy(byteBuffer);
-    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer);
+    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer, stats);
     byte buf[] = new byte[writeLen];
     for(int i=0; i<buf.length; i++){
       buf[i] = (byte)i;
@@ -72,9 +77,10 @@ public class DaosOutputStreamTest {
   public void writeOne(boolean flush)throws Exception{
     int bufCap = 100;
     DaosFile file = mock(DaosFile.class);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufCap);
     ByteBuffer sbuffer = spy(byteBuffer);
-    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer);
+    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer, stats);
 
     daos.write('e');
 
@@ -103,9 +109,10 @@ public class DaosOutputStreamTest {
   private void writeMoreThanBuffer(int writeLen, int writeTimes)throws Exception{
     int bufCap = 100;
     DaosFile file = mock(DaosFile.class);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufCap);
     ByteBuffer sbuffer = spy(byteBuffer);
-    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer);
+    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer, stats);
     byte buf[] = new byte[writeLen];
     for(int i=0; i<buf.length; i++){
       buf[i] = (byte)i;
@@ -164,9 +171,10 @@ public class DaosOutputStreamTest {
   private DaosOutputStream close()throws Exception{
     int bufCap = 100;
     DaosFile file = mock(DaosFile.class);
+    FileSystem.Statistics stats = mock(FileSystem.Statistics.class);
     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufCap);
     ByteBuffer sbuffer = spy(byteBuffer);
-    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer);
+    DaosOutputStream daos = new DaosOutputStream(file, "/zjf", sbuffer, stats);
 
     daos.close();
     daos.close();

@@ -5,30 +5,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.*;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.junit.Assume.assumeTrue;
 
 public class DaosFileSystemContractIT extends FileSystemContractBaseTest {
 
-  static FileSystem daosFs;
-
   private static final Log LOG = LogFactory.getLog(DaosFileSystemContractIT.class);
-
-  public DaosFileSystemContractIT()throws IOException {
-    fs = DaosFSFactory.getFS();
-  }
 
   @Override
   protected void setUp() throws Exception {
+    fs = DaosFSFactory.getFS();
     fs.mkdirs(new Path("/test"));
   }
 
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
-    fs.delete(new Path("/test"), true);
   }
 
   @Override
@@ -174,7 +167,7 @@ public class DaosFileSystemContractIT extends FileSystemContractBaseTest {
     this.createFile(dst);
     try {
       super.rename(src, dst, false, true, true);
-      fail("Should throw FileAlreadyExistsException");
+      fail("Should throw IOException");
     } catch (IOException e) {
       // expected
     }
