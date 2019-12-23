@@ -69,6 +69,11 @@ import java.util.concurrent.*;
  *   }
  * </code>
  *
+ * User can also call some utility methods directly in this object for convenience without creating new {@link DaosFile}.
+ * User should prefer these utility methods to {@link DaosFile} if it's only one-shot DAOS file operation. Whilst
+ * {@link DaosFile} should be created for multiple DAOS file operations because DAOS FS object is cached inside. We
+ * don't need to query/open DAOS FS object for each DAOS operation.
+ *
  * @see DaosFsClientBuilder
  * @see DaosFile
  * @see Cleaner
@@ -225,6 +230,13 @@ public final class DaosFsClient {
     return contId;
   }
 
+  /**
+   * create pool based on information from {@link DaosFsClientBuilder}
+   *
+   * @param builder
+   * @return pool id
+   * @throws IOException
+   */
   public static String createPool(DaosFsClientBuilder builder)throws IOException {
     String poolInfo = daosCreatePool(builder.serverGroup,
                           builder.poolSvcReplics,
@@ -241,6 +253,15 @@ public final class DaosFsClient {
     return pooId;
   }
 
+  /**
+   * mount DAOS FS on specific pool and container
+   *
+   * @param poolPtr
+   * @param contPtr
+   * @param readOnly
+   * @return pointer of native mounted DAOS FS object.
+   * @throws IOException
+   */
   public static synchronized long mountFileSystem(long poolPtr, long contPtr, boolean readOnly) throws IOException{
     if(contPtr != -1){
       return dfsMountFs(poolPtr, contPtr, readOnly);
@@ -248,6 +269,18 @@ public final class DaosFsClient {
     return dfsMountFsOnRoot(poolPtr);
   }
 
+  /**
+   * Disconnect this client from DAOS server.
+   * - DAOS FS is unmounted
+   * - container is closed
+   * - pool is closed
+   * - cleaner task is stopped
+   * - this instance is removed from cache
+   *
+   * User should call this method before application exiting to release resources
+   *
+   * @throws IOException
+   */
   public void disconnect() throws IOException{
     if (inited && dfsPtr != 0) {
       if(contPtr == -1){
@@ -276,64 +309,174 @@ public final class DaosFsClient {
     pcFsMap.remove(poolId+contId);
   }
 
-  int getDefaultFileAccessFlags(){
-    return builder.defaultFileAccessFlags;
-  }
-
-  int getDefaultFileMode(){
-    return builder.defaultFileMode;
-  }
-
-  DaosObjectType getDefaultFileObjType(){
-    return builder.defaultFileObjType;
-  }
-
-  int getDefaultFileChunkSize(){
-    return builder.defaultFileChunkSize;
-  }
-
+  /**
+   * Get {@link DaosFile} denoted by <code>path</code>
+   *
+   * @param path
+   * @return DaosFile
+   */
   public DaosFile getFile(String path) {
     return getFile(path, builder.defaultFileAccessFlags);
   }
 
+  /**
+   * Get {@link DaosFile} denoted by <code>path</code> with giving <code>accessFlags</code>
+   *
+   * @param path
+   * @param accessFlags
+   * @return DaosFile
+   */
   public DaosFile getFile(String path, int accessFlags) {
     return new DaosFile(path, accessFlags, this);
   }
 
+  /**
+   * Get {@link DaosFile} denoted by <code>parent</code> and <code>path</code>
+   * @param parent
+   * @param path
+   * @return DaosFile
+   */
   public DaosFile getFile(String parent, String path){
     return getFile(parent, path, builder.defaultFileAccessFlags);
   }
 
+  /**
+   * Get {@link DaosFile} denoted by <code>parent</code> and <code>path</code> with giving <code>accessFlags</code>
+   * @param parent
+   * @param path
+   * @param accessFlags
+   * @return DaosFile
+   */
   public DaosFile getFile(String parent, String path, int accessFlags) {
     return new DaosFile(parent, path, accessFlags, this);
   }
 
+  /**
+   * Get {@link DaosFile} denoted by <code>parent</code> object and <code>path</code>
+   *
+   * @param parent
+   * @param path
+   * @return DaosFile
+   */
   public DaosFile getFile(DaosFile parent, String path){
     return getFile(parent, path, builder.defaultFileAccessFlags);
   }
 
+  /**
+   * Get {@link DaosFile} denoted by <code>parent</code> object and <code>path</code> with giving <code>accessFlags</code>
+   *
+   * @param parent
+   * @param path
+   * @param accessFlags
+   * @return DaosFile
+   */
   public DaosFile getFile(DaosFile parent, String path, int accessFlags) {
     return new DaosFile(parent, path, accessFlags, this);
   }
 
-  //non-native methods
+  /**
+   * move file from <code>srcPath</code> to <code>destPath</code>
+   *
+   * @param srcPath
+   * @param destPath
+   * @throws IOException
+   */
   public void move(String srcPath, String destPath)throws IOException {
     move(dfsPtr, srcPath, destPath);
   }
 
-  public void delete(String path, boolean force)throws IOException{
+  /**
+   * delete file or directory denoted by <code>path</code>. Non-empty directory will be deleted
+   * if <code>force</code> is true.
+   *
+   * @param path
+   * @param force
+   * @throws IOException
+   *
+   * @return true for deleted successfully, false for other cases, like not existed or failed to delete
+   */
+  public boolean delete(String path, boolean force)throws IOException{
     path = DaosUtils.normalize(path);
     String[] pc = DaosUtils.parsePath(path);
-    delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], force);
+    return delete(dfsPtr, pc.length==2 ? pc[0]:null, pc[1], force);
   }
 
-  public void delete(String path)throws IOException{
-    delete(path, false);
+  /**
+   * delete file or directory denoted by <code>path</code> without force deletion.
+   *
+   * @param path
+   * @throws IOException
+   *
+   * @return true for deleted successfully, false for other cases, like not existed or failed to delete
+   */
+  public boolean delete(String path)throws IOException{
+    return delete(path, false);
   }
 
+  /**
+   * create directory denoted by <code>path</code>
+   * If <code>recursive</code> is true, ancestor path will be created if they don't exist.
+   *
+   * @param path
+   * @param recursive
+   * @throws IOException
+   */
+  public void mkdir(String path, boolean recursive)throws IOException{
+    mkdir(path, builder.defaultFileMode, recursive);
+  }
+
+  /**
+   * create directory denoted by <code>path</code> with giving <code>mode</code>.
+   * If <code>recursive</code> is true, ancestor path will be created if they don't exist.
+   *
+   * @param path
+   * @param mode
+   * @param recursive
+   * @throws IOException
+   */
   public void mkdir(String path, int mode, boolean recursive)throws IOException{
-    mkdir(dfsPtr, path, mode, recursive);
+    try {
+      mkdir(dfsPtr, path, mode, recursive);
+    } catch (IOException e) {
+      if (recursive && (e instanceof DaosIOException)) {
+        if (((DaosIOException)e).getErrorCode() == Constants.ERROR_CODE_DIRECTORY_EXIST) {
+          return;
+        }
+      }
+      throw e;
+    }
   }
+
+  /**
+   * check existence of file denoted by <code>path</code>
+   *
+   * @param path
+   * @return true if exists. false otherwise
+   * @throws IOException
+   */
+  public boolean exists(String path) throws IOException{
+    long objId = 0;
+    try {
+      objId = dfsLookup(dfsPtr, path, builder.defaultFileAccessFlags, -1);
+      return true;
+    }catch (Exception e) {
+      if (!(e instanceof DaosIOException)) {//unexpected exception
+        throw new DaosIOException(e);
+      }
+      //verify error code to determine existence, if it's other error code, throw it anyway.
+      DaosIOException de = (DaosIOException) e;
+      if (de.getErrorCode() != Constants.ERROR_CODE_NOT_EXIST) {
+        throw de;
+      }
+      return false;
+    }finally {
+      if (objId > 0){
+        dfsRelease(objId);
+      }
+    }
+  }
+
+  //------------------native methods------------------
 
   /**
    * move file object denoted by <code>srcPath</code> to new path denoted by <code>destPath</code>
@@ -697,6 +840,25 @@ public final class DaosFsClient {
    * @throws IOException
    */
   static native void daosFinalize()throws IOException;
+
+  //------------------native methods end------------------
+
+
+  int getDefaultFileAccessFlags(){
+    return builder.defaultFileAccessFlags;
+  }
+
+  int getDefaultFileMode(){
+    return builder.defaultFileMode;
+  }
+
+  DaosObjectType getDefaultFileObjType(){
+    return builder.defaultFileObjType;
+  }
+
+  int getDefaultFileChunkSize(){
+    return builder.defaultFileChunkSize;
+  }
 
 
   /**

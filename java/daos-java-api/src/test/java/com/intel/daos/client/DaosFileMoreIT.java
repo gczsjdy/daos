@@ -5,6 +5,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
+
 public class DaosFileMoreIT {
 
   private static String poolId;
@@ -43,9 +45,16 @@ public class DaosFileMoreIT {
 
   @Test
   public void tesMkdirAndVerify() throws Exception{
-    DaosFile file = client.getFile("/dir1");
+    DaosFile file = client.getFile("/dir11");
     file.mkdir();
     Assert.assertTrue(file.isDirectory());
+  }
+
+  @Test(expected = IOException.class)
+  public void testGetChunkSizeOfDir() throws Exception {
+    DaosFile file = client.getFile("/dir1");
+    file.mkdir();
+    file.getChunkSize();
   }
 
   @Test

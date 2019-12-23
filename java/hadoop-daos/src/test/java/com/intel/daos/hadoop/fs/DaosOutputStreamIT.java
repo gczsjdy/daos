@@ -16,10 +16,9 @@ import static org.junit.Assert.assertEquals;
 /**
  *
  */
-public class TestDaosOutputStream{
+public class DaosOutputStreamIT {
   private static FileSystem fs;
-  private static String testRootPath =
-          TestDaosTestUtils.generateUniqueTestPath();
+  private static String testRootPath = DaosUtils.generateUniqueTestPath();
 
   @Rule
   public Timeout testTimeout = new Timeout(30 * 60 * 1000);

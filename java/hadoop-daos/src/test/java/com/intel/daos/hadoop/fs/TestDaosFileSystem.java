@@ -18,8 +18,6 @@ import java.net.URI;
 public class TestDaosFileSystem {
   private static final Logger LOG = LoggerFactory.getLogger(TestDaosFileSystem.class);
 
-  private static String testRootPath =
-          TestDaosTestUtils.generateUniqueTestPath();
   private static FileSystem fs;
 
   @BeforeClass
@@ -64,7 +62,7 @@ public class TestDaosFileSystem {
   }
 
   private void initializationTest(String initializationUri, String expectedUri) throws Exception{
-    fs.initialize(URI.create(initializationUri), TestDaosTestUtils.getConfiguration());
+    fs.initialize(URI.create(initializationUri), DaosUtils.getConfiguration());
     Assert.assertEquals(URI.create(expectedUri), fs.getUri());
   }
 

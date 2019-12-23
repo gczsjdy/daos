@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -53,6 +54,30 @@ public class DaosFileBasicIT {
   }
 
   @Test
+  public void testRenameToBeConfirmed()throws Exception{
+    DaosFile dir1 = client.getFile("/src3/dir");
+    dir1.mkdirs();
+    DaosFile srcFile = client.getFile(dir1, "data1");
+    srcFile.mkdir();
+
+    DaosFile dir2 = client.getFile("/src3/dir2");
+    dir2.mkdirs();
+    String destPath = dir2.getPath() + "/data2";
+    DaosFile destFile = client.getFile(destPath);
+    destFile.createNewFile();
+    DaosFile destFile2 = srcFile.rename(destPath);
+    System.out.println(destFile.getObjId());
+    System.out.println(destFile2.getObjId());
+    Assert.assertFalse(destFile.isDirectory());
+    Assert.assertTrue(destFile2.isDirectory());
+    String[] children = dir2.listChildren();
+    System.out.println(children.length);
+    System.out.println(children[0]);
+    DaosFile file3 = client.getFile(destPath);
+    System.out.println(file3.isDirectory());
+  }
+
+  @Test
   public void testRenameDir()throws Exception{
     DaosFile dir1 = client.getFile("/src2/dir");
     dir1.mkdirs();
@@ -68,7 +93,7 @@ public class DaosFileBasicIT {
 
   @Test
   public void testVerifyEmptyDir()throws Exception{
-    DaosFile dir1 = client.getFile("/src3/");
+    DaosFile dir1 = client.getFile("/src11/");
     dir1.mkdirs();
     String[] children = dir1.listChildren();
     Assert.assertEquals(0, children.length);

@@ -319,6 +319,9 @@ public class DaosFile {
    * read <code>len</code> of data from file at <code>fileOffset</code> to <code>buffer</code> starting from
    * <code>bufferOffset</code>.
    *
+   * Be note, caller should set <code>buffer</code> indices, like position, limit or marker, by itself based on
+   * return value of this method.
+   *
    * @param buffer
    * Must be instance of {@link DirectBuffer}
    * @param bufferOffset

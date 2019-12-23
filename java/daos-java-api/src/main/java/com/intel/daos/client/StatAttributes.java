@@ -24,6 +24,7 @@
 package com.intel.daos.client;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Java attributes representing DAOS <code>struct stat</code> which has below information
@@ -60,7 +61,10 @@ public class StatAttributes {
 
   private final boolean file;
 
+  private static final ByteOrder DEFAULT_ORDER = ByteOrder.nativeOrder();
+
   protected StatAttributes(ByteBuffer buffer){
+    buffer.order(DEFAULT_ORDER);
     objId = buffer.getLong();
     mode = buffer.getInt();
     uid = buffer.getInt();
