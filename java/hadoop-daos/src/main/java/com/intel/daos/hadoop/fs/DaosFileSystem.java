@@ -177,8 +177,8 @@ public class DaosFileSystem extends FileSystem {
 
     DaosFile daosFile = this.daos.getFile(key);
 
-    if (daosFile.exists()) {
-      throw new FileAlreadyExistsException(f + " already exists");
+    if (daosFile.exists() && (!daosFile.delete())) {
+      throw new IOException("failed to delete existing file "+daosFile);
     }
 
     daosFile.createNewFile(

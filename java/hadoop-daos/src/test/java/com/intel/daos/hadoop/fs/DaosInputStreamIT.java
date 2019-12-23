@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
@@ -40,7 +42,26 @@ public class DaosInputStreamIT {
     if (fs != null) {
       fs.delete(new Path(testRootPath), true);
     }
-//    fs.close();
+  }
+
+  @Test
+  public void testHeavyWrite() throws IOException {
+    int numFiles = 100;
+    long size = 1024;
+
+    Path p = new Path("/test/data");
+    fs.mkdirs(p);
+    List<Path> files = new ArrayList<>();
+
+    for (int i=0; i<numFiles; i++) {
+      Path file = new Path(p, ""+i);
+      files.add(file);
+    }
+    for (Path file : files) {
+      ContractTestUtils.generateTestFile(fs, file, size, 256, 255);
+      System.out.println(fs.exists(file));
+    }
+
   }
 
   private Path setPath(String path) throws IOException {

@@ -1,15 +1,15 @@
 package com.intel.daos.hadoop.fs;
 
+import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.contract.ContractTestUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Timeout;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,6 +46,19 @@ public class DaosOutputStreamIT {
       fs.mkdirs(p);
     }
     return p;
+  }
+
+  @Test
+  public void testOutputStream2ExistingFile() throws IOException {
+    long size = 1024;
+
+    Path p = new Path("/test/data");
+    fs.mkdirs(p);
+    Path file = new Path(p, "1");
+    ContractTestUtils.generateTestFile(fs, file, size, 256, 255);
+    ContractTestUtils.generateTestFile(fs, file, size, 256, 255);
+
+    Assert.assertEquals(1024, fs.listStatus(file)[0].getLen());
   }
 
   @Test
