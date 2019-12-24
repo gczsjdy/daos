@@ -380,6 +380,7 @@ public class DaosInputStreamTest {
       })
       .when(file)
       .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
+    doReturn((long)data.length).when(file).length();
 
     boolean[] trueFalse = new boolean[]{true, false};
 
@@ -393,13 +394,13 @@ public class DaosInputStreamTest {
       for (int i = 0; i < readSize; i++) {
         expect[i] = data[i];
       }
-      assertArrayEquals(expect, answer);
+      Assert.assertArrayEquals(expect, answer);
 
       boolean shouldThemEqual = bufferedReadEnabled;
       for (int i = readSize; i < data.length && i < internalBuffer.limit(); i++) {
         // If enabled buffered read, the internal buffer of DataInputStream should be fully filled
         // Otherwise, DaosInputStream's internal buffer is not filled for non-target part
-        assert (shouldThemEqual == (internalBuffer.get(i) == data[i]));
+        Assert.assertEquals(shouldThemEqual, (internalBuffer.get(i) == data[i]));
       }
     }
   }
@@ -434,6 +435,7 @@ public class DaosInputStreamTest {
       })
         .when(file)
         .read(any(ByteBuffer.class), anyLong(), anyLong(), anyLong());
+    doReturn((long)data.length).when(file).length();
 
     boolean[] trueFalse = new boolean[]{true, false};
 
@@ -447,13 +449,13 @@ public class DaosInputStreamTest {
       for (int i = 0; i < readSize; i++) {
         expect[i] = data[i];
       }
-      assertArrayEquals(expect, answer);
+      Assert.assertArrayEquals(expect, answer);
 
       boolean shouldThemEqual = bufferedReadEnabled;
       for (int i = readSize; i < data.length && i < internalBuffer.limit(); i++) {
         // If enabled buffered read, the internal buffer of DataInputStream should be fully filled
         // Otherwise, DaosInputStream's internal buffer is not filled for non-target part
-        assert (shouldThemEqual == (internalBuffer.get(i) == data[i]));
+        Assert.assertEquals(shouldThemEqual, (internalBuffer.get(i) == data[i]));
       }
     }
   }
