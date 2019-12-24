@@ -457,7 +457,7 @@ JNIEXPORT void JNICALL Java_com_intel_daos_client_DaosFsClient_mkdir
 
 JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_createNewFile
   (JNIEnv *env, jobject client, jlong dfsPtr, jstring parentPath, jstring name,
-		  jint mode, jint accessFlags, jint objectId, jint chunkSize){
+		  jint mode, jint accessFlags, jint objectId, jint chunkSize, jboolean createParent){
 	dfs_t *dfs = *(dfs_t**)&dfsPtr;
 	const char* parent_path = (*env)->GetStringUTFChars(env, parentPath, NULL);
 	const char* file_name = (*env)->GetStringUTFChars(env, name, NULL);
@@ -465,20 +465,33 @@ JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_createNewFile
 	mode_t tmp_mode;
 	int rc = dfs_lookup(dfs, parent_path, O_RDWR, &parent, &tmp_mode, NULL);
 	if (rc) {
-		char *tmp = "Failed to find parent directory (%s)";
-		char *msg = (char *)malloc(strlen(tmp) + strlen(parent_path));
-		sprintf(msg, tmp, parent_path);
-		throw_exception(env, msg, rc);
-	} else {
-		rc = dfs_open(dfs, parent, file_name, S_IFREG | mode, O_CREAT | mode, objectId, chunkSize, NULL, &file);
-		if (rc) {
-			char *tmp = "Failed to create new file (%s) under directory (%s)";
-			char *msg = (char *)malloc(strlen(tmp) + strlen(file_name) + strlen(parent_path));
-			sprintf(msg, tmp, file_name, parent_path);
+		if (createParent) {
+			rc = mkdirs(dfs, parent_path, mode, 1, &parent);
+			if (rc) {
+				char *tmp = "Failed to create parent/ancestor directories (%s)";
+				char *msg = (char *)malloc(strlen(tmp) + strlen(parent_path));
+				sprintf(msg, tmp, parent_path);
+				throw_exception(env, msg, rc);
+				goto out;
+			}
+		} else {
+			char *tmp = "Failed to find parent directory (%s)";
+			char *msg = (char *)malloc(strlen(tmp) + strlen(parent_path));
+			sprintf(msg, tmp, parent_path);
 			throw_exception(env, msg, rc);
+			goto out;
 		}
 	}
 
+	rc = dfs_open(dfs, parent, file_name, S_IFREG | mode, O_CREAT | mode, objectId, chunkSize, NULL, &file);
+	if (rc) {
+		char *tmp = "Failed to create new file (%s) under directory (%s)";
+		char *msg = (char *)malloc(strlen(tmp) + strlen(file_name) + strlen(parent_path));
+		sprintf(msg, tmp, file_name, parent_path);
+		throw_exception(env, msg, rc);
+	}
+
+out:
 	(*env)->ReleaseStringUTFChars(env, parentPath, parent_path);
 	(*env)->ReleaseStringUTFChars(env, name, file_name);
 	if (parent) dfs_release(parent);

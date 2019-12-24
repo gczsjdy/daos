@@ -119,25 +119,43 @@ public class DaosFile {
     this((String) null, path, accessFlags, daosFsClient);
   }
 
+  /**
+   * create new file with default mode, object type and chunk size.
+   * Parent directory should exist.
+   *
+   * @throws IOException
+   */
   public void createNewFile() throws IOException {
-    createNewFile(mode, objectType, chunkSize);
+    createNewFile(false);
   }
 
   /**
-   * create new file with mode, object type and chunk size
+   * create new file with default mode, object type and chunk size.
+   * This operation will fail if parent directory doesn't exist and <code>createParent</code> is false.
+   *
+   * @param createParent
+   * @throws IOException
+   */
+  public void createNewFile(boolean createParent) throws IOException {
+    createNewFile(mode, objectType, chunkSize, createParent);
+  }
+
+  /**
+   * create new file with mode, object type and chunk size as well as createParent.
    *
    * @param mode       should be octal number, like 0775
    * @param objectType
    * @param chunkSize
+   * @param createParent
    * @throws IOException
    */
-  public void createNewFile(int mode, DaosObjectType objectType, int chunkSize) throws IOException {
+  public void createNewFile(int mode, DaosObjectType objectType, int chunkSize, boolean createParent) throws IOException {
     if (objId != 0) {
       throw new IOException("file existed already");
     }
     //parse path to get parent and name.
     //dfs lookup parent and then dfs open
-    objId = client.createNewFile(dfsPtr, parentPath, name, mode, accessFlags, objectType.getValue(), chunkSize);
+    objId = client.createNewFile(dfsPtr, parentPath, name, mode, accessFlags, objectType.getValue(), chunkSize, createParent);
     createCleaner();
   }
 

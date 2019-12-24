@@ -187,7 +187,8 @@ public class DaosFileSystem extends FileSystem {
     daosFile.createNewFile(
               Constants.DAOS_MODLE,
               DaosObjectType.OC_SX,
-              this.chunkSize);
+              this.chunkSize,
+              true);
 
     return new FSDataOutputStream(new DaosOutputStream(daosFile, key, writeBufferSize, statistics), statistics);
   }

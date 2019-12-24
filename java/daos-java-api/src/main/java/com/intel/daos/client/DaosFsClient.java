@@ -514,12 +514,13 @@ public final class DaosFsClient {
    * @param accessFlags
    * @param objectId
    * @param chunkSize
+   * @param createParent
    * @throws IOException
    *
    * @return DAOS FS object id
    */
   native long createNewFile(long dfsPtr, String parentPath, String name, int mode, int accessFlags,
-                                      int objectId, int chunkSize)throws IOException;
+                                      int objectId, int chunkSize, boolean createParent)throws IOException;
 
   /**
    * delete file with <code>name</code> from <code>parentPath</code>

@@ -174,9 +174,21 @@ public class DaosFileBasicIT {
   }
 
   @Test
-  public void testCreateNewFile()throws Exception{
+  public void testCreateNewFileSimple()throws Exception{
     DaosFile daosFile = client.getFile("/zjf");
     daosFile.createNewFile();
+  }
+
+  @Test(expected = DaosIOException.class)
+  public void testCreateNewFileWithCreateParentFalse()throws Exception{
+    DaosFile daosFile = client.getFile("/d4/d3/d2/file");
+    daosFile.createNewFile();
+  }
+
+  @Test
+  public void testCreateNewFileWithCreateParentTrue()throws Exception{
+    DaosFile daosFile = client.getFile("/d4/d3/d2/file");
+    daosFile.createNewFile(true);
   }
 
   @AfterClass
