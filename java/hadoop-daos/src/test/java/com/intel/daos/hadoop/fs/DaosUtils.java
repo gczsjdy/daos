@@ -2,13 +2,10 @@ package com.intel.daos.hadoop.fs;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 
 import java.io.IOException;
 import java.net.URI;
-
-import static java.lang.System.out;
 
 /**
  *

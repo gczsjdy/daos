@@ -42,7 +42,7 @@ public final class Constants {
   // the minimum and default daos chunk size, maximum size
   public static final String DAOS_CHUNK_SIZE = "fs.daos.chunk.size";
   public static final int DEFAULT_DAOS_CHUNK_SIZE = 1024 * 1024;
-  public static final long MAXIMUM_DAOS_CHUNK_SIZE = 2147483648L; //2g
+  public static final int MAXIMUM_DAOS_CHUNK_SIZE = Integer.MAX_VALUE;
 
 
   public static final int DAOS_MODLE = 0755;
@@ -50,17 +50,21 @@ public final class Constants {
   // the minimum and default internal read buffer size, maximum size
   public static final String DAOS_READ_BUFFER_SIZE = "fs.daos.read.buffer.size";
   public static final int DEFAULT_DAOS_READ_BUFFER_SIZE = 8 * 1024 * 1024;
-  public static final long MAXIMUM_DAOS_READ_BUFFER_SIZE = 2147483648L; //2g
+  public static final int MAXIMUM_DAOS_READ_BUFFER_SIZE = Integer.MAX_VALUE;
 
   // the minimum and default preload size, maximum size
   public static final String DAOS_PRELOAD_SIZE = "fs.daos.preload.size";
   public static final int DEFAULT_DAOS_PRELOAD_SIZE = 4 * 1024 * 1024;
-  public static final int MAXIMUM_DAOS_PRELOAD_SIZE = 1 * 1024 * 1024 * 1024;
+
+  // the minimum and default preload size, maximum size
+  public static final String BUFFERED_READ_ENABLED = "fs.daos.io.bufferedReadEnabled";
+  public static final boolean DEFAULT_BUFFERED_READ_ENABLED = true;
+  public static final int MAXIMUM_DAOS_PRELOAD_SIZE = Integer.MAX_VALUE;
 
   // the minimum and default internal write buffer size, maximum size
   public static final String DAOS_WRITE_BUFFER_SIZE = "fs.daos.write.buffer.size";
   public static final int DEFAULT_DAOS_WRITE_BUFFER_SIZE = 8 * 1024 * 1024;
-  public static final long MAXIMUM_DAOS_WRITE_BUFFER_SIZE = 2147483648L; //2g
+  public static final int MAXIMUM_DAOS_WRITE_BUFFER_SIZE = Integer.MAX_VALUE;
 
   // default file block size
   public static final String DAOS_BLOCK_SIZE = "fs.daos.block.size";
@@ -68,7 +72,7 @@ public final class Constants {
 
   // minimum and maximum file block size
   public static final int MINIMUM_DAOS_BLOCK_SIZE = 16 * 1024 * 1024;
-  public static final long MAXIMUM_DAOS_BLOCK_SIZE = 10737418240L; //10g
+  public static final int MAXIMUM_DAOS_BLOCK_SIZE = Integer.MAX_VALUE;
 
   public static <T> T value(T v){
     return v;
