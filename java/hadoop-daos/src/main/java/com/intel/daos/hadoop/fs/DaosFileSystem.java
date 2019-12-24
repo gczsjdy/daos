@@ -40,6 +40,40 @@ import java.util.List;
 
 /**
  * Implementation of {@link FileSystem} for DAOS file system.
+ *
+ *
+ * Before instantiating this class, we need to do some configuration visible to
+ *  Hadoop. See below table for all mandatory and optional configuration items.
+ *
+ * <table>
+ *   <th><td>Item</td><td>Default</td><td>Range</td><td>Mandatory</td><td>Description</td></th>
+ *   <tr>
+ *     <td>{@link Constants#DAOS_READ_BUFFER_SIZE}</td>
+ *     <td>{@link Constants#DEFAULT_DAOS_READ_BUFFER_SIZE}</td>
+ *     <td>{@link Constants#DEFAULT_DAOS_READ_BUFFER_SIZE} - {@link Constants#MAXIMUM_DAOS_READ_BUFFER_SIZE}</td>
+ *     <td>false</td>
+ *     <td>size of direct buffer for reading data from DAOS</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link Constants#DAOS_WRITE_BUFFER_SIZE}</td>
+ *     <td>{@link Constants#DEFAULT_DAOS_WRITE_BUFFER_SIZE}</td>
+ *     <td>{@link Constants#DEFAULT_DAOS_WRITE_BUFFER_SIZE} - {@link Constants#MAXIMUM_DAOS_WRITE_BUFFER_SIZE}</td>
+ *     <td>false</td>
+ *     <td>size of direct buffer for writing data to DAOS</td>
+ *   </tr>
+ *   <tr><td>{@link Constants#DAOS_BLOCK_SIZE}</td><td></td><td></td><td></td></tr>
+ *   <tr><td></td><td></td><td></td><td></td></tr>
+ *   <tr><td></td><td></td><td></td><td></td></tr>
+ * </table>
+ *
+ * User can use below statement to make their configuration visible to Hadoop.
+ * <code>
+ *   Configuration cfg = new Configuration();
+ *   cfg.addResource("path to your configuration file");
+ * </code>
+ *
+ * To get instance of this class via Hadoop FileSystem, please refer to the package description.
+ *
  */
 public class DaosFileSystem extends FileSystem {
   private static final Logger LOG = LoggerFactory.getLogger(DaosFileSystem.class);
@@ -69,7 +103,7 @@ public class DaosFileSystem extends FileSystem {
     super.initialize(name, conf);
 
     try {
-      // get conf from hdfs-site.xml
+
       this.readBufferSize = conf.getInt(Constants.DAOS_READ_BUFFER_SIZE, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE);
       this.writeBufferSize = conf.getInt(Constants.DAOS_WRITE_BUFFER_SIZE, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE);
       this.blockSize = conf.getInt(Constants.DAOS_BLOCK_SIZE, Constants.DEFAULT_DAOS_BLOCK_SIZE);
@@ -210,7 +244,7 @@ public class DaosFileSystem extends FileSystem {
     // determine  if src is root dir and whether it exits
     if(src.toUri().getPath().equals("/")){
       if(LOG.isDebugEnabled()){
-        LOG.debug("DaosFileSystem:  cat not rename root path {}", src);
+        LOG.debug("DaosFileSystem:  can not rename root path {}", src);
       }
       throw new IOException("cannot move root / directory");
     }

@@ -468,11 +468,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_createNewFile
 		if (createParent) {
 			rc = mkdirs(dfs, parent_path, mode, 1, &parent);
 			if (rc) {
-				char *tmp = "Failed to create parent/ancestor directories (%s)";
-				char *msg = (char *)malloc(strlen(tmp) + strlen(parent_path));
-				sprintf(msg, tmp, parent_path);
-				throw_exception(env, msg, rc);
-				goto out;
+				rc = dfs_lookup(dfs, parent_path, O_RDWR, &parent, &tmp_mode, NULL);
 			}
 		} else {
 			char *tmp = "Failed to find parent directory (%s)";
@@ -481,6 +477,13 @@ JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_createNewFile
 			throw_exception(env, msg, rc);
 			goto out;
 		}
+	}
+	if (rc) {
+		char *tmp = "Failed to find parent directory or create parent directory (%s)";
+		char *msg = (char *)malloc(strlen(tmp) + strlen(parent_path));
+		sprintf(msg, tmp, parent_path);
+		throw_exception(env, msg, rc);
+		goto out;
 	}
 
 	rc = dfs_open(dfs, parent, file_name, S_IFREG | mode, O_CREAT | mode, objectId, chunkSize, NULL, &file);
