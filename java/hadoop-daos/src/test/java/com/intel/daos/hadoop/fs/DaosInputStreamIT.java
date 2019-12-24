@@ -1,6 +1,5 @@
 package com.intel.daos.hadoop.fs;
 
-import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -11,23 +10,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Answers.RETURNS_SMART_NULLS;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
 /**
  *
@@ -156,7 +147,7 @@ public class DaosInputStreamIT {
   }
 
   @Test
-  public void testSequentialAndRandomRead() throws Exception {
+  public void testSequentialAndRandomRead() throws  IOException{
       Path smallSeekFile = setPath("/test/smallSeekFile.txt");
       long size = 5 * 1024 * 1024;
 
@@ -184,5 +175,4 @@ public class DaosInputStreamIT {
 
       IOUtils.closeStream(fsDataInputStream);
   }
-
 }

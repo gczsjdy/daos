@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-
 /**
  * Implementation of {@link FileSystem} for DAOS file system.
  */
@@ -49,7 +48,6 @@ public class DaosFileSystem extends FileSystem {
   private DaosFsClient daos;
   private int readBufferSize;
   private int preLoadBufferSize;
-  private boolean bufferedReadEnabled;
   private int writeBufferSize;
   private int blockSize;
   private int chunkSize;
@@ -76,7 +74,6 @@ public class DaosFileSystem extends FileSystem {
       this.blockSize = conf.getInt(Constants.DAOS_BLOCK_SIZE, Constants.DEFAULT_DAOS_BLOCK_SIZE);
       this.chunkSize = conf.getInt(Constants.DAOS_CHUNK_SIZE, Constants.DEFAULT_DAOS_CHUNK_SIZE);
       this.preLoadBufferSize = conf.getInt(Constants.DAOS_PRELOAD_SIZE, Constants.DEFAULT_DAOS_PRELOAD_SIZE);
-      bufferedReadEnabled = conf.getBoolean(Constants.BUFFERED_READ_ENABLED, Constants.DEFAULT_BUFFERED_READ_ENABLED);
 
       checkSizeMin(readBufferSize, Constants.DEFAULT_DAOS_READ_BUFFER_SIZE, "internal read buffer size should be no less than ");
       checkSizeMin(writeBufferSize, Constants.DEFAULT_DAOS_WRITE_BUFFER_SIZE, "internal write buffer size should be no less than ");
@@ -160,8 +157,7 @@ public class DaosFileSystem extends FileSystem {
       throw new FileNotFoundException(f + "not exist");
     }
 
-    return new FSDataInputStream(new DaosInputStream(
-            file, statistics, readBufferSize, preLoadBufferSize, bufferedReadEnabled));
+    return new FSDataInputStream(new DaosInputStream(file, statistics, readBufferSize, preLoadBufferSize));
   }
 
   @Override
@@ -332,10 +328,6 @@ public class DaosFileSystem extends FileSystem {
       daos.disconnect();
     }
     super.close();
-  }
-
-  public boolean getBufferedReadEnabled() {
-    return bufferedReadEnabled;
   }
 
   static long toMilliSeconds(StatAttributes.TimeSpec modifyTime) {

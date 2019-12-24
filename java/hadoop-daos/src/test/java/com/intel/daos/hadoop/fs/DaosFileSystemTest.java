@@ -10,7 +10,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
 import java.net.URI;
 
 import static org.mockito.Mockito.*;
@@ -97,35 +96,6 @@ public class DaosFileSystemTest {
     cfg.set(Constants.DAOS_POOL_UUID, "123");
     cfg.set(Constants.DAOS_CONTAINER_UUID, "123");
     fs.initialize(URI.create("daos://1234:56/root"), cfg);
-    fs.close();
-  }
-
-  @Test
-  public void testBufferedReadConfigurationKey() throws Exception {
-    PowerMockito.mockStatic(DaosFsClient.class);
-    DaosFsClient.DaosFsClientBuilder builder = mock(DaosFsClient.DaosFsClientBuilder.class);
-    DaosFsClient client = mock(DaosFsClient.class);
-    Configuration conf = new Configuration();
-
-    PowerMockito.whenNew(DaosFsClient.DaosFsClientBuilder.class).withNoArguments().thenReturn(builder);
-    when(builder.poolId(anyString())).thenReturn(builder);
-    when(builder.containerId(anyString())).thenReturn(builder);
-    when(builder.ranks(anyString())).thenReturn(builder);
-    when(builder.build()).thenReturn(client);
-    conf.set(Constants.DAOS_POOL_UUID, "123");
-    conf.set(Constants.DAOS_CONTAINER_UUID, "123");
-    conf.set(Constants.DAOS_POOL_SVC, "0");
-
-    boolean defaultEnabled = Constants.DEFAULT_BUFFERED_READ_ENABLED;
-    conf.setBoolean(Constants.BUFFERED_READ_ENABLED, defaultEnabled ^ true);
-    DaosFileSystem fs = new DaosFileSystem();
-    fs.initialize(URI.create("daos://1234:56"), conf);
-    assert (fs.getBufferedReadEnabled() == defaultEnabled ^ true);
-    fs.close();
-    // if not set, should be default
-    conf.unset(Constants.BUFFERED_READ_ENABLED);
-    fs.initialize(URI.create("daos://1234:56"), conf);
-    assert (fs.getBufferedReadEnabled() == defaultEnabled);
     fs.close();
   }
 }
