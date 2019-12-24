@@ -38,7 +38,7 @@ import java.nio.ByteBuffer;
  * The input stream for {@link DaosFile}
  *
  * Data is first read into internal direct buffer from DAOS FS. Then data is copied from the internal buffer
- * to destination byte array. The internal buffer data is kept as data cache until cache miss on {@linkplain #read}
+ * to destination byte array. The internal buffer data is kept as data cache until cache miss on {@linkplain #read read}
  * next time. The buffer capacity is controlled by constructor parameter <code>bufferCap</code>.
  *
  * The internal buffer and buffer copy may be eliminated later for performance after bench-mark on some workloads.

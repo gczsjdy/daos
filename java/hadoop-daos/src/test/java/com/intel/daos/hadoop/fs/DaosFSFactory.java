@@ -11,9 +11,13 @@ import java.io.IOException;
  *
  */
 public class DaosFSFactory {
-  private final static String pooluuid = "53a47469-ea2a-418e-89d3-6d1df1aaadb4";
-  private final static String contuuid = "9e60aff2-ca28-45fe-bdb0-d1a6c182c342";
-  private final static String svc = "0";
+
+//  public final static String pooluuid = "53a47469-ea2a-418e-89d3-6d1df1aaadb4";
+//  public final static String contuuid = "9e60aff2-ca28-45fe-bdb0-d1a6c182c342";
+
+  public final static String pooluuid = "0eba76a4-5f9d-4c47-91c7-545b3677fb28";
+  public final static String contuuid = "676074c6-a33a-4e07-8990-fe9279065145";
+  public final static String svc = "0";
 
   private static FileSystem createFS() throws IOException {
     Configuration conf = new Configuration();

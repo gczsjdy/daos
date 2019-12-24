@@ -51,12 +51,12 @@ import java.util.concurrent.*;
  * non-readonly root container with UUID {@link #ROOT_CONT_UUID}. Thus, you need to make sure the pool
  * doesn't have root container yet.
  *
- * User cannot instantiate this class directly since we need to make sure single instance of {@linkplain DaosFsClient}
+ * User cannot instantiate this class directly since we need to make sure single instance of {@linkplain DaosFsClient client}
  * per pool and container. User should get this object from {@link DaosFsClientBuilder}.
  *
- * After getting {@linkplain DaosFsClient}, user usually get {@link DaosFile} object via {@linkplain #getFile} methods.
+ * After getting {@linkplain DaosFsClient client}, user usually get {@link DaosFile} object via {@linkplain #getFile} methods.
  *
- * For example, user can simply create {@linkplain DaosFsClient} and {@link DaosFile} with all default values
+ * For example, user can simply create {@linkplain DaosFsClient client} and {@link DaosFile} with all default values
  * by following code.
  * <code>
  *   DaosFsClient.DaosFsClientBuilder builder = new DaosFsClient.DaosFsClientBuilder();
@@ -728,6 +728,7 @@ public final class DaosFsClient {
    *     uid = buffer.getInt();
    *     gid = buffer.getInt();
    *     blockCnt = buffer.getLong();
+   *     blockSize = buffer.getLong();
    *     length = buffer.getLong();
    *     accessTime = buffer.getLong() buffer.getLong();
    *     modifyTime = buffer.getLong() buffer.getLong();

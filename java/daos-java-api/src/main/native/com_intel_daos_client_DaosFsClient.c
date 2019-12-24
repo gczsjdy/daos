@@ -736,20 +736,16 @@ JNIEXPORT void JNICALL Java_com_intel_daos_client_DaosFsClient_dfsOpenedObjStat
 		}
 		char *buffer = (char *)bufferAddress;
 		cpyfield(env, buffer, &objId, sizeof(objId), 8);
-		jint ivalue = stat.st_mode;
-		cpyfield(env, buffer+8, &ivalue, sizeof(ivalue), 4);
-		ivalue = stat.st_uid;
-		cpyfield(env, buffer+12, &ivalue, sizeof(ivalue), 4);
-		ivalue = stat.st_gid;
-		cpyfield(env, buffer+16, &ivalue, sizeof(ivalue), 4);
-		jlong lvalue = stat.st_blocks;
-		cpyfield(env, buffer+20, &lvalue, sizeof(lvalue), 8);
-		lvalue = stat.st_size;
-		cpyfield(env, buffer+28, &lvalue, sizeof(lvalue), 8);
-		cpyfield(env, buffer+36, &stat.st_atim, sizeof(stat.st_atim), 16);
-		cpyfield(env, buffer+52, &stat.st_mtim, sizeof(stat.st_mtim), 16);
-		cpyfield(env, buffer+68, &stat.st_ctim, sizeof(stat.st_ctim), 16);
-		buffer[84] = S_ISDIR(stat.st_mode) ? '\0':'1';
+		cpyfield(env, buffer+8, &stat.st_mode, sizeof(stat.st_mode), 4);
+		cpyfield(env, buffer+12, &stat.st_uid, sizeof(stat.st_uid), 4);
+		cpyfield(env, buffer+16, &stat.st_gid, sizeof(stat.st_gid), 4);
+		cpyfield(env, buffer+20, &stat.st_blocks, sizeof(stat.st_blocks), 8);
+		cpyfield(env, buffer+28, &stat.st_blksize, sizeof(stat.st_blksize), 8);
+		cpyfield(env, buffer+36, &stat.st_size, sizeof(stat.st_size), 8);
+		cpyfield(env, buffer+44, &stat.st_atim, sizeof(stat.st_atim), 16);
+		cpyfield(env, buffer+60, &stat.st_mtim, sizeof(stat.st_mtim), 16);
+		cpyfield(env, buffer+76, &stat.st_ctim, sizeof(stat.st_ctim), 16);
+		buffer[92] = S_ISDIR(stat.st_mode) ? '\0':'1';
 	}
 }
 

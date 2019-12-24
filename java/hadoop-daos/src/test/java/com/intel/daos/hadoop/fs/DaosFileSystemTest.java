@@ -10,7 +10,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
 import java.net.URI;
 
 import static org.mockito.Mockito.*;
@@ -117,15 +116,15 @@ public class DaosFileSystemTest {
     conf.set(Constants.DAOS_POOL_SVC, "0");
 
     boolean defaultEnabled = Constants.DEFAULT_BUFFERED_READ_ENABLED;
-    conf.setBoolean(Constants.BUFFERED_READ_ENABLED, defaultEnabled ^ true);
+    conf.setBoolean(Constants.DAOS_BUFFERED_READ_ENABLED, defaultEnabled ^ true);
     DaosFileSystem fs = new DaosFileSystem();
     fs.initialize(URI.create("daos://1234:56"), conf);
-    assert (fs.getBufferedReadEnabled() == defaultEnabled ^ true);
+    assert (fs.isBufferedReadEnabled() == defaultEnabled ^ true);
     fs.close();
     // if not set, should be default
-    conf.unset(Constants.BUFFERED_READ_ENABLED);
+    conf.unset(Constants.DAOS_BUFFERED_READ_ENABLED);
     fs.initialize(URI.create("daos://1234:56"), conf);
-    assert (fs.getBufferedReadEnabled() == defaultEnabled);
+    assert (fs.isBufferedReadEnabled() == defaultEnabled);
     fs.close();
   }
 }

@@ -1,5 +1,6 @@
 package com.intel.daos.client;
 
+import com.sun.security.auth.module.UnixSystem;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -63,16 +64,34 @@ public class DaosFileMoreIT {
     file.createNewFile();
     StatAttributes attributes = file.getStatAttributes();
 
-    Assert.assertTrue(attributes.getUid() != 0);
-    Assert.assertTrue(attributes.getGid() != 0);
+    UnixSystem system = new UnixSystem();
+    int uid = (int)system.getUid();
+    int gid = (int)system.getGid();
+
+    Assert.assertTrue(attributes.getUid() == uid);
+    Assert.assertTrue(attributes.getGid() == gid);
     Assert.assertTrue(attributes.isFile());
     Assert.assertTrue(attributes.getLength() == 0);
     Assert.assertTrue(attributes.getObjId() != 0);
     Assert.assertTrue(attributes.getBlockCnt() == 0);
+    Assert.assertTrue(attributes.getBlockSize() == Constants.FILE_DEFAULT_CHUNK_SIZE);
     Assert.assertTrue(attributes.getMode() != 0);
     Assert.assertTrue(attributes.getAccessTime() != null);
     Assert.assertTrue(attributes.getModifyTime() != null);
     Assert.assertTrue(attributes.getCreateTime() != null);
+
+    file = client.getFile("/zjf44");
+    long time = System.currentTimeMillis();
+    file.createNewFile(Constants.FILE_DEFAULT_FILE_MODE, DaosObjectType.OC_SX, 4096);
+    attributes = file.getStatAttributes();
+    Assert.assertTrue(attributes.getBlockSize() == 4096);
+
+    long ctTime = DaosUtils.toMilliSeconds(attributes.getCreateTime());
+    Assert.assertTrue(Math.abs(time - ctTime) < 1000);
+    long mdTime = DaosUtils.toMilliSeconds(attributes.getModifyTime());
+    Assert.assertTrue(Math.abs(time - mdTime) < 1000);
+    long acTime = DaosUtils.toMilliSeconds(attributes.getAccessTime());
+    Assert.assertTrue(Math.abs(time - acTime) < 1000);
   }
 
   @Test

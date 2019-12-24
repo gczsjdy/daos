@@ -33,6 +33,7 @@ import java.nio.ByteOrder;
  *  * gid_t     st_gid;
  *  * off_t     st_size;
  *  * blkcnt_t  st_blocks
+ *  * blksize_t st_blocksize
  *  * struct timespec st_atim;
  *  * struct timespec st_mtim;
  *  * struct timespec st_ctim;
@@ -50,6 +51,8 @@ public class StatAttributes {
   private final int gid;
 
   private final long blockCnt;
+
+  private final long blockSize;
 
   private final long length;
 
@@ -70,6 +73,7 @@ public class StatAttributes {
     uid = buffer.getInt();
     gid = buffer.getInt();
     blockCnt = buffer.getLong();
+    blockSize = buffer.getLong();
     length = buffer.getLong();
     accessTime = new TimeSpec(buffer.getLong(), buffer.getLong());
     modifyTime = new TimeSpec(buffer.getLong(), buffer.getLong());
@@ -101,6 +105,10 @@ public class StatAttributes {
     return blockCnt;
   }
 
+  public long getBlockSize() {
+    return blockSize;
+  }
+
   public long getLength() {
     return length;
   }
@@ -118,7 +126,7 @@ public class StatAttributes {
   }
 
   public static int objectSize(){
-    return 3*8 + 3*4 + 3*16 + 1; //85
+    return 4*8 + 3*4 + 3*16 + 1; //93
   }
 
   public static class TimeSpec{

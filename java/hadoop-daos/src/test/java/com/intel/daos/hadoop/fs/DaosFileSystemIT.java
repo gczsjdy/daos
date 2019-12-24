@@ -1,5 +1,6 @@
 package com.intel.daos.hadoop.fs;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -39,15 +40,18 @@ public class DaosFileSystemIT {
     initializationTest("daos://192.168.2.1:2345/234/", "daos://192.168.2.1:2345");
   }
 
+  @Test
+  public void testServiceLoader() throws Exception {
+    Configuration cfg = new Configuration();
+    cfg.set(Constants.DAOS_POOL_UUID, DaosFSFactory.pooluuid);
+    cfg.set(Constants.DAOS_CONTAINER_UUID, DaosFSFactory.contuuid);
+    cfg.set(Constants.DAOS_POOL_SVC, DaosFSFactory.svc);
+    FileSystem fileSystem = FileSystem.get(URI.create("daos://2345:567/"), cfg);
+    Assert.assertTrue(fileSystem instanceof DaosFileSystem);
+  }
+
   private void initializationTest(String initializationUri, String expectedUri) throws Exception{
     fs.initialize(URI.create(initializationUri), DaosUtils.getConfiguration());
     Assert.assertEquals(URI.create(expectedUri), fs.getUri());
-  }
-
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    System.out.println("@AfterClass");
-    fs.close();
   }
 }

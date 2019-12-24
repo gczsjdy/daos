@@ -1,6 +1,5 @@
 package com.intel.daos.hadoop.fs;
 
-import com.intel.daos.client.DaosFile;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.contract.ContractTestUtils;
@@ -8,8 +7,6 @@ import org.junit.*;
 import org.junit.rules.Timeout;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
