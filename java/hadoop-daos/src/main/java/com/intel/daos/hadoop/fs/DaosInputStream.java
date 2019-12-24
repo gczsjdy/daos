@@ -53,6 +53,7 @@ public class DaosInputStream extends FSInputStream {
   private final long fileLen;
   private final int bufferCapacity;
   private final int preLoadSize;
+  private final boolean bufferedReadEnabled;
 
   private ByteBuffer buffer;
 
@@ -67,13 +68,13 @@ public class DaosInputStream extends FSInputStream {
 
   public DaosInputStream(DaosFile daosFile,
                          FileSystem.Statistics stats,
-                         int bufferCap, int preLoadSize) throws IOException {
-    this(daosFile, stats, ByteBuffer.allocateDirect(bufferCap), preLoadSize);
+                         int bufferCap, int preLoadSize, boolean bufferedReadEnabled) throws IOException {
+    this(daosFile, stats, ByteBuffer.allocateDirect(bufferCap), preLoadSize, bufferedReadEnabled);
   }
 
   public DaosInputStream(DaosFile daosFile,
                          FileSystem.Statistics stats,
-                         ByteBuffer buffer, int preLoadSize) throws IOException {
+                         ByteBuffer buffer, int preLoadSize,  boolean bufferedReadEnabled) throws IOException {
     this.daosFile = daosFile;
     this.stats = stats;
     this.buffer = buffer;
@@ -84,10 +85,12 @@ public class DaosInputStream extends FSInputStream {
     this.fileLen = daosFile.length();
     this.bufferCapacity = buffer.capacity();
     this.preLoadSize = preLoadSize;
+    this.bufferedReadEnabled = bufferedReadEnabled;
     if (bufferCapacity < preLoadSize) {
       throw new IllegalArgumentException("preLoadSize " + preLoadSize + " should be not greater than buffer capacity " + bufferCapacity);
     }
   }
+
 
   @Override
   public synchronized void seek(long targetPos) throws IOException {
@@ -209,27 +212,21 @@ public class DaosInputStream extends FSInputStream {
   }
 
   private long readFromDaos(byte[] buf, int off, int len) throws IOException {
-    long totalLen = 0;
-    boolean next = true;
-    while (len > 0 && next && (nextReadPos < fileLen)) {
+    long numBytes = 0;
+    while (len > 0 && (nextReadPos < fileLen)) {
       long actualLen = readFromDaos(len);
       if (actualLen == 0) {
         break;
       }
-      if (len <= actualLen) {
-        buffer.get(buf, off, len);
-        totalLen += len;
-        nextReadPos += len;
-        next = false;
-      } else {
-        buffer.get(buf, off, (int) actualLen);
-        totalLen += actualLen;
-        nextReadPos += actualLen;
-        off += actualLen;
-        len -= actualLen;
-      }
+      // If we read 3 bytes but need 1, put 1; if we read 1 byte but need 3, put 1
+      int lengthToPutInBuffer = Math.min(len, (int)actualLen);
+      buffer.get(buf, off, lengthToPutInBuffer);
+      numBytes += lengthToPutInBuffer;
+      nextReadPos += lengthToPutInBuffer;
+      off += lengthToPutInBuffer;
+      len -= lengthToPutInBuffer;
     }
-    return totalLen;
+    return numBytes;
   }
 
   /**
@@ -242,7 +239,9 @@ public class DaosInputStream extends FSInputStream {
     buffer.clear();
 
     length = Math.min(length, bufferCapacity);
-    length = Math.max(length, preLoadSize);
+    if (bufferedReadEnabled) {
+      length = Math.max(length, preLoadSize);
+    }
 
     long currentTime = 0;
     if (LOG.isDebugEnabled()) {
