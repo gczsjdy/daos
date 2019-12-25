@@ -187,7 +187,7 @@ public class DaosInputStream extends FSInputStream {
     // check buffer overlay
     long start = lastFilePos;
     long end = lastFilePos + buffer.limit();
-    // Copy requested data from internal buffer to result array
+    // Copy requested data from internal buffer to result array if possible
     if (nextReadPos >= start && nextReadPos < end) {
       buffer.position((int) (nextReadPos - start));
       int remaining = (int) (end - nextReadPos);
@@ -199,7 +199,7 @@ public class DaosInputStream extends FSInputStream {
       off += actualLen;
       len -= actualLen;
     }
-    // Read data from DAOS
+    // Read data from DAOS to result array
     actualLen += readFromDaos(buf, off, len);
     if (actualLen == 0) {
       actualLen = -1;
