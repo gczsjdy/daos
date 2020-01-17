@@ -113,7 +113,7 @@ public final class DaosFsClient {
 
   private static final Logger log = LoggerFactory.getLogger(DaosFsClient.class);
 
-  //make it non-daemon so that all DAOS file object can be released
+  //make it daemon so that cleaner doesn't stop app from exiting
   private final ExecutorService cleanerExe = Executors.newSingleThreadExecutor((r) -> {
     Thread thread = new Thread(r, "DAOS file object cleaner thread");
     thread.setDaemon(true);
@@ -313,7 +313,7 @@ public final class DaosFsClient {
     disconnect(false);
   }
 
-  private void disconnect(boolean force) throws IOException {
+  private synchronized void disconnect(boolean force) throws IOException {
     decrementRef();
     if (force || refCnt <= 0) {
       if (inited && dfsPtr != 0) {
