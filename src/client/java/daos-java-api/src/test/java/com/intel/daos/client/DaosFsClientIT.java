@@ -69,7 +69,7 @@ public class DaosFsClientIT {
   @Test
   public void testCreateNewPool()throws Exception {
     DaosFsClient.DaosFsClientBuilder builder = new DaosFsClient.DaosFsClientBuilder();
-    builder.poolScmSize(1*1024*1024*1024);
+    builder.poolScmSize(1*1024*1024);
     DaosFsClient client = null;
     try{
       client = builder.build();

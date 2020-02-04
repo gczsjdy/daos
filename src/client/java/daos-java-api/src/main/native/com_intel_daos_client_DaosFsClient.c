@@ -217,7 +217,7 @@ JNIEXPORT jlong JNICALL Java_com_intel_daos_client_DaosFsClient_daosOpenPool
 		if (rc) {
 			char *tmp = "Failed to connect to pool (%s)";
 			char *msg = (char *)malloc(strlen(tmp) + strlen(pool_str));
-			sprintf(msg, tmp, svc_ranks, pool_str);
+			sprintf(msg, tmp, pool_str);
 			throw_exception_base(env, msg, rc, 1, 0);
 			ret = -1;
 		}else {
