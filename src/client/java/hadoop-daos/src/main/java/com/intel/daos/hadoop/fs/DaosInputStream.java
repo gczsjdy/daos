@@ -216,6 +216,7 @@ public class DaosInputStream extends FSInputStream {
   @Override
   public synchronized int read(byte[] buf, int off, int len)
           throws IOException {
+    long startTime = System.currentTimeMillis();
     int actualLen = 0;
     if (LOG.isDebugEnabled()) {
       LOG.debug("DaosInputStream : read from daos , contentLength = " + this.fileLen + " ;  currentPos = " +
@@ -252,6 +253,10 @@ public class DaosInputStream extends FSInputStream {
     }
     // Read data from DAOS to result array
     actualLen += readFromDaos(buf, off, len);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("DaosInputStream: read function spending time is :  " +
+          (System.currentTimeMillis() - startTime) + " ; read data size : " + actualLen);
+    }
     // -1 : reach EOF
     return actualLen == 0 ? -1 : actualLen;
   }

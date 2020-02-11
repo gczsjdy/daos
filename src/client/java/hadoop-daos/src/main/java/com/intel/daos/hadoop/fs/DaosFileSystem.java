@@ -177,16 +177,12 @@ public class DaosFileSystem extends FileSystem {
       this.bufferedReadEnabled = conf.getBoolean(Constants.DAOS_BUFFERED_READ_ENABLED,
               Constants.DEFAULT_BUFFERED_READ_ENABLED);
 
-      checkSizeMin(readBufferSize, Constants.MINIMUM_DAOS_READ_BUFFER_SIZE,
-              "internal read buffer size should be no less than ");
       checkSizeMin(writeBufferSize, Constants.MINIMUM_DAOS_WRITE_BUFFER_SIZE,
               "internal write buffer size should be no less than ");
       checkSizeMin(blockSize, Constants.MINIMUM_DAOS_BLOCK_SIZE,
               "block size should be no less than ");
       checkSizeMin(chunkSize, Constants.MINIMUM_DAOS_CHUNK_SIZE,
               "daos chunk size should be no less than ");
-      checkSizeMin(preLoadBufferSize, Constants.MINIMUM_DAOS_PRELOAD_SIZE,
-              "preload buffer size should be no less than ");
 
       checkSizeMax(readBufferSize, Constants.MAXIMUM_DAOS_READ_BUFFER_SIZE,
               "internal read buffer size should not be greater than ");
@@ -263,7 +259,8 @@ public class DaosFileSystem extends FileSystem {
           Path f,
           final int bufferSize) throws IOException {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("DaosFileSystem open :  path = " + f.toUri().getPath() + " ; buffer size = " + bufferSize);
+      LOG.debug("DaosFileSystem open :  path = " + f.toUri().getPath() + " ; buffer size = " + readBufferSize
+        + "; preload size = " + preLoadBufferSize);
     }
 
     DaosFile file = daos.getFile(f.toUri().getPath());
